@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # PostgreSQL databases
+  postgres-events:
+    image: postgres:15-alpine
+    container_name: tickon-postgres-events
+    environment:
+      POSTGRES_DB: tickon_events
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-events-data:/var/lib/postgresql/data
+    networks:
+      - tickon-network
+
+  postgres-users:
+    image: postgres:15-alpine
+    container_name: tickon-postgres-users
+    environment:
+      POSTGRES_DB: tickon_users
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-users-data:/var/lib/postgresql/data
+    networks:
+      - tickon-network
+
+  # Eureka Server
+  eureka-server:
+    build: ./services/eureka-server
+    container_name: tickon-eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - tickon-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway
+  api-gateway:
+    build: ./services/api-gateway
+    container_name: tickon-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - tickon-network
+
+  # Event Service
+  event-service:
+    build: ./services/event-service
+    container_name: tickon-event-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-events:5432/tickon_events
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      - postgres-events
+      - eureka-server
+    networks:
+      - tickon-network
+
+  # User Service
+  user-service:
+    build: ./services/user-service
+    container_name: tickon-user-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-users:5432/tickon_users
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      - postgres-users
+      - eureka-server
+    networks:
+      - tickon-network
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tickon-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    networks:
+      - tickon-network
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: tickon-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - tickon-network
+
+volumes:
+  postgres-events-data:
+  postgres-users-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  tickon-network:
+    driver: bridge

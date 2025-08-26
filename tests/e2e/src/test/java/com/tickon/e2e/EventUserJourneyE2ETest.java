@@ -1,4 +1,4 @@
-package com.example.tickon.e2e;
+package com.tickon.e2e;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

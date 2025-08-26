@@ -1,4 +1,4 @@
-package com.example.tickon.eureka;
+package com.tickon.eureka;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package com.example.tickon.eventservice.integration.api;
+package com.tickon.eventservice.integration.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

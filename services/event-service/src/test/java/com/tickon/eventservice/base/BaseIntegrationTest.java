@@ -1,4 +1,4 @@
-package com.example.tickon.eventservice.base;
+package com.tickon.eventservice.base;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;

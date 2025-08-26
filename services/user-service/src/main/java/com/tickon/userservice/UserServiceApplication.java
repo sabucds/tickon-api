@@ -1,4 +1,4 @@
-package com.example.tickon.eventservice;
+package com.tickon.userservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,9 +6,9 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-public class EventServiceApplication {
+public class UserServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(EventServiceApplication.class, args);
+        SpringApplication.run(UserServiceApplication.class, args);
     }
 }

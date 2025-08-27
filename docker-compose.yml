@@ -16,17 +16,17 @@ services:
     networks:
       - tickon-network
 
-  postgres-users:
+  postgres-identity:
     image: postgres:15-alpine
-    container_name: tickon-postgres-users
+    container_name: tickon-postgres-identity
     environment:
-      POSTGRES_DB: tickon_users
+      POSTGRES_DB: tickon_identity
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5433:5432"
     volumes:
-      - postgres-users-data:/var/lib/postgresql/data
+      - postgres-identity-data:/var/lib/postgresql/data
     networks:
       - tickon-network
 
@@ -72,17 +72,17 @@ services:
     networks:
       - tickon-network
 
-  # User Service
-  user-service:
-    build: ./services/user-service
-    container_name: tickon-user-service
+  # Identity Service
+  identity-service:
+    build: ./services/identity-service
+    container_name: tickon-identity-service
     ports:
       - "8082:8082"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-users:5432/tickon_users
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-identity:5432/tickon_identity
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     depends_on:
-      - postgres-users
+      - postgres-identity
       - eureka-server
     networks:
       - tickon-network
@@ -118,7 +118,7 @@ services:
 
 volumes:
   postgres-events-data:
-  postgres-users-data:
+  postgres-identity-data:
   prometheus-data:
   grafana-data:
 

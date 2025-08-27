@@ -25,7 +25,7 @@
 		<module>common</module>
 		<module>services/eureka-server</module>
 		<module>services/event-service</module>
-		<module>services/user-service</module>
+		<module>services/identity-service</module>
 		<module>services/api-gateway</module>
 		<module>tests/e2e</module>
 	</modules>

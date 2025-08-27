@@ -12,9 +12,9 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>user-service</artifactId>
-    <name>user-service</name>
-    <description>User Management Service</description>
+    <artifactId>identity-service</artifactId>
+    <name>identity-service</name>
+    <description>Identity Management Service</description>
 
     <dependencies>
         <dependency>

@@ -1,8 +1,8 @@
 spring:
   application:
-    name: user-service
+    name: identity-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/tickon_users
+    url: jdbc:postgresql://localhost:5432/tickon_identity
     username: postgres
     password: postgres
   jpa:

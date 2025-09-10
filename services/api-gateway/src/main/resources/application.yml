@@ -8,14 +8,17 @@ spring:
           uri: lb://EVENT-SERVICE
           predicates:
             - Path=/api/events/**
+          filters:
+            - RewritePath=/api/events/(?<segment>.*), /${segment}
         - id: identity-service
           uri: lb://IDENTITY-SERVICE
           predicates:
             - Path=/api/identity/**
+          filters:
+            - RewritePath=/api/identity/(?<segment>.*), /${segment}
       discovery:
         locator:
-          enabled: true
-          lower-case-service-id: true
+          enabled: false
 
 server:
   port: 8080
@@ -23,12 +26,18 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka-server:8761/eureka/
   instance:
-    hostname: localhost
+    hostname: api-gateway
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,metrics,prometheus,gateway
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG

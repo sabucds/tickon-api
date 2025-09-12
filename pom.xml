@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.3.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
+		<!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
 	<artifactId>tickon-parent</artifactId>
@@ -14,14 +14,6 @@
 	<packaging>pom</packaging>
 	<name>tickon-parent</name>
 	<description>Tickon Microservices Parent</description>
-
-	<properties>
-		<java.version>21</java.version>
-		<spring-cloud.version>2023.0.3</spring-cloud.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spotless.version>2.43.0</spotless.version>
-		<google-java-format.version>1.19.2</google-java-format.version>
-	</properties>
 
 	<modules>
 		<module>common</module>
@@ -31,6 +23,14 @@
 		<module>services/api-gateway</module>
 		<module>tests/e2e</module>
 	</modules>
+
+	<properties>
+		<java.version>21</java.version>
+		<spring-cloud.version>2023.0.3</spring-cloud.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spotless.version>2.43.0</spotless.version>
+		<google-java-format.version>1.19.2</google-java-format.version>
+	</properties>
 
 	<dependencyManagement>
 		<dependencies>
@@ -120,7 +120,7 @@
 							<expandEmptyElements>false</expandEmptyElements>
 							<nrOfIndentSpace>-1</nrOfIndentSpace>
 							<keepBlankLines>true</keepBlankLines>
-							<sortDependencies></sortDependencies>
+							<sortDependencies/>
 							<sortProperties>false</sortProperties>
 						</sortPom>
 					</pom>
@@ -172,11 +172,9 @@
 										<!-- Allow common module -->
 										<include>com.example:tickon-common</include>
 									</includes>
-									<message>
-										ERROR: Microservices must not depend on each other directly!
+									<message>ERROR: Microservices must not depend on each other directly!
 										Use REST APIs or message queues for inter-service communication.
-										Only the tickon-common module is allowed as a shared dependency.
-									</message>
+										Only the tickon-common module is allowed as a shared dependency.</message>
 								</bannedDependencies>
 							</rules>
 							<fail>true</fail>

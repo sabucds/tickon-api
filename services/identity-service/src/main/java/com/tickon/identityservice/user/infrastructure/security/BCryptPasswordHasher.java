@@ -1,9 +1,9 @@
 package com.tickon.identityservice.user.infrastructure.security;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
 import com.tickon.identityservice.user.application.ports.outbound.PasswordHasher;
 import com.tickon.identityservice.user.domain.PasswordHash;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
 
 @Component
 public class BCryptPasswordHasher implements PasswordHasher {

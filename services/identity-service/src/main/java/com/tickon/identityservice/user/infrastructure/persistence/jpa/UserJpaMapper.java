@@ -23,9 +23,16 @@ class UserJpaMapper {
   }
 
   User toDomain(JpaUserEntity entity) {
-    return User.fromPersistence(UserId.from(entity.id), new Email(entity.email),
-        new Username(entity.username), entity.firstName, entity.lastName,
-        new PasswordHash(entity.passwordHash), entity.createdAt, entity.updatedAt, entity.isDeleted,
+    return User.fromPersistence(
+        UserId.from(entity.id),
+        new Email(entity.email),
+        new Username(entity.username),
+        entity.firstName,
+        entity.lastName,
+        new PasswordHash(entity.passwordHash),
+        entity.createdAt,
+        entity.updatedAt,
+        entity.isDeleted,
         entity.deletedAt);
   }
 }

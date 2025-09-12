@@ -1,11 +1,11 @@
 // user/application/use-cases/GetUserById.java
 package com.tickon.identityservice.user.application.services;
 
-import java.util.Optional;
 import com.tickon.identityservice.user.application.models.UserResponse;
 import com.tickon.identityservice.user.application.ports.inbound.GetUserByIdUseCase;
 import com.tickon.identityservice.user.application.ports.outbound.UserRepository;
 import com.tickon.identityservice.user.domain.UserId;
+import java.util.Optional;
 
 public class GetUserById implements GetUserByIdUseCase {
 
@@ -16,7 +16,6 @@ public class GetUserById implements GetUserByIdUseCase {
   }
 
   public Optional<UserResponse> handle(UserId userId) {
-    return userRepository.findById(userId)
-        .map(UserResponse::from);
+    return userRepository.findById(userId).map(UserResponse::from);
   }
 }

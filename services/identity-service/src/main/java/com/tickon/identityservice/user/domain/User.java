@@ -15,8 +15,16 @@ public class User {
   private boolean isDeleted;
   private Instant deletedAt;
 
-  private User(UserId id, Email email, Username username, String firstName, String lastName,
-      PasswordHash passwordHash, Instant createdAt, Instant updatedAt, boolean isDeleted,
+  private User(
+      UserId id,
+      Email email,
+      Username username,
+      String firstName,
+      String lastName,
+      PasswordHash passwordHash,
+      Instant createdAt,
+      Instant updatedAt,
+      boolean isDeleted,
       Instant deletedAt) {
     this.id = id;
     this.email = email;
@@ -30,17 +38,48 @@ public class User {
     this.deletedAt = deletedAt;
   }
 
-  public static User fromPersistence(UserId id, Email email, Username username, String firstName,
-      String lastName, PasswordHash passwordHash, Instant createdAt, Instant updatedAt,
-      boolean isDeleted, Instant deletedAt) {
-    return new User(id, email, username, firstName, lastName, passwordHash, createdAt, updatedAt,
-        isDeleted, deletedAt);
+  public static User fromPersistence(
+      UserId id,
+      Email email,
+      Username username,
+      String firstName,
+      String lastName,
+      PasswordHash passwordHash,
+      Instant createdAt,
+      Instant updatedAt,
+      boolean isDeleted,
+      Instant deletedAt) {
+    return new User(
+        id,
+        email,
+        username,
+        firstName,
+        lastName,
+        passwordHash,
+        createdAt,
+        updatedAt,
+        isDeleted,
+        deletedAt);
   }
 
-  public static User forRegistration(UserId id, Email email, Username username, String firstName,
-      String lastName, PasswordHash passwordHash) {
-    return new User(id, email, username, firstName, lastName, passwordHash, Instant.now(),
-        Instant.now(), false, null);
+  public static User forRegistration(
+      UserId id,
+      Email email,
+      Username username,
+      String firstName,
+      String lastName,
+      PasswordHash passwordHash) {
+    return new User(
+        id,
+        email,
+        username,
+        firstName,
+        lastName,
+        passwordHash,
+        Instant.now(),
+        Instant.now(),
+        false,
+        null);
   }
 
   public UserId id() {
@@ -82,5 +121,4 @@ public class User {
   public Instant deletedAt() {
     return deletedAt;
   }
-
 }

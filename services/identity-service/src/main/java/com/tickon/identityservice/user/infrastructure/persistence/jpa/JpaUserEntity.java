@@ -9,35 +9,35 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
-class JpaUserEntity {
-  @Id String id;
+public class JpaUserEntity {
+  @Id public String id;
 
   @Column(name = "username", unique = true)
-  String username;
+  public String username;
 
   @Column(name = "first_name")
-  String firstName;
+  public String firstName;
 
   @Column(name = "last_name")
-  String lastName;
+  public String lastName;
 
   @Column(name = "email", unique = true, nullable = false)
-  String email;
+  public String email;
 
   @Column(name = "password_hash")
-  String passwordHash;
+  public String passwordHash;
 
   @Column(name = "created_at")
-  Instant createdAt;
+  public Instant createdAt;
 
   @Column(name = "updated_at")
-  Instant updatedAt;
+  public Instant updatedAt;
 
   @Column(name = "is_deleted")
-  boolean isDeleted;
+  public boolean isDeleted;
 
   @Column(name = "deleted_at")
-  Instant deletedAt;
+  public Instant deletedAt;
 
-  protected JpaUserEntity() {}
+  public JpaUserEntity() {}
 }

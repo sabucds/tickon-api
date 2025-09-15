@@ -1,13 +1,14 @@
-package com.tickon.identityservice.user.infrastructure.persistence.jpa;
+package com.tickon.identityservice.user.infrastructure.persistence.jpa.mappers;
 
 import com.tickon.identityservice.user.domain.User;
 import com.tickon.identityservice.user.domain.valueobjects.Email;
 import com.tickon.identityservice.user.domain.valueobjects.PasswordHash;
 import com.tickon.identityservice.user.domain.valueobjects.UserId;
 import com.tickon.identityservice.user.domain.valueobjects.Username;
+import com.tickon.identityservice.user.infrastructure.persistence.jpa.JpaUserEntity;
 
-class UserJpaMapper {
-  JpaUserEntity toEntity(User user) {
+public class UserJpaMapper {
+  public JpaUserEntity toEntity(User user) {
     var entity = new JpaUserEntity();
     entity.id = user.id().value().toString();
     entity.firstName = user.firstName();
@@ -22,7 +23,7 @@ class UserJpaMapper {
     return entity;
   }
 
-  User toDomain(JpaUserEntity entity) {
+  public User toDomain(JpaUserEntity entity) {
     return User.fromPersistence(
         UserId.from(entity.id),
         new Email(entity.email),

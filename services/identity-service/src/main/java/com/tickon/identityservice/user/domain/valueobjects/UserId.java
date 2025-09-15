@@ -1,4 +1,4 @@
-package com.tickon.identityservice.user.domain;
+package com.tickon.identityservice.user.domain.valueobjects;
 
 import java.util.UUID;
 

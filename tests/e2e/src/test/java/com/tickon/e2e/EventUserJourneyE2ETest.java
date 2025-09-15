@@ -1,13 +1,15 @@
 package com.tickon.e2e;
 
-import io.restassured.RestAssured;
 import java.io.File;
 import java.time.Duration;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import io.restassured.RestAssured;
 
 @Testcontainers
 class EventUserJourneyE2ETest {

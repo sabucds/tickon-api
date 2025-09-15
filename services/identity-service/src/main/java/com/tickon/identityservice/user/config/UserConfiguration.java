@@ -1,13 +1,15 @@
 package com.tickon.identityservice.user.config;
 
-import com.tickon.identityservice.user.application.ports.inbound.GetUserByIdUseCase;
-import com.tickon.identityservice.user.application.ports.inbound.RegisterUserUseCase;
+import com.tickon.identityservice.user.application.ports.inbound.GetUserByIdService;
+import com.tickon.identityservice.user.application.ports.inbound.RegisterUserService;
 import com.tickon.identityservice.user.application.ports.outbound.PasswordHasher;
 import com.tickon.identityservice.user.application.ports.outbound.UserRepository;
-import com.tickon.identityservice.user.application.services.GetUserById;
-import com.tickon.identityservice.user.application.services.RegisterUser;
+import com.tickon.identityservice.user.application.usecases.GetUserById;
+import com.tickon.identityservice.user.application.usecases.RegisterUser;
 import com.tickon.identityservice.user.domain.policies.PasswordStrengthPolicy;
+
 import java.time.Clock;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,7 +22,7 @@ public class UserConfiguration {
   }
 
   @Bean
-  public RegisterUserUseCase registerUserUseCase(
+  public RegisterUserService registerUserService(
       UserRepository userRepository,
       PasswordHasher passwordHasher,
       PasswordStrengthPolicy passwordPolicy,
@@ -29,7 +31,7 @@ public class UserConfiguration {
   }
 
   @Bean
-  public GetUserByIdUseCase getUserByIdUseCase(UserRepository userRepository) {
+  public GetUserByIdService getUserByIdService(UserRepository userRepository) {
     return new GetUserById(userRepository);
   }
 }

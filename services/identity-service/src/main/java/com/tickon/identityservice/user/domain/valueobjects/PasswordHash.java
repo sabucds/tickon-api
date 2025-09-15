@@ -1,4 +1,4 @@
-package com.tickon.identityservice.user.domain;
+package com.tickon.identityservice.user.domain.valueobjects;
 
 public class PasswordHash {
   private final String value;

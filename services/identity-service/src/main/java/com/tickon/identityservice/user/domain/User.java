@@ -1,5 +1,9 @@
-// user/domain/User.java
 package com.tickon.identityservice.user.domain;
+
+import com.tickon.identityservice.user.domain.valueobjects.Email;
+import com.tickon.identityservice.user.domain.valueobjects.PasswordHash;
+import com.tickon.identityservice.user.domain.valueobjects.UserId;
+import com.tickon.identityservice.user.domain.valueobjects.Username;
 
 import java.time.Instant;
 
@@ -68,18 +72,9 @@ public class User {
       Username username,
       String firstName,
       String lastName,
-      PasswordHash passwordHash) {
-    return new User(
-        id,
-        email,
-        username,
-        firstName,
-        lastName,
-        passwordHash,
-        Instant.now(),
-        Instant.now(),
-        false,
-        null);
+      PasswordHash passwordHash,
+      Instant now) {
+    return new User(id, email, username, firstName, lastName, passwordHash, now, now, false, null);
   }
 
   public UserId id() {

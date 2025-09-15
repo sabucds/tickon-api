@@ -1,10 +1,10 @@
 package com.tickon.identityservice.user.infrastructure.persistence.jpa;
 
-import com.tickon.identityservice.user.domain.Email;
-import com.tickon.identityservice.user.domain.PasswordHash;
 import com.tickon.identityservice.user.domain.User;
-import com.tickon.identityservice.user.domain.UserId;
-import com.tickon.identityservice.user.domain.Username;
+import com.tickon.identityservice.user.domain.valueobjects.Email;
+import com.tickon.identityservice.user.domain.valueobjects.PasswordHash;
+import com.tickon.identityservice.user.domain.valueobjects.UserId;
+import com.tickon.identityservice.user.domain.valueobjects.Username;
 
 class UserJpaMapper {
   JpaUserEntity toEntity(User user) {

@@ -1,11 +1,13 @@
 package com.tickon.identityservice.user.infrastructure.persistence.jpa;
 
 import com.tickon.identityservice.user.application.ports.outbound.UserRepository;
-import com.tickon.identityservice.user.domain.Email;
 import com.tickon.identityservice.user.domain.User;
-import com.tickon.identityservice.user.domain.UserId;
-import com.tickon.identityservice.user.domain.Username;
+import com.tickon.identityservice.user.domain.valueobjects.Email;
+import com.tickon.identityservice.user.domain.valueobjects.UserId;
+import com.tickon.identityservice.user.domain.valueobjects.Username;
+
 import java.util.Optional;
+
 import org.springframework.stereotype.Repository;
 
 @Repository

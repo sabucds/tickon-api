@@ -1,10 +1,10 @@
-// user/application/port/out/UserRepository.java
 package com.tickon.identityservice.user.application.ports.outbound;
 
-import com.tickon.identityservice.user.domain.Email;
 import com.tickon.identityservice.user.domain.User;
-import com.tickon.identityservice.user.domain.UserId;
-import com.tickon.identityservice.user.domain.Username;
+import com.tickon.identityservice.user.domain.valueobjects.Email;
+import com.tickon.identityservice.user.domain.valueobjects.UserId;
+import com.tickon.identityservice.user.domain.valueobjects.Username;
+
 import java.util.Optional;
 
 public interface UserRepository {

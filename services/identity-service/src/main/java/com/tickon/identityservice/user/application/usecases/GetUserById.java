@@ -16,7 +16,8 @@ public class GetUserById implements GetUserByIdService {
   }
 
   @Override
-  public Optional<UserResponseModel> handle(UserId userId) {
-    return userRepository.findById(userId).map(UserResponseModel::from);
+  public Optional<UserResponseModel> handle(String userId) {
+    UserId id = UserId.from(userId);
+    return userRepository.findById(id).map(UserResponseModel::from);
   }
 }

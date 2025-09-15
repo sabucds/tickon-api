@@ -2,7 +2,6 @@ package com.tickon.identityservice.user.infrastructure.web;
 
 import com.tickon.identityservice.user.application.ports.inbound.GetUserByIdService;
 import com.tickon.identityservice.user.application.ports.inbound.RegisterUserService;
-import com.tickon.identityservice.user.domain.valueobjects.UserId;
 import com.tickon.identityservice.user.infrastructure.web.dto.RegisterUserRequest;
 import com.tickon.identityservice.user.infrastructure.web.dto.UserResponse;
 import com.tickon.identityservice.user.infrastructure.web.mappers.UserMapper;
@@ -35,7 +34,7 @@ class UserController {
   @GetMapping("/{id}")
   public UserResponse getUser(@PathVariable String id) {
     return getUserById
-        .handle(UserId.from(id))
+        .handle(id)
         .map(UserMapper::toDto)
         .orElseThrow(() -> new RuntimeException("User not found: " + id));
   }

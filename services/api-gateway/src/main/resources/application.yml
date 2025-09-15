@@ -25,13 +25,11 @@ server:
 
 eureka:
   client:
-    fetchRegistry: true
-    registerWithEureka: true
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka
   instance:
     hostname: api-gateway
-    prefer-ip-address: true
+    prefer-ip-address: false
     instance-id: ${spring.application.name}:${random.value}
 
 management:

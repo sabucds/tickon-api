@@ -56,7 +56,6 @@ services:
     ports:
       - "8080:8080"
     environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DEVTOOLS_RESTART_ENABLED: true
     volumes:
       - ./services/api-gateway/target:/app/target
@@ -74,7 +73,6 @@ services:
       - "8081:8081"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-events:5432/tickon_events
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DEVTOOLS_RESTART_ENABLED: true
     volumes:
       - ./services/event-service/target:/app/target
@@ -93,7 +91,6 @@ services:
       - "8082:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-identity:5432/tickon_identity
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_DEVTOOLS_RESTART_ENABLED: true
     volumes:
       - ./services/identity-service/target:/app/target

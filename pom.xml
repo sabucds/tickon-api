@@ -106,7 +106,13 @@
 							<version>${google-java-format.version}</version>
 							<style>GOOGLE</style>
 						</googleJavaFormat>
-						<importOrder/>
+						<indent>
+							<spaces>true</spaces>
+							<spacesPerTab>2</spacesPerTab>
+						</indent>
+						<importOrder>
+							<order>com.tickon,com,java,javax,org,\#</order>
+						</importOrder>
 						<removeUnusedImports/>
 						<toggleOffOn/>
 						<trimTrailingWhitespace/>

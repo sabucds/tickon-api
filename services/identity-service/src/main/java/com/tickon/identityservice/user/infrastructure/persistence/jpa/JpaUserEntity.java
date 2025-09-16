@@ -44,5 +44,5 @@ public class JpaUserEntity {
   @Column(name = "deleted_at")
   public Instant deletedAt;
 
-  protected JpaUserEntity() {}
+  public JpaUserEntity() {}
 }

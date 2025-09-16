@@ -6,6 +6,7 @@ import com.tickon.identityservice.user.infrastructure.web.dto.RegisterUserReques
 import com.tickon.identityservice.user.infrastructure.web.dto.UserResponse;
 import com.tickon.identityservice.user.infrastructure.web.mappers.UserMapper;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/v1/users")
-class UserController {
+public class UserController {
 
   private final RegisterUserService registerUser;
   private final GetUserByIdService getUserById;
@@ -26,7 +27,7 @@ class UserController {
   }
 
   @PostMapping
-  public UserResponse register(@RequestBody RegisterUserRequest request) {
+  public UserResponse register(@Valid @RequestBody RegisterUserRequest request) {
     var appResponse = registerUser.register(UserMapper.toCommand(request));
     return UserMapper.toDto(appResponse);
   }

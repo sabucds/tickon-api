@@ -14,11 +14,11 @@ public final class UserMapper {
         request.lastName(),
         request.username(),
         request.email(),
-        request.password());
+        request.password()); 
   }
 
   public static UserResponse toDto(UserResponseModel model) {
     return new UserResponse(
-        model.id(), model.username(), model.email(), model.firstName(), model.lastName());
+        model.id(), model.firstName(), model.lastName(), model.username(), model.email());
   }
 }

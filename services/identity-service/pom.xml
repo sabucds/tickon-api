@@ -14,6 +14,10 @@
 	<description>Identity Management Service</description>
 
 	<dependencies>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
 		<dependency>
 			<groupId>com.example</groupId>
 			<artifactId>tickon-common</artifactId>

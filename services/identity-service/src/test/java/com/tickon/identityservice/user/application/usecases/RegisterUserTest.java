@@ -54,11 +54,11 @@ class RegisterUserTest {
 
     @Test
     void shouldRegisterUser_WhenValidInput() {
-        var command = new RegisterUserCommand(
+        RegisterUserCommand command = new RegisterUserCommand(
             "John", "Doe", "johndoe", "john@example.com", "SecurePass123!"
         );
         
-        var hashedPassword = new PasswordHash("hashed-password");
+        PasswordHash hashedPassword = new PasswordHash("hashed-password");
         
         when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
         when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
@@ -89,7 +89,7 @@ class RegisterUserTest {
 
     @Test
     void shouldThrowException_WhenEmailAlreadyExists() {
-        var command = new RegisterUserCommand(
+        RegisterUserCommand command = new RegisterUserCommand(
             "John", "Doe", "johndoe", "john@example.com", "SecurePass123!"
         );
         
@@ -102,7 +102,7 @@ class RegisterUserTest {
 
     @Test
     void shouldThrowException_WhenUsernameAlreadyExists() {
-        var command = new RegisterUserCommand(
+        RegisterUserCommand command = new RegisterUserCommand(
             "John", "Doe", "johndoe", "john@example.com", "SecurePass123!"
         );
         
@@ -116,7 +116,7 @@ class RegisterUserTest {
 
     @Test
     void shouldThrowException_WhenPasswordPolicyValidationFails() {
-        var command = new RegisterUserCommand(
+        RegisterUserCommand command = new RegisterUserCommand(
             "John", "Doe", "johndoe", "john@example.com", "weak"
         );
         
@@ -132,7 +132,7 @@ class RegisterUserTest {
 
     @Test
     void shouldThrowException_WhenInvalidEmailFormat() {
-        var command = new RegisterUserCommand(
+        RegisterUserCommand command = new RegisterUserCommand(
             "John", "Doe", "johndoe", "invalid-email", "SecurePass123!"
         );
         
@@ -143,7 +143,7 @@ class RegisterUserTest {
 
     @Test
     void shouldThrowException_WhenInvalidUsernameFormat() {
-        var command = new RegisterUserCommand(
+        RegisterUserCommand command = new RegisterUserCommand(
             "John", "Doe", "", "john@example.com", "SecurePass123!"
         );
         
@@ -153,7 +153,7 @@ class RegisterUserTest {
 
     @Test
     void shouldUseClockForCreatedAt() {
-        var command = new RegisterUserCommand(
+        RegisterUserCommand command = new RegisterUserCommand(
             "John", "Doe", "johndoe", "john@example.com", "SecurePass123!"
         );
         
@@ -172,10 +172,10 @@ class RegisterUserTest {
 
     @Test
     void shouldCreateUniqueUserIds_WhenRegisteringMultipleUsers() {
-        var command1 = new RegisterUserCommand(
+        RegisterUserCommand command1 = new RegisterUserCommand(
             "John", "Doe", "johndoe", "john@example.com", "SecurePass123!"
         );
-        var command2 = new RegisterUserCommand(
+        RegisterUserCommand command2 = new RegisterUserCommand(
             "Jane", "Smith", "janesmith", "jane@example.com", "SecurePass456!"
         );
         
@@ -191,7 +191,7 @@ class RegisterUserTest {
 
     @Test
     void shouldValidatePasswordBeforeHashing() {
-        var command = new RegisterUserCommand(
+        RegisterUserCommand command = new RegisterUserCommand(
             "John", "Doe", "johndoe", "john@example.com", "SecurePass123!"
         );
         

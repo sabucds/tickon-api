@@ -41,9 +41,8 @@ class UserControllerTest {
 
   @Test
   void shouldRegisterNewUser_WhenValidInput() throws Exception {
-    // Given
-    var request = new RegisterUserRequest("John", "Doe", "johndoe", "john@example.com", "SecurePass123!");
-    var expectedResponse = new UserResponseModel("123", "johndoe", "john@example.com", "John", "Doe");
+    RegisterUserRequest request = new RegisterUserRequest("John", "Doe", "johndoe", "john@example.com", "SecurePass123!");
+    UserResponseModel expectedResponse = new UserResponseModel("123", "johndoe", "john@example.com", "John", "Doe");
 
     when(registerUserService.register(any(RegisterUserService.RegisterUserCommand.class)))
         .thenReturn(expectedResponse);
@@ -62,8 +61,7 @@ class UserControllerTest {
 
   @Test
   void shouldReturnBadRequest_WhenFirstNameIsBlank() throws Exception {
-    // Given
-    var request = new RegisterUserRequest("", "Doe", "johndoe", "john@example.com", "SecurePass123!");
+    RegisterUserRequest request = new RegisterUserRequest("", "Doe", "johndoe", "john@example.com", "SecurePass123!");
     
     // When & Then
     mockMvc.perform(post("/v1/users")
@@ -76,8 +74,7 @@ class UserControllerTest {
 
   @Test
   void shouldReturnBadRequest_WhenEmailIsInvalid() throws Exception {
-    // Given
-    var request = new RegisterUserRequest("John", "Doe", "johndoe", "invalid-email", "SecurePass123!");
+    RegisterUserRequest request = new RegisterUserRequest("John", "Doe", "johndoe", "invalid-email", "SecurePass123!");
     
     // When & Then
     mockMvc.perform(post("/v1/users")
@@ -89,8 +86,7 @@ class UserControllerTest {
 
   @Test
   void shouldReturnBadRequest_WhenPasswordTooShort() throws Exception {
-    // Given
-    var request = new RegisterUserRequest("John", "Doe", "johndoe", "john@example.com", "123");
+    RegisterUserRequest request = new RegisterUserRequest("John", "Doe", "johndoe", "john@example.com", "123");
     
     // When & Then
     mockMvc.perform(post("/v1/users")
@@ -102,8 +98,7 @@ class UserControllerTest {
 
   @Test
   void shouldReturnBadRequest_WhenMultipleValidationErrors() throws Exception {
-    // Given
-    var request = new RegisterUserRequest("", "", "ab", "invalid-email", "123");
+    RegisterUserRequest request = new RegisterUserRequest("", "", "ab", "invalid-email", "123");
     
     // When & Then
     mockMvc.perform(post("/v1/users")

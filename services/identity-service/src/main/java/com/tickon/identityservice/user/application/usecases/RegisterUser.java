@@ -10,7 +10,6 @@ import com.tickon.identityservice.user.domain.valueobjects.Email;
 import com.tickon.identityservice.user.domain.valueobjects.PasswordHash;
 import com.tickon.identityservice.user.domain.valueobjects.UserId;
 import com.tickon.identityservice.user.domain.valueobjects.Username;
-
 import java.time.Clock;
 import java.time.Instant;
 
@@ -21,11 +20,8 @@ public class RegisterUser implements RegisterUserService {
   private final PasswordStrengthPolicy passwordPolicy;
   private final Clock clock;
 
-  public RegisterUser(
-      UserRepository userRepository,
-      PasswordHasher passwordHasher,
-      PasswordStrengthPolicy passwordPolicy,
-      Clock clock) {
+  public RegisterUser(UserRepository userRepository, PasswordHasher passwordHasher,
+      PasswordStrengthPolicy passwordPolicy, Clock clock) {
     this.userRepository = userRepository;
     this.passwordHasher = passwordHasher;
     this.passwordPolicy = passwordPolicy;
@@ -48,9 +44,8 @@ public class RegisterUser implements RegisterUserService {
     PasswordHash hash = passwordHasher.hash(request.rawPassword());
 
     Instant now = Instant.now(clock);
-    User user =
-        User.forRegistration(
-            UserId.generate(), email, username, request.firstName(), request.lastName(), hash, now);
+    User user = User.forRegistration(UserId.generate(), email, username, request.firstName(), request.lastName(), hash,
+        now);
 
     userRepository.save(user);
     return UserResponseModel.from(user);

@@ -7,9 +7,7 @@ import com.tickon.identityservice.user.application.ports.outbound.UserRepository
 import com.tickon.identityservice.user.application.usecases.GetUserById;
 import com.tickon.identityservice.user.application.usecases.RegisterUser;
 import com.tickon.identityservice.user.domain.policies.PasswordStrengthPolicy;
-
 import java.time.Clock;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,11 +20,8 @@ public class UserConfiguration {
   }
 
   @Bean
-  public RegisterUserService registerUserService(
-      UserRepository userRepository,
-      PasswordHasher passwordHasher,
-      PasswordStrengthPolicy passwordPolicy,
-      Clock clock) {
+  public RegisterUserService registerUserService(UserRepository userRepository, PasswordHasher passwordHasher,
+      PasswordStrengthPolicy passwordPolicy, Clock clock) {
     return new RegisterUser(userRepository, passwordHasher, passwordPolicy, clock);
   }
 

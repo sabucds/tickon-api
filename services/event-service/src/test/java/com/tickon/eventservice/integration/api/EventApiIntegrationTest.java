@@ -16,11 +16,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class EventApiIntegrationTest {
 
   @Container
-  static PostgreSQLContainer<?> postgres =
-      new PostgreSQLContainer<>("postgres:15-alpine")
-          .withDatabaseName("testdb")
-          .withUsername("test")
-          .withPassword("test");
+  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine").withDatabaseName("testdb")
+      .withUsername("test").withPassword("test");
 
   @DynamicPropertySource
   static void properties(DynamicPropertyRegistry registry) {

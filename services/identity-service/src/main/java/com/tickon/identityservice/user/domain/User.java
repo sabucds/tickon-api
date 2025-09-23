@@ -4,7 +4,6 @@ import com.tickon.identityservice.user.domain.valueobjects.Email;
 import com.tickon.identityservice.user.domain.valueobjects.PasswordHash;
 import com.tickon.identityservice.user.domain.valueobjects.UserId;
 import com.tickon.identityservice.user.domain.valueobjects.Username;
-
 import java.time.Instant;
 
 public class User {
@@ -19,17 +18,8 @@ public class User {
   private boolean isDeleted;
   private Instant deletedAt;
 
-  private User(
-      UserId id,
-      Email email,
-      Username username,
-      String firstName,
-      String lastName,
-      PasswordHash passwordHash,
-      Instant createdAt,
-      Instant updatedAt,
-      boolean isDeleted,
-      Instant deletedAt) {
+  private User(UserId id, Email email, Username username, String firstName, String lastName, PasswordHash passwordHash,
+      Instant createdAt, Instant updatedAt, boolean isDeleted, Instant deletedAt) {
     this.id = id;
     this.email = email;
     this.username = username;
@@ -42,38 +32,13 @@ public class User {
     this.deletedAt = deletedAt;
   }
 
-  public static User fromPersistence(
-      UserId id,
-      Email email,
-      Username username,
-      String firstName,
-      String lastName,
-      PasswordHash passwordHash,
-      Instant createdAt,
-      Instant updatedAt,
-      boolean isDeleted,
-      Instant deletedAt) {
-    return new User(
-        id,
-        email,
-        username,
-        firstName,
-        lastName,
-        passwordHash,
-        createdAt,
-        updatedAt,
-        isDeleted,
-        deletedAt);
+  public static User fromPersistence(UserId id, Email email, Username username, String firstName, String lastName,
+      PasswordHash passwordHash, Instant createdAt, Instant updatedAt, boolean isDeleted, Instant deletedAt) {
+    return new User(id, email, username, firstName, lastName, passwordHash, createdAt, updatedAt, isDeleted, deletedAt);
   }
 
-  public static User forRegistration(
-      UserId id,
-      Email email,
-      Username username,
-      String firstName,
-      String lastName,
-      PasswordHash passwordHash,
-      Instant now) {
+  public static User forRegistration(UserId id, Email email, Username username, String firstName, String lastName,
+      PasswordHash passwordHash, Instant now) {
     return new User(id, email, username, firstName, lastName, passwordHash, now, now, false, null);
   }
 

@@ -9,16 +9,11 @@ public final class UserMapper {
   private UserMapper() {}
 
   public static RegisterUserCommand toCommand(RegisterUserRequest request) {
-    return new RegisterUserCommand(
-        request.firstName(),
-        request.lastName(),
-        request.username(),
-        request.email(),
-        request.password()); 
+    return new RegisterUserCommand(request.firstName(), request.lastName(), request.username(), request.email(),
+        request.password());
   }
 
   public static UserResponse toDto(UserResponseModel model) {
-    return new UserResponse(
-        model.id(), model.firstName(), model.lastName(), model.username(), model.email());
+    return new UserResponse(model.id(), model.firstName(), model.lastName(), model.username(), model.email());
   }
 }

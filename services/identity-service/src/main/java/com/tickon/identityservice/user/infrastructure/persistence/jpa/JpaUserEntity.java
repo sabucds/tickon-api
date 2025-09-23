@@ -1,21 +1,20 @@
 package com.tickon.identityservice.user.infrastructure.persistence.jpa;
 
-import java.time.Instant;
-
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.Instant;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "users")
 @SQLDelete(sql = "UPDATE users SET is_deleted = true, deleted_at = now() WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 public class JpaUserEntity {
-  @Id public String id;
+  @Id
+  public String id;
 
   @Column(name = "username", nullable = false, columnDefinition = "citext")
   public String username;

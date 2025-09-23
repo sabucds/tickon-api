@@ -16,8 +16,10 @@ public class PasswordHash {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
     PasswordHash that = (PasswordHash) o;
     return value.equals(that.value);
   }

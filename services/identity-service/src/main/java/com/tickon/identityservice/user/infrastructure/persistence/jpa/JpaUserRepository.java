@@ -6,9 +6,7 @@ import com.tickon.identityservice.user.domain.valueobjects.Email;
 import com.tickon.identityservice.user.domain.valueobjects.UserId;
 import com.tickon.identityservice.user.domain.valueobjects.Username;
 import com.tickon.identityservice.user.infrastructure.persistence.jpa.mappers.UserJpaMapper;
-
 import java.util.Optional;
-
 import org.springframework.stereotype.Repository;
 
 @Repository

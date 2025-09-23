@@ -9,14 +9,12 @@ public class DefaultPasswordStrengthPolicy implements PasswordStrengthPolicy {
   private static final String UPPERCASE_PATTERN = ".*[A-Z].*";
   private static final String LOWERCASE_PATTERN = ".*[a-z].*";
   private static final String DIGIT_PATTERN = ".*\\d.*";
-  private static final String SPECIAL_CHAR_PATTERN =
-      ".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*";
+  private static final String SPECIAL_CHAR_PATTERN = ".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*";
 
   @Override
   public void validate(String rawPassword) {
     if (rawPassword == null || rawPassword.length() < MIN_LENGTH) {
-      throw new IllegalArgumentException(
-          "Password must be at least " + MIN_LENGTH + " characters long");
+      throw new IllegalArgumentException("Password must be at least " + MIN_LENGTH + " characters long");
     }
 
     if (!rawPassword.matches(UPPERCASE_PATTERN)) {

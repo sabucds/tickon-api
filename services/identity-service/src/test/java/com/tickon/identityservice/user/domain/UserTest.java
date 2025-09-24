@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class UserTest {
+class UserTest {
 
   private Instant fixedInstant;
 
@@ -35,7 +35,7 @@ public class UserTest {
     assertThat(registeredUser.passwordHash().value()).isEqualTo("hashed-password");
     assertThat(registeredUser.createdAt()).isEqualTo(fixedInstant);
     assertThat(registeredUser.updatedAt()).isEqualTo(fixedInstant);
-    assertThat(registeredUser.isDeleted()).isEqualTo(false);
+    assertThat(registeredUser.isDeleted()).isFalse();
     assertThat(registeredUser.deletedAt()).isNull();
   }
 
@@ -52,7 +52,7 @@ public class UserTest {
     assertThat(registeredUser.passwordHash().value()).isEqualTo("hashed-password");
     assertThat(registeredUser.createdAt()).isEqualTo(fixedInstant);
     assertThat(registeredUser.updatedAt()).isEqualTo(fixedInstant);
-    assertThat(registeredUser.isDeleted()).isEqualTo(false);
+    assertThat(registeredUser.isDeleted()).isFalse();
     assertThat(registeredUser.deletedAt()).isNull();
   }
 }

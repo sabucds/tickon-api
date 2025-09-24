@@ -4,7 +4,7 @@ public class PasswordHash {
   private final String value;
 
   public PasswordHash(String value) {
-    if (value == null || value.isEmpty()) {
+    if (value == null || value.isEmpty() || value.isBlank()) {
       throw new IllegalArgumentException("Password hash cannot be null or empty");
     }
     this.value = value;

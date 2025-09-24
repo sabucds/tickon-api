@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL databases
   postgres-events:
@@ -34,15 +32,24 @@ services:
   eureka-server:
     build:
       context: .
-      dockerfile: services/eureka-server/Dockerfile
+      dockerfile: Dockerfile
+      target: development
+      args:
+        SERVICE_PATH: services/eureka-server
     container_name: tickon-eureka
+    develop:
+      watch:
+        - action: rebuild
+          path: services/eureka-server
     ports:
       - "8761:8761"
     environment:
       SPRING_DEVTOOLS_RESTART_ENABLED: true
+      SERVICE_NAME: eureka-server
     volumes:
-      - ./services/eureka-server/target:/app/target
-      - ./services/eureka-server/src:/app/src
+      - .:/workspace
+      - ./services/eureka-server:/app
+      - maven-cache:/root/.m2/repository
     networks:
       - tickon-network
     healthcheck:
@@ -55,15 +62,24 @@ services:
   api-gateway:
     build:
       context: .
-      dockerfile: services/api-gateway/Dockerfile
+      dockerfile: Dockerfile
+      target: development
+      args:
+        SERVICE_PATH: services/api-gateway
     container_name: tickon-gateway
+    develop:
+      watch:
+        - action: rebuild
+          path: services/api-gateway
     ports:
       - "8080:8080"
     environment:
       SPRING_DEVTOOLS_RESTART_ENABLED: true
+      SERVICE_NAME: api-gateway
     volumes:
-      - ./services/api-gateway/target:/app/target
-      - ./services/api-gateway/src:/app/src
+      - .:/workspace
+      - ./services/api-gateway:/app
+      - maven-cache:/root/.m2/repository
     depends_on:
       - eureka-server
     networks:
@@ -73,16 +89,25 @@ services:
   event-service:
     build:
       context: .
-      dockerfile: services/event-service/Dockerfile
+      dockerfile: Dockerfile
+      target: development
+      args:
+        SERVICE_PATH: services/event-service
     container_name: tickon-event-service
+    develop:
+      watch:
+        - action: rebuild
+          path: services/event-service
     ports:
       - "8081:8081"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-events:5432/tickon_events
       SPRING_DEVTOOLS_RESTART_ENABLED: true
+      SERVICE_NAME: event-service
     volumes:
-      - ./services/event-service/target:/app/target
-      - ./services/event-service/src:/app/src
+      - .:/workspace
+      - ./services/event-service:/app
+      - maven-cache:/root/.m2/repository
     depends_on:
       - postgres-events
       - eureka-server
@@ -93,16 +118,25 @@ services:
   identity-service:
     build:
       context: .
-      dockerfile: services/identity-service/Dockerfile
+      dockerfile: Dockerfile
+      target: development
+      args:
+        SERVICE_PATH: services/identity-service
     container_name: tickon-identity-service
+    develop:
+      watch:
+        - action: rebuild
+          path: services/identity-service
     ports:
       - "8082:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-identity:5432/tickon_identity
       SPRING_DEVTOOLS_RESTART_ENABLED: true
+      SERVICE_NAME: identity-service
     volumes:
-      - ./services/identity-service/target:/app/target
-      - ./services/identity-service/src:/app/src
+      - .:/workspace
+      - ./services/identity-service:/app
+      - maven-cache:/root/.m2/repository
     depends_on:
       - postgres-identity
       - eureka-server
@@ -143,6 +177,7 @@ volumes:
   postgres-identity-data:
   prometheus-data:
   grafana-data:
+  maven-cache:
 
 networks:
   tickon-network:

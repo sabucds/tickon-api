@@ -1,8 +1,24 @@
-FROM eclipse-temurin:21-jdk-jammy AS deps
-ARG SERVICE_PATH
+FROM eclipse-temurin:21-jdk-jammy as base
 WORKDIR /build
 COPY --chmod=0755 mvnw mvnw
 COPY .mvn/ .mvn/
+
+FROM base as test
+WORKDIR /build
+# Copy all module structure for Maven multi-module build
+COPY pom.xml .
+COPY java-formatter.xml .
+COPY common/ common/
+COPY services/ services/
+COPY tests/ tests/
+# Copy root src if it exists
+COPY src/ src/
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw test
+
+FROM base as deps
+ARG SERVICE_PATH
+WORKDIR /build
 # Copy all module structure for Maven multi-module build
 COPY pom.xml .
 COPY java-formatter.xml .

@@ -15,6 +15,7 @@ import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
 import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.Username;
+import java.time.Clock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,10 +36,12 @@ class RegisterUserServiceTest {
 
   private RegisterUserService registerUser;
 
+  private Clock clock = Clock.systemUTC();
+
   @BeforeEach
   void setUp() {
     passwordPolicy = new PasswordStrengthPolicy();
-    registerUser = new RegisterUserService(userRepository, passwordHasher, passwordPolicy);
+    registerUser = new RegisterUserService(userRepository, passwordHasher, passwordPolicy, clock);
   }
 
   @Test

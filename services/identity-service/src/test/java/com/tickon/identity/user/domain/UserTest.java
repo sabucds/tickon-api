@@ -25,8 +25,8 @@ class UserTest {
   @Test
   public void shouldRegisterUser() {
     UserId userId = UserId.generate();
-    User registeredUser = User.forRegistration(userId, Email.from("john@example.com"), Username.from("john_doe"),
-        "John", "Doe", new PasswordHash("hashed-password"));
+    User registeredUser = User.create(userId, Email.from("john@example.com"), Username.from("john_doe"), "John", "Doe",
+        new PasswordHash("hashed-password"), fixedInstant);
 
     assertThat(registeredUser.email().value()).isEqualTo("john@example.com");
     assertThat(registeredUser.username().value()).isEqualTo("john_doe");
@@ -37,6 +37,9 @@ class UserTest {
     assertThat(registeredUser.updatedAt()).isNotNull();
     assertThat(registeredUser.isDeleted()).isFalse();
     assertThat(registeredUser.deletedAt()).isNull();
+    assertThat(registeredUser.id()).isEqualTo(userId);
+    assertThat(registeredUser.createdAt()).isEqualTo(fixedInstant);
+    assertThat(registeredUser.updatedAt()).isEqualTo(fixedInstant);
   }
 
   @Test

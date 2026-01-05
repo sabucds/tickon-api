@@ -1,0 +1,7 @@
+package com.tickon.identity.auth.domain.exceptions;
+
+public class InvalidCredentialsException extends RuntimeException {
+  public InvalidCredentialsException() {
+    super("Invalid credentials");
+  }
+}

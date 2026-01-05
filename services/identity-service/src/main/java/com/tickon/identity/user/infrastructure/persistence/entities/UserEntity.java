@@ -1,4 +1,4 @@
-package com.tickon.identity.user.infrastructure.persistence.entity;
+package com.tickon.identity.user.infrastructure.persistence.entities;
 
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
@@ -45,6 +45,4 @@ public class UserEntity {
 
   @Column(name = "deleted_at")
   public Instant deletedAt;
-
-  public UserEntity() {}
 }

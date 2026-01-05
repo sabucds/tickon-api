@@ -11,6 +11,8 @@ import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.UserId;
 import com.tickon.identity.user.domain.valueobjects.Username;
+import java.time.Clock;
+import java.time.Instant;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,12 +21,14 @@ public class RegisterUserService implements RegisterUserUseCase {
   private final UserRepository userRepository;
   private final PasswordHasher passwordHasher;
   private final PasswordStrengthPolicy passwordPolicy;
+  private final Clock clock;
 
   public RegisterUserService(UserRepository userRepository, PasswordHasher passwordHasher,
-      PasswordStrengthPolicy passwordPolicy) {
+      PasswordStrengthPolicy passwordPolicy, Clock clock) {
     this.userRepository = userRepository;
     this.passwordHasher = passwordHasher;
     this.passwordPolicy = passwordPolicy;
+    this.clock = clock;
   }
 
   @Override
@@ -42,7 +46,9 @@ public class RegisterUserService implements RegisterUserUseCase {
     passwordPolicy.validate(request.rawPassword());
     PasswordHash hash = passwordHasher.hash(request.rawPassword());
 
-    User user = User.forRegistration(UserId.generate(), email, username, request.firstName(), request.lastName(), hash);
+    Instant now = clock.instant();
+
+    User user = User.create(UserId.generate(), email, username, request.firstName(), request.lastName(), hash, now);
 
     userRepository.save(user);
     return UserResult.from(user);

@@ -5,7 +5,7 @@ import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.UserId;
 import com.tickon.identity.user.domain.valueobjects.Username;
-import com.tickon.identity.user.infrastructure.persistence.entity.UserEntity;
+import com.tickon.identity.user.infrastructure.persistence.entities.UserEntity;
 import com.tickon.identity.user.infrastructure.persistence.mappers.UserPersistenceMapper;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
@@ -40,5 +40,11 @@ public class UserRepositoryAdapter implements UserRepository {
   @Override
   public boolean existsByUsername(Username username) {
     return springRepository.existsByUsername(username.value());
+  }
+
+  @Override
+  public Optional<User> findByUsernameOrEmail(String usernameOrEmail) {
+    return springRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(usernameOrEmail, usernameOrEmail)
+        .map(mapper::toDomain);
   }
 }

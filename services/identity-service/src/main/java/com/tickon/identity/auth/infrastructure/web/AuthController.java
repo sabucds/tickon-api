@@ -23,7 +23,7 @@ public class AuthController {
     this.loginUser = loginUser;
   }
 
-  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseStatus(HttpStatus.OK)
   @PostMapping("/login")
   public LoginResponse login(@Valid @RequestBody LoginRequest request) {
     var appResponse = loginUser.login(LoginMapper.toLoginCommand(request));

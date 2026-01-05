@@ -13,5 +13,7 @@ public interface UserRepository {
 
   boolean existsByUsername(Username username);
 
+  Optional<User> findByUsernameOrEmail(String usernameOrEmail);
+
   void save(User user);
 }

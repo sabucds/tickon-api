@@ -5,7 +5,7 @@ import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.UserId;
 import com.tickon.identity.user.domain.valueobjects.Username;
-import com.tickon.identity.user.infrastructure.persistence.entity.UserEntity;
+import com.tickon.identity.user.infrastructure.persistence.entities.UserEntity;
 
 public class UserPersistenceMapper {
   public UserEntity toEntity(User user) {

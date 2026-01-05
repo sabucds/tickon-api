@@ -1,10 +1,13 @@
 package com.tickon.identity.user.infrastructure.persistence;
 
-import com.tickon.identity.user.infrastructure.persistence.entity.UserEntity;
+import com.tickon.identity.user.infrastructure.persistence.entities.UserEntity;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaUserRepository extends JpaRepository<UserEntity, String> {
   boolean existsByEmail(String email);
 
   boolean existsByUsername(String username);
+
+  Optional<UserEntity> findByUsernameIgnoreCaseOrEmailIgnoreCase(String username, String email);
 }

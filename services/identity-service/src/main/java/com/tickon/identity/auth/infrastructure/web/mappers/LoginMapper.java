@@ -1,7 +1,7 @@
 package com.tickon.identity.auth.infrastructure.web.mappers;
 
+import com.tickon.identity.auth.application.dto.LoginCommand;
 import com.tickon.identity.auth.application.dto.LoginResult;
-import com.tickon.identity.auth.application.ports.in.LoginUseCase.LoginCommand;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginResponse;
 

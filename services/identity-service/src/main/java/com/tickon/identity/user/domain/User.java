@@ -37,9 +37,8 @@ public class User {
     return new User(id, email, username, firstName, lastName, passwordHash, createdAt, updatedAt, isDeleted, deletedAt);
   }
 
-  public static User forRegistration(UserId id, Email email, Username username, String firstName, String lastName,
-      PasswordHash passwordHash) {
-    Instant now = Instant.now();
+  public static User create(UserId id, Email email, Username username, String firstName, String lastName,
+      PasswordHash passwordHash, Instant now) {
     return new User(id, email, username, firstName, lastName, passwordHash, now, now, false, null);
   }
 

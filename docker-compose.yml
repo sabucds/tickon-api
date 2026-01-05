@@ -133,6 +133,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-identity:5432/tickon_identity
       SPRING_DEVTOOLS_RESTART_ENABLED: true
       SERVICE_NAME: identity-service
+      SECURITY_JWT_PRIVATE_KEY: ${SECURITY_JWT_PRIVATE_KEY:-}
+      SECURITY_JWT_PUBLIC_KEY: ${SECURITY_JWT_PUBLIC_KEY:-}
     volumes:
       - .:/workspace
       - ./services/identity-service:/app

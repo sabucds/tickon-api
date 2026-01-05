@@ -126,40 +126,40 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.4.1</version>
-				<executions>
-					<execution>
-						<id>enforce-no-cross-service-dependencies</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<phase>validate</phase>
-						<configuration>
-							<rules>
-								<bannedDependencies>
-									<excludes>
-										<!-- Prevent services from depending on each other -->
-										<exclude>com.example:identity-service</exclude>
-										<exclude>com.example:event-service</exclude>
-										<exclude>com.example:api-gateway</exclude>
-									</excludes>
-									<includes>
-										<!-- Allow common module -->
-										<include>com.example:tickon-common</include>
-									</includes>
-									<message>ERROR: Microservices must not depend on each other directly!
-										Use REST APIs or message queues for inter-service communication.
-										Only the tickon-common module is allowed as a shared dependency.</message>
-								</bannedDependencies>
-							</rules>
-							<fail>true</fail>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>3.4.1</version>
+					<executions>
+						<execution>
+							<id>enforce-no-cross-service-dependencies</id>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+							<phase>validate</phase>
+							<configuration>
+								<rules>
+									<bannedDependencies>
+										<excludes>
+											<!-- Prevent services from depending on each other -->
+											<exclude>com.example:identity-service</exclude>
+											<exclude>com.example:event-service</exclude>
+											<exclude>com.example:api-gateway</exclude>
+										</excludes>
+										<includes>
+											<!-- Allow common module -->
+											<include>com.example:tickon-common</include>
+										</includes>
+										<message>ERROR: Microservices must not depend on each other directly!
+											Use REST APIs or message queues for inter-service communication.
+											Only the tickon-common module is allowed as a shared dependency.</message>
+									</bannedDependencies>
+								</rules>
+								<fail>true</fail>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>

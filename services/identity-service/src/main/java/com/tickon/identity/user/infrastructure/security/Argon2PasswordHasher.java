@@ -18,7 +18,7 @@ public class Argon2PasswordHasher implements PasswordHasher {
 
   @Override
   public PasswordHash hash(String rawPassword) {
-    return new PasswordHash(encoder.encode(rawPassword));
+    return PasswordHash.from(encoder.encode(rawPassword));
   }
 
   @Override

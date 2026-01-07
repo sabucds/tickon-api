@@ -1,43 +1,23 @@
 package com.tickon.identity.user.domain.valueobjects;
 
+import com.tickon.identity.shared.errors.InvalidIdException;
 import java.util.UUID;
 
-public class UserId {
-  private final UUID value;
+public record UserId(UUID value) {
+  public UserId {
+    if (value == null)
+      throw new InvalidIdException("Invalid UserId: null value");
+  }
 
-  private UserId(UUID value) {
-    this.value = value;
+  public static UserId from(String s) {
+    if (s == null || s.isEmpty())
+      throw new InvalidIdException("Invalid UserId: null or empty string");
+    if (!s.matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"))
+      throw new InvalidIdException("Invalid UserId: not a valid UUID format");
+    return new UserId(UUID.fromString(s));
   }
 
   public static UserId generate() {
     return new UserId(UUID.randomUUID());
-  }
-
-  public static UserId from(String value) {
-    return new UserId(UUID.fromString(value));
-  }
-
-  public UUID value() {
-    return value;
-  }
-
-  @Override
-  public String toString() {
-    return value.toString();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
-    UserId userId = (UserId) o;
-    return value.equals(userId.value);
-  }
-
-  @Override
-  public int hashCode() {
-    return value.hashCode();
   }
 }

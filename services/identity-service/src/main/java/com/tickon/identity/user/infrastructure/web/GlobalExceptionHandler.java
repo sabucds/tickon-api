@@ -1,6 +1,7 @@
 package com.tickon.identity.user.infrastructure.web;
 
-import com.tickon.identity.auth.domain.exceptions.InvalidCredentialsException;
+import com.tickon.identity.shared.errors.DomainException;
+import com.tickon.identity.shared.errors.ErrorCode;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -8,47 +9,39 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-
-    Map<String, Object> response = new HashMap<>();
+  public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex) {
     Map<String, String> errors = new HashMap<>();
+    ex.getBindingResult().getFieldErrors().forEach(e -> errors.put(e.getField(), e.getDefaultMessage()));
 
-    ex.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-
-    response.put("message", "Validation failed");
-    response.put("errors", errors);
-
-    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    return ResponseEntity.badRequest().body(ApiError.of("VALIDATION_FAILED", "Validation failed", errors));
   }
 
-  @ExceptionHandler(IllegalArgumentException.class)
-  @ResponseStatus(HttpStatus.UNAUTHORIZED)
-  public Map<String, Object> handleIllegalArgument(IllegalArgumentException ex) {
-    Map<String, Object> response = new HashMap<>();
-    response.put("message", ex.getMessage());
-    return response;
-  }
-
-  @ExceptionHandler(InvalidCredentialsException.class)
-  @ResponseStatus(HttpStatus.UNAUTHORIZED)
-  public Map<String, Object> handleInvalidCredentials(InvalidCredentialsException ex) {
-    Map<String, Object> response = new HashMap<>();
-    response.put("message", ex.getMessage());
-    return response;
+  @ExceptionHandler(DomainException.class)
+  public ResponseEntity<ApiError> handleDomain(DomainException ex) {
+    ErrorCode code = ex.code();
+    return ResponseEntity.status(code.status()).body(new ApiError(code.name(), ex.getMessage(), null));
   }
 
   @ExceptionHandler(AccessDeniedException.class)
-  @ResponseStatus(HttpStatus.FORBIDDEN)
-  public Map<String, Object> handleAccessDenied(AccessDeniedException ex) {
-    Map<String, Object> response = new HashMap<>();
-    response.put("message", "Access denied");
-    return response;
+  public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiError.of("ACCESS_DENIED", "Access denied", null));
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ApiError> handleUnexpected(Exception ex) {
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(ApiError.of("INTERNAL_ERROR", "Something went wrong", null));
+  }
+
+  public record ApiError(String code, String message, Map<String, String> errors) {
+    public static ApiError of(String code, String message, Map<String, String> errors) {
+      return new ApiError(code, message, errors);
+    }
   }
 }

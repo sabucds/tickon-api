@@ -6,6 +6,8 @@ import com.tickon.identity.user.application.ports.in.RegisterUserUseCase;
 import com.tickon.identity.user.application.ports.out.PasswordHasher;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
+import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
+import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
 import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
@@ -37,10 +39,10 @@ public class RegisterUserService implements RegisterUserUseCase {
     Username username = Username.from(request.username());
 
     if (userRepository.existsByEmail(email)) {
-      throw new IllegalStateException("Email already in use");
+      throw new DuplicateEmailException(email.value());
     }
     if (userRepository.existsByUsername(username)) {
-      throw new IllegalStateException("Username already in use");
+      throw new DuplicateUsernameException(username.value());
     }
 
     passwordPolicy.validate(request.rawPassword());

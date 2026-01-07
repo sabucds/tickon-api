@@ -7,12 +7,9 @@ import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.UserId;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import java.time.Instant;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.Test;
 
-@ExtendWith(MockitoExtension.class)
 class UserTest {
 
   private Instant fixedInstant;
@@ -23,31 +20,30 @@ class UserTest {
   }
 
   @Test
-  public void shouldRegisterUser() {
+  void shouldCreateUserWithTimestampsAndDefaults() {
     UserId userId = UserId.generate();
     User registeredUser = User.create(userId, Email.from("john@example.com"), Username.from("john_doe"), "John", "Doe",
         new PasswordHash("hashed-password"), fixedInstant);
 
+    assertThat(registeredUser.id()).isEqualTo(userId);
     assertThat(registeredUser.email().value()).isEqualTo("john@example.com");
     assertThat(registeredUser.username().value()).isEqualTo("john_doe");
     assertThat(registeredUser.firstName()).isEqualTo("John");
     assertThat(registeredUser.lastName()).isEqualTo("Doe");
     assertThat(registeredUser.passwordHash().value()).isEqualTo("hashed-password");
-    assertThat(registeredUser.createdAt()).isNotNull();
-    assertThat(registeredUser.updatedAt()).isNotNull();
-    assertThat(registeredUser.isDeleted()).isFalse();
-    assertThat(registeredUser.deletedAt()).isNull();
-    assertThat(registeredUser.id()).isEqualTo(userId);
     assertThat(registeredUser.createdAt()).isEqualTo(fixedInstant);
     assertThat(registeredUser.updatedAt()).isEqualTo(fixedInstant);
+    assertThat(registeredUser.isDeleted()).isFalse();
+    assertThat(registeredUser.deletedAt()).isNull();
   }
 
   @Test
-  public void shouldBeInstantiatedWithPersistenceData() {
+  void shouldRestoreFromPersistence() {
     UserId userId = UserId.generate();
     User registeredUser = User.fromPersistence(userId, Email.from("john@example.com"), Username.from("john_doe"),
         "John", "Doe", new PasswordHash("hashed-password"), fixedInstant, fixedInstant, false, null);
 
+    assertThat(registeredUser.id()).isEqualTo(userId);
     assertThat(registeredUser.email().value()).isEqualTo("john@example.com");
     assertThat(registeredUser.username().value()).isEqualTo("john_doe");
     assertThat(registeredUser.firstName()).isEqualTo("John");

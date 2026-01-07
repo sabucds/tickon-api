@@ -3,40 +3,25 @@ package com.tickon.identity.user.domain.valueobjects;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.jupiter.api.Test;
+import com.tickon.identity.user.domain.exceptions.InvalidUsernameException;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class UsernameTest {
-  @Test
-  void shouldCreateUsername_WhenValid() {
-    String validUsername = "valid_username";
+
+  @ParameterizedTest
+  @ValueSource(strings = { "valid_username", "user_name99" })
+  void shouldCreateUsername_WhenValid(String validUsername) {
     Username username = Username.from(validUsername);
     assertThat(username.value()).isEqualTo(validUsername);
   }
 
-  @Test
-  void shouldThrowException_WhenInvalidUsername() {
-    String invalidUsername = "@invalid-username.";
-    assertThatThrownBy(() -> Username.from(invalidUsername)).isInstanceOf(IllegalArgumentException.class);
-  }
-
-  @Test
-  void shouldThrowException_WhenNullUsername() {
-    assertThatThrownBy(() -> Username.from(null)).isInstanceOf(IllegalArgumentException.class);
-  }
-
-  @Test
-  void shouldThrowException_WhenEmptyUsername() {
-    assertThatThrownBy(() -> Username.from("")).isInstanceOf(IllegalArgumentException.class);
-  }
-
-  @Test
-  void shouldThrowException_WhenUsernameTooShort() {
-    assertThatThrownBy(() -> Username.from("ab")).isInstanceOf(IllegalArgumentException.class);
-  }
-
-  @Test
-  void shouldCreateUsername_WhenMinimumLength() {
-    Username username = Username.from("min_user");
-    assertThat(username.value()).isEqualTo("min_user");
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = { "@invalid-username.", "ab", "with.dot", "with space",
+      "too-long-username_is_not_okay_because_length" })
+  void shouldThrowException_WhenInvalidUsername(String invalidUsername) {
+    assertThatThrownBy(() -> Username.from(invalidUsername)).isInstanceOf(InvalidUsernameException.class);
   }
 }

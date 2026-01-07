@@ -3,44 +3,41 @@ package com.tickon.identity.user.domain.valueobjects;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class PasswordHashTest {
-  @Test
-  void shouldCreatePassword_WhenValid() {
-    String validPassword = "my-hashed-password";
+
+  @ParameterizedTest
+  @ValueSource(strings = { "my-hashed-password", "$2a$10$example.hash.value" })
+  void shouldCreatePassword_WhenValid(String validPassword) {
     PasswordHash password = new PasswordHash(validPassword);
     assertThat(password.value()).isEqualTo(validPassword);
   }
 
-  @Test
-  void shouldThrowException_WhenNullPassword() {
-    assertThatThrownBy(() -> new PasswordHash(null)).isInstanceOf(IllegalArgumentException.class);
+  @ParameterizedTest
+  @NullAndEmptySource
+  @ValueSource(strings = { "   " })
+  void shouldThrowException_WhenNullEmptyOrBlank(String invalidPassword) {
+    assertThatThrownBy(() -> new PasswordHash(invalidPassword)).isInstanceOf(IllegalArgumentException.class);
   }
 
-  @Test
-  void shouldThrowException_WhenEmptyPassword() {
-    assertThatThrownBy(() -> new PasswordHash("")).isInstanceOf(IllegalArgumentException.class);
-  }
-
-  @Test
-  void shouldThrowException_WhenBlankPassword() {
-    assertThatThrownBy(() -> new PasswordHash("   ")).isInstanceOf(IllegalArgumentException.class);
-  }
-
-  @Test
-  void shouldBeEqual_WhenSameHash() {
-    String hash = "$2a$10$example.hash.value";
+  @ParameterizedTest
+  @ValueSource(strings = { "hash1", "hash2" })
+  void equalityShouldDependOnHashValue(String hash) {
     PasswordHash password1 = new PasswordHash(hash);
     PasswordHash password2 = new PasswordHash(hash);
     assertThat(password1).isEqualTo(password2);
-    assertThat(password1.hashCode()).hasSameHashCodeAs(password2.hashCode());
+    assertThat(password1.hashCode()).isEqualTo(password2.hashCode());
   }
 
-  @Test
-  void shouldNotBeEqual_WhenDifferentHash() {
-    PasswordHash password1 = new PasswordHash("hash1");
-    PasswordHash password2 = new PasswordHash("hash2");
+  @ParameterizedTest
+  @ValueSource(strings = { "hash1:hash2", "hashA:hashB" })
+  void shouldNotBeEqual_WhenDifferentHash(String hashes) {
+    String[] parts = hashes.split(":");
+    PasswordHash password1 = new PasswordHash(parts[0]);
+    PasswordHash password2 = new PasswordHash(parts[1]);
     assertThat(password1).isNotEqualTo(password2);
   }
 }

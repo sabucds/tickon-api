@@ -9,10 +9,12 @@ import static org.mockito.Mockito.when;
 
 import com.tickon.identity.auth.application.dto.LoginCommand;
 import com.tickon.identity.auth.application.dto.LoginResult;
+import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
 import com.tickon.identity.auth.application.ports.out.SessionRepository;
 import com.tickon.identity.auth.application.ports.out.TokenProvider;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.exceptions.InvalidCredentialsException;
+import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.user.application.ports.out.PasswordHasher;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
@@ -46,6 +48,9 @@ class LoginServiceTest {
   @Mock
   private TokenProvider tokenProvider;
 
+  @Mock
+  private RefreshTokenHasher refreshTokenHasher;
+
   private LoginService loginService;
 
   private Clock clock = Clock.systemUTC();
@@ -55,7 +60,7 @@ class LoginServiceTest {
   @BeforeEach
   void setUp() {
     loginService = new LoginService(userRepository, sessionRepository, passwordHasher, tokenProvider,
-        Duration.ofHours(1), clock);
+        Duration.ofHours(1), clock, refreshTokenHasher);
 
   }
 
@@ -69,7 +74,9 @@ class LoginServiceTest {
     when(tokenProvider.generateAccessToken(user)).thenReturn("access-token");
     when(tokenProvider.generateRefreshToken(user)).thenReturn("refresh-token");
 
-    LoginResult result = loginService.login(new LoginCommand("john@example.com", "plain-password"));
+    when(refreshTokenHasher.hash("refresh-token")).thenReturn(RefreshTokenHash.from("hashed-refresh-token"));
+
+    LoginResult result = loginService.login(new LoginCommand("john@example.com", "plain-password", "device-123"));
 
     assertThat(result.accessToken()).isEqualTo("access-token");
     assertThat(result.refreshToken()).isEqualTo("refresh-token");
@@ -79,7 +86,7 @@ class LoginServiceTest {
 
     Session savedSession = sessionCaptor.getValue();
     assertThat(savedSession.userId()).isEqualTo(user.id());
-    assertThat(savedSession.refreshToken()).isEqualTo("refresh-token");
+    assertThat(savedSession.refreshTokenHash()).isEqualTo(RefreshTokenHash.from("hashed-refresh-token"));
     assertThat(savedSession.isValid()).isTrue();
     assertThat(savedSession.expiresAt()).isAfter(Instant.now());
   }
@@ -88,7 +95,7 @@ class LoginServiceTest {
   void shouldThrow_WhenUserNotFound() {
     when(userRepository.findByUsernameOrEmail("missing")).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> loginService.login(new LoginCommand("missing", "any")))
+    assertThatThrownBy(() -> loginService.login(new LoginCommand("missing", "any", "device-123")))
         .isInstanceOf(InvalidCredentialsException.class).hasMessageContaining("Invalid credentials");
 
     verify(sessionRepository, never()).save(any());
@@ -102,7 +109,7 @@ class LoginServiceTest {
     when(userRepository.findByUsernameOrEmail("john@example.com")).thenReturn(Optional.of(user));
     when(passwordHasher.verify("wrong-password", user.passwordHash())).thenReturn(false);
 
-    assertThatThrownBy(() -> loginService.login(new LoginCommand("john@example.com", "wrong-password")))
+    assertThatThrownBy(() -> loginService.login(new LoginCommand("john@example.com", "wrong-password", "device-123")))
         .isInstanceOf(InvalidCredentialsException.class).hasMessageContaining("Invalid credentials");
 
     verify(sessionRepository, never()).save(any());

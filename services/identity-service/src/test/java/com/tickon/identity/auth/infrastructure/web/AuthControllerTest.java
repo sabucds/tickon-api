@@ -34,7 +34,7 @@ class AuthControllerTest {
 
   @Test
   void shouldLoginAndReturnTokens_WhenValidRequest() throws Exception {
-    LoginRequest request = new LoginRequest("john@example.com", "plain-password");
+    LoginRequest request = new LoginRequest("john@example.com", "plain-password", "device-123");
     LoginResult response = new LoginResult("access-token", "refresh-token");
 
     when(loginUseCase.login(any(LoginCommand.class))).thenReturn(response);
@@ -48,7 +48,7 @@ class AuthControllerTest {
 
   @Test
   void shouldReturnBadRequest_WhenPayloadIsInvalid() throws Exception {
-    LoginRequest request = new LoginRequest("", "");
+    LoginRequest request = new LoginRequest("", "", "");
 
     mockMvc.perform(post("/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request))).andExpect(status().isBadRequest());

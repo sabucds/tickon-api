@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.tickon.identity.user.application.dto.RegisterUserCommand;
@@ -11,11 +12,18 @@ import com.tickon.identity.user.application.dto.UserResult;
 import com.tickon.identity.user.application.ports.out.PasswordHasher;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
+import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
+import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
+import com.tickon.identity.user.domain.exceptions.InvalidEmailException;
+import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
+import com.tickon.identity.user.domain.exceptions.InvalidUsernameException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
 import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,18 +44,20 @@ class RegisterUserServiceTest {
 
   private RegisterUserService registerUser;
 
-  private Clock clock = Clock.systemUTC();
+  private Clock clock;
+
+  private static final Instant FIXED_INSTANT = Instant.parse("2026-01-01T00:00:00Z");
 
   @BeforeEach
   void setUp() {
+    clock = Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC);
     passwordPolicy = new PasswordStrengthPolicy();
     registerUser = new RegisterUserService(userRepository, passwordHasher, passwordPolicy, clock);
   }
 
   @Test
   void shouldRegisterUser_WhenValidInput() {
-    RegisterUserCommand command = new RegisterUserCommand("John", "Doe", "john_doe", "john@example.com",
-        "SecurePass123!");
+    RegisterUserCommand command = aCommand("john_doe", "john@example.com", "SecurePass123!");
 
     PasswordHash hashedPassword = new PasswordHash("hashed-password");
 
@@ -74,61 +84,65 @@ class RegisterUserServiceTest {
     assertThat(savedUser.firstName()).isEqualTo("John");
     assertThat(savedUser.lastName()).isEqualTo("Doe");
     assertThat(savedUser.passwordHash()).isEqualTo(hashedPassword);
+    assertThat(savedUser.createdAt()).isEqualTo(FIXED_INSTANT);
+    assertThat(savedUser.updatedAt()).isEqualTo(FIXED_INSTANT);
   }
 
   @Test
   void shouldThrowException_WhenEmailAlreadyExists() {
-    RegisterUserCommand command = new RegisterUserCommand("John", "Doe", "john_doe", "john@example.com",
-        "SecurePass123!");
+    RegisterUserCommand command = aCommand("john_doe", "john@example.com", "SecurePass123!");
 
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(true);
 
-    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(IllegalStateException.class)
-        .hasMessage("Email already in use");
+    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(DuplicateEmailException.class)
+        .hasMessage("Email already in use: john@example.com");
+    verify(userRepository).existsByEmail(any(Email.class));
+    verifyNoMoreInteractions(userRepository, passwordHasher);
   }
 
   @Test
   void shouldThrowException_WhenUsernameAlreadyExists() {
-    RegisterUserCommand command = new RegisterUserCommand("John", "Doe", "john_doe", "john@example.com",
-        "SecurePass123!");
+    RegisterUserCommand command = aCommand("john_doe", "john@example.com", "SecurePass123!");
 
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(true);
 
-    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(IllegalStateException.class)
-        .hasMessage("Username already in use");
+    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(DuplicateUsernameException.class)
+        .hasMessage("Username already in use: john_doe");
+    verify(userRepository).existsByEmail(any(Email.class));
+    verify(userRepository).existsByUsername(any(Username.class));
+    verifyNoMoreInteractions(userRepository, passwordHasher);
   }
 
   @Test
   void shouldThrowException_WhenPasswordPolicyValidationFails() {
-    RegisterUserCommand command = new RegisterUserCommand("John", "Doe", "john_doe", "john@example.com", "weak");
+    RegisterUserCommand command = aCommand("john_doe", "john@example.com", "weak");
 
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
 
-    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(InvalidPasswordException.class)
         .hasMessageContaining("Password must be at least");
   }
 
   @Test
   void shouldThrowException_WhenInvalidEmailFormat() {
-    RegisterUserCommand command = new RegisterUserCommand("John", "Doe", "john_doe", "invalid-email", "SecurePass123!");
+    RegisterUserCommand command = aCommand("john_doe", "invalid-email", "SecurePass123!");
 
-    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Invalid email");
+    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(InvalidEmailException.class)
+        .hasMessage("Invalid email: invalid-email");
   }
 
   @Test
   void shouldThrowException_WhenInvalidUsernameFormat() {
-    RegisterUserCommand command = new RegisterUserCommand("John", "Doe", "", "john@example.com", "SecurePass123!");
+    RegisterUserCommand command = aCommand("", "john@example.com", "SecurePass123!");
 
-    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(InvalidUsernameException.class);
   }
 
   @Test
   void shouldCreateUniqueUserIds_WhenRegisteringMultipleUsers() {
-    RegisterUserCommand command1 = new RegisterUserCommand("John", "Doe", "john_doe", "john@example.com",
-        "SecurePass123!");
+    RegisterUserCommand command1 = aCommand("john_doe", "john@example.com", "SecurePass123!");
     RegisterUserCommand command2 = new RegisterUserCommand("Jane", "Smith", "janesmith", "jane@example.com",
         "SecurePass456!");
 
@@ -144,8 +158,7 @@ class RegisterUserServiceTest {
 
   @Test
   void shouldValidatePasswordBeforeHashing() {
-    RegisterUserCommand command = new RegisterUserCommand("John", "Doe", "john_doe", "john@example.com",
-        "SecurePass123!");
+    RegisterUserCommand command = aCommand("john_doe", "john@example.com", "SecurePass123!");
 
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
@@ -153,8 +166,10 @@ class RegisterUserServiceTest {
 
     registerUser.register(command);
 
-    // Password validation happens before hashing (verified by service
-    // implementation)
     verify(passwordHasher).hash("SecurePass123!");
+  }
+
+  private RegisterUserCommand aCommand(String username, String email, String password) {
+    return new RegisterUserCommand("John", "Doe", username, email, password);
   }
 }

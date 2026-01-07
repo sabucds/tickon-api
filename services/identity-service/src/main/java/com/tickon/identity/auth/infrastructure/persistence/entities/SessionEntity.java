@@ -3,6 +3,8 @@ package com.tickon.identity.auth.infrastructure.persistence.entities;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.Instant;
 
@@ -41,5 +43,18 @@ public class SessionEntity {
 
   @Column(name = "updated_at", nullable = false)
   public Instant updatedAt = Instant.now();
+
+  @PrePersist
+  void onCreate() {
+    Instant now = Instant.now();
+    if (createdAt == null)
+      createdAt = now;
+    updatedAt = now;
+  }
+
+  @PreUpdate
+  void onUpdate() {
+    updatedAt = Instant.now();
+  }
 
 }

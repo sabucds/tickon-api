@@ -31,8 +31,8 @@ public class SessionRepositoryAdapter implements SessionRepository {
   }
 
   @Override
-  public Optional<Session> findByRefreshToken(String refreshToken) {
-    return springRepository.findByRefreshToken(refreshToken).map(mapper::toDomain);
+  public Optional<Session> findByRefreshTokenHash(String refreshToken) {
+    return springRepository.findByRefreshTokenHash(refreshToken).map(mapper::toDomain);
   }
 
 }

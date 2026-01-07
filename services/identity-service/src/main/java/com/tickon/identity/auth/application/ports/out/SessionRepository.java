@@ -10,5 +10,5 @@ public interface SessionRepository {
 
   Optional<Session> findById(SessionId id);
 
-  Optional<Session> findByRefreshToken(String refreshToken);
+  Optional<Session> findByRefreshTokenHash(String refreshToken);
 }

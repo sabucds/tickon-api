@@ -1,19 +1,18 @@
 package com.tickon.identity.auth.domain.valueobjects;
 
-import com.tickon.identity.shared.errors.InvalidIdException;
 import java.util.UUID;
 
 public record SessionId(UUID value) {
   public SessionId {
     if (value == null)
-      throw new InvalidIdException("Invalid SessionId: null value");
+      throw new IllegalArgumentException("Invalid SessionId: null value");
   }
 
   public static SessionId from(String s) {
     if (s == null || s.isEmpty())
-      throw new InvalidIdException("Invalid UserId: null or empty string");
+      throw new IllegalArgumentException("Invalid SessionId: null or empty string");
     if (!s.matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"))
-      throw new InvalidIdException("Invalid UserId: not a valid UUID format");
+      throw new IllegalArgumentException("Invalid SessionId: not a valid UUID format");
     return new SessionId(UUID.fromString(s));
   }
 

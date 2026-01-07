@@ -2,9 +2,7 @@ package com.tickon.identity.auth.infrastructure.security;
 
 import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
-
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.Base64;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -38,9 +36,4 @@ public class MacRefreshTokenHasher implements RefreshTokenHasher {
     }
   }
 
-  public boolean equalsConstantTime(String a, String b) {
-    if (a == null || b == null)
-      return false;
-    return MessageDigest.isEqual(a.getBytes(StandardCharsets.UTF_8), b.getBytes(StandardCharsets.UTF_8));
-  }
 }

@@ -5,7 +5,6 @@ import com.tickon.identity.user.domain.User;
 import io.jsonwebtoken.Jwts;
 import java.security.KeyFactory;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -50,8 +49,8 @@ public class JwtTokenProvider implements TokenProvider {
   private String generateToken(User user, long validityMs) {
     Instant now = Instant.now();
     return Jwts.builder().subject(user.id().value().toString()).issuer(issuer).issuedAt(Date.from(now))
-        .expiration(Date.from(now.plusMillis(validityMs))).claim("username", user.username().value())
-        .claim("email", user.email().value()).signWith(signingKey, Jwts.SIG.ES256).compact();
+        .expiration(Date.from(now.plusMillis(validityMs))).claim("userId", user.id().value().toString())
+        .signWith(signingKey, Jwts.SIG.ES256).compact();
   }
 
   private String generateSecureRandomToken() {
@@ -62,19 +61,13 @@ public class JwtTokenProvider implements TokenProvider {
 
   private KeyPair resolveKeyPair(String privateKeyPem, String publicKeyPem) {
     try {
-      boolean hasProvidedKeys = !privateKeyPem.isBlank() && !publicKeyPem.isBlank();
-      if (hasProvidedKeys) {
-        PrivateKey privateKey = parsePrivateKey(privateKeyPem);
-        PublicKey publicKey = parsePublicKey(publicKeyPem);
-        return new KeyPair(publicKey, privateKey);
-      }
-
-      KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");
-      generator.initialize(256);
-      return generator.generateKeyPair();
+      PrivateKey privateKey = parsePrivateKey(privateKeyPem);
+      PublicKey publicKey = parsePublicKey(publicKeyPem);
+      return new KeyPair(publicKey, privateKey);
     } catch (Exception e) {
-      throw new IllegalStateException("Failed to initialize JWT key pair", e);
+      throw new IllegalStateException("Failed to parse JWT key pair", e);
     }
+
   }
 
   private PrivateKey parsePrivateKey(String pem) throws Exception {

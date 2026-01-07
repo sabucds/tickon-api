@@ -5,5 +5,5 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface JpaSessionRepository extends JpaRepository<SessionEntity, String> {
-  Optional<SessionEntity> findByRefreshToken(String refreshToken);
+  Optional<SessionEntity> findByRefreshTokenHash(String refreshToken);
 }

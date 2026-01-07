@@ -24,6 +24,7 @@ public class JwtTokenProvider implements TokenProvider {
   private final PublicKey verificationKey;
   private final long accessTokenValidityMs;
   private final String issuer;
+  private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
   public JwtTokenProvider(@Value("${security.jwt.private-key:}") String privateKeyPem,
       @Value("${security.jwt.public-key:}") String publicKeyPem,
@@ -55,7 +56,7 @@ public class JwtTokenProvider implements TokenProvider {
 
   private String generateSecureRandomToken() {
     byte[] randomBytes = new byte[32];
-    new SecureRandom().nextBytes(randomBytes);
+    SECURE_RANDOM.nextBytes(randomBytes);
     return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
   }
 

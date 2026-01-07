@@ -3,21 +3,21 @@ package com.tickon.identity.auth.domain.valueobjects;
 import com.tickon.identity.shared.errors.InvalidIdException;
 import java.util.UUID;
 
-public record SessionId(UUID value) {
-  public SessionId {
+public record FamilyId(UUID value) {
+  public FamilyId {
     if (value == null)
-      throw new InvalidIdException("Invalid SessionId: null value");
+      throw new InvalidIdException("Invalid FamilyId: null value");
   }
 
-  public static SessionId from(String s) {
+  public static FamilyId from(String s) {
     if (s == null || s.isEmpty())
       throw new InvalidIdException("Invalid UserId: null or empty string");
     if (!s.matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"))
       throw new InvalidIdException("Invalid UserId: not a valid UUID format");
-    return new SessionId(UUID.fromString(s));
+    return new FamilyId(UUID.fromString(s));
   }
 
-  public static SessionId generate() {
-    return new SessionId(UUID.randomUUID());
+  public static FamilyId generate() {
+    return new FamilyId(UUID.randomUUID());
   }
 }

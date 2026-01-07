@@ -41,3 +41,4 @@ security:
     access-token-expiration: 900000 # 15 minutes
     session-expiration: 1209600000 # 14 days
     issuer: tickon-identity
+    refresh-token-pepper: "${REFRESH_TOKEN_PEPPER:}"

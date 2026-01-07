@@ -9,7 +9,7 @@ public final class LoginMapper {
   private LoginMapper() {}
 
   public static LoginCommand toLoginCommand(LoginRequest request) {
-    return new LoginCommand(request.usernameOrEmail(), request.password());
+    return new LoginCommand(request.usernameOrEmail(), request.password(), request.deviceId());
   }
 
   public static LoginResponse toLoginResponse(LoginResult model) {

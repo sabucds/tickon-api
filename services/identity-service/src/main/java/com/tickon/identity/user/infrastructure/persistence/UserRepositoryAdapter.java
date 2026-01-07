@@ -29,7 +29,7 @@ public class UserRepositoryAdapter implements UserRepository {
 
   @Override
   public Optional<User> findById(UserId id) {
-    return springRepository.findById(id.toString()).map(mapper::toDomain);
+    return springRepository.findById(id.value().toString()).map(mapper::toDomain);
   }
 
   @Override
@@ -44,7 +44,6 @@ public class UserRepositoryAdapter implements UserRepository {
 
   @Override
   public Optional<User> findByUsernameOrEmail(String usernameOrEmail) {
-    return springRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(usernameOrEmail, usernameOrEmail)
-        .map(mapper::toDomain);
+    return springRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).map(mapper::toDomain);
   }
 }

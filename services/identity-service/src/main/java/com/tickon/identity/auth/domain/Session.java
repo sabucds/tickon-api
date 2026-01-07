@@ -1,52 +1,62 @@
 package com.tickon.identity.auth.domain;
 
+import com.tickon.identity.auth.domain.valueobjects.FamilyId;
+import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
+import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.user.domain.valueobjects.UserId;
+import java.time.Duration;
 import java.time.Instant;
 
 public class Session {
   private final SessionId id;
-  private final String refreshToken;
+  private final RefreshTokenHash refreshTokenHash;
   private final UserId userId;
+  private final String deviceId;
+  private final FamilyId familyId;
+  private final SessionId rotatedFromSessionId;
   private final Instant expiresAt;
-  private boolean isValid;
+  private Instant revokedAt;
+  private final RevokeReason revokeReason;
   private final Instant createdAt;
   private Instant updatedAt;
-  private Instant invalidatedAt;
 
-  private Session(SessionId id, String refreshToken, UserId userId, Instant expiresAt, boolean isValid,
-      Instant createdAt, Instant updatedAt, Instant invalidatedAt) {
+  private Session(SessionId id, RefreshTokenHash refreshTokenHash, UserId userId, String deviceId, FamilyId familyId,
+      SessionId rotatedFromSessionId, Instant expiresAt, Instant createdAt, Instant updatedAt, Instant revokedAt,
+      RevokeReason revokeReason) {
     this.id = id;
-    this.refreshToken = refreshToken;
+    this.refreshTokenHash = refreshTokenHash;
     this.userId = userId;
+    this.deviceId = deviceId;
+    this.familyId = familyId;
+    this.rotatedFromSessionId = rotatedFromSessionId;
     this.expiresAt = expiresAt;
-    this.isValid = isValid;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-    this.invalidatedAt = invalidatedAt;
+    this.revokedAt = revokedAt;
+    this.revokeReason = revokeReason;
   }
 
-  public static Session create(SessionId id, String refreshToken, UserId userId, Instant now, java.time.Duration ttl) {
+  public static Session create(SessionId id, RefreshTokenHash refreshTokenHash, UserId userId, String deviceId,
+      FamilyId familyId, SessionId rotatedFromSessionId, Instant now, Duration ttl) {
     Instant expiresAt = now.plus(ttl);
-    return new Session(id, refreshToken, userId, expiresAt, true, now, now, null);
+    return new Session(id, refreshTokenHash, userId, deviceId, familyId, rotatedFromSessionId, expiresAt, now, now,
+        null, null);
   }
 
-  public static Session fromPersistence(SessionId id, String refreshToken, UserId userId, Instant expiresAt,
-      boolean isValid, Instant createdAt, Instant updatedAt, Instant invalidatedAt) {
-    return new Session(id, refreshToken, userId, expiresAt, isValid, createdAt, updatedAt, invalidatedAt);
+  public static Session fromPersistence(SessionId id, RefreshTokenHash refreshTokenHash, UserId userId, String deviceId,
+      FamilyId familyId, SessionId rotatedFromSessionId, Instant expiresAt, Instant createdAt, Instant updatedAt,
+      Instant revokedAt) {
+    return new Session(id, refreshTokenHash, userId, deviceId, familyId, rotatedFromSessionId, expiresAt, createdAt,
+        updatedAt, revokedAt, null);
   }
 
   public boolean isExpired(Instant now) {
     return !now.isBefore(expiresAt);
   }
 
-  public boolean isActive(Instant now) {
-    return isValid && !isExpired(now);
-  }
-
-  public void invalidate(Instant now) {
-    this.isValid = false;
-    this.invalidatedAt = now;
+  public void revoke(Instant now) {
+    this.revokedAt = now;
     this.updatedAt = now;
   }
 
@@ -54,12 +64,24 @@ public class Session {
     return id;
   }
 
-  public String refreshToken() {
-    return refreshToken;
+  public RefreshTokenHash refreshTokenHash() {
+    return refreshTokenHash;
   }
 
   public UserId userId() {
     return userId;
+  }
+
+  public String deviceId() {
+    return deviceId;
+  }
+
+  public FamilyId familyId() {
+    return familyId;
+  }
+
+  public SessionId rotatedFromSessionId() {
+    return rotatedFromSessionId;
   }
 
   public Instant expiresAt() {
@@ -67,7 +89,7 @@ public class Session {
   }
 
   public boolean isValid() {
-    return isValid;
+    return !isExpired(Instant.now()) && revokedAt == null;
   }
 
   public Instant createdAt() {
@@ -78,12 +100,12 @@ public class Session {
     return updatedAt;
   }
 
-  public Instant invalidatedAt() {
-    return invalidatedAt;
+  public Instant revokedAt() {
+    return revokedAt;
   }
 
-  public void invalidate() {
-    this.isValid = false;
-    this.invalidatedAt = Instant.now();
+  public RevokeReason revokeReason() {
+    return revokeReason;
   }
+
 }

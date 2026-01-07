@@ -3,10 +3,13 @@ package com.tickon.identity.auth.application.services;
 import com.tickon.identity.auth.application.dto.LoginCommand;
 import com.tickon.identity.auth.application.dto.LoginResult;
 import com.tickon.identity.auth.application.ports.in.LoginUseCase;
+import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
 import com.tickon.identity.auth.application.ports.out.SessionRepository;
 import com.tickon.identity.auth.application.ports.out.TokenProvider;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.exceptions.InvalidCredentialsException;
+import com.tickon.identity.auth.domain.valueobjects.FamilyId;
+import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.user.application.ports.out.PasswordHasher;
 import com.tickon.identity.user.application.ports.out.UserRepository;
@@ -26,14 +29,16 @@ public class LoginService implements LoginUseCase {
   private final TokenProvider tokenProvider;
   private final Duration sessionTtl;
   private final Clock clock;
+  private final RefreshTokenHasher refreshTokenHasher;
 
   public LoginService(UserRepository userRepository, SessionRepository sessionRepository, PasswordHasher passwordHasher,
       TokenProvider tokenProvider, @Value("${security.jwt.session-expiration}") Duration sessionTtl,
-      java.time.Clock clock) {
+      java.time.Clock clock, RefreshTokenHasher refreshTokenHasher) {
     this.userRepository = userRepository;
     this.sessionRepository = sessionRepository;
     this.passwordHasher = passwordHasher;
     this.tokenProvider = tokenProvider;
+    this.refreshTokenHasher = refreshTokenHasher;
     this.sessionTtl = sessionTtl;
     this.clock = clock;
   }
@@ -49,9 +54,11 @@ public class LoginService implements LoginUseCase {
 
     String accessToken = tokenProvider.generateAccessToken(user);
     String refreshToken = tokenProvider.generateRefreshToken(user);
+    RefreshTokenHash refreshTokenHash = refreshTokenHasher.hash(refreshToken);
 
     Instant now = clock.instant();
-    Session session = Session.create(SessionId.generate(), refreshToken, user.id(), now, sessionTtl);
+    Session session = Session.create(SessionId.generate(), refreshTokenHash, user.id(), command.deviceId(),
+        FamilyId.generate(), null, now, sessionTtl);
 
     sessionRepository.save(session);
 

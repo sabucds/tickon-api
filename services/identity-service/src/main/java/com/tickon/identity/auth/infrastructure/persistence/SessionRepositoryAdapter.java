@@ -27,7 +27,7 @@ public class SessionRepositoryAdapter implements SessionRepository {
 
   @Override
   public Optional<Session> findById(SessionId id) {
-    return springRepository.findById(id.toString()).map(mapper::toDomain);
+    return springRepository.findById(id.value().toString()).map(mapper::toDomain);
   }
 
   @Override

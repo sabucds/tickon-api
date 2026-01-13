@@ -10,7 +10,7 @@ import com.tickon.identity.user.infrastructure.persistence.entities.UserEntity;
 public class UserPersistenceMapper {
   public UserEntity toEntity(User user) {
     var entity = new UserEntity();
-    entity.id = user.id().value().toString();
+    entity.id = user.id().value();
     entity.firstName = user.firstName();
     entity.lastName = user.lastName();
     entity.username = user.username().value();
@@ -20,7 +20,7 @@ public class UserPersistenceMapper {
   }
 
   public User toDomain(UserEntity entity) {
-    return User.fromPersistence(UserId.from(entity.id), Email.from(entity.email), Username.from(entity.username),
+    return User.fromPersistence(new UserId(entity.id), Email.from(entity.email), Username.from(entity.username),
         entity.firstName, entity.lastName, new PasswordHash(entity.passwordHash));
   }
 }

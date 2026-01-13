@@ -29,7 +29,7 @@ public class UserRepositoryAdapter implements UserRepository {
 
   @Override
   public Optional<User> findById(UserId id) {
-    return springRepository.findById(id.value().toString()).map(mapper::toDomain);
+    return springRepository.findById(id.value()).map(mapper::toDomain);
   }
 
   @Override
@@ -49,7 +49,7 @@ public class UserRepositoryAdapter implements UserRepository {
 
   @Override
   public void delete(UserId id) {
-    springRepository.deleteById(id.value().toString());
+    springRepository.deleteById(id.value());
   }
 
 }

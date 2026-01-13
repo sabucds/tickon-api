@@ -1,12 +1,17 @@
 package com.tickon.identity.user.infrastructure.web;
 
+import com.tickon.identity.user.application.ports.in.DeleteUserUseCase;
 import com.tickon.identity.user.application.ports.in.GetUserByIdUseCase;
 import com.tickon.identity.user.application.ports.in.RegisterUserUseCase;
 import com.tickon.identity.user.infrastructure.web.dto.RegisterUserRequest;
 import com.tickon.identity.user.infrastructure.web.dto.UserResponse;
 import com.tickon.identity.user.infrastructure.web.mappers.UserMapper;
 import jakarta.validation.Valid;
+
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,10 +26,12 @@ public class UserController {
 
   private final RegisterUserUseCase registerUser;
   private final GetUserByIdUseCase getUserById;
+  private final DeleteUserUseCase deleteUser;
 
-  UserController(RegisterUserUseCase registerUser, GetUserByIdUseCase getUserById) {
+  UserController(RegisterUserUseCase registerUser, GetUserByIdUseCase getUserById, DeleteUserUseCase deleteUser) {
     this.registerUser = registerUser;
     this.getUserById = getUserById;
+    this.deleteUser = deleteUser;
   }
 
   @ResponseStatus(HttpStatus.CREATED)
@@ -35,8 +42,14 @@ public class UserController {
   }
 
   @GetMapping("/{id}")
-  public UserResponse getUser(@PathVariable String id) {
-    return getUserById.handle(id).map(UserMapper::toDto)
-        .orElseThrow(() -> new RuntimeException("User not found: " + id));
+  public Optional<UserResponse> getUser(@PathVariable String id) {
+    return getUserById.handle(id).map(UserMapper::toDto);
+
+  }
+
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @DeleteMapping("/{id}")
+  public void deleteUser(@PathVariable String id) {
+    deleteUser.handle(id);
   }
 }

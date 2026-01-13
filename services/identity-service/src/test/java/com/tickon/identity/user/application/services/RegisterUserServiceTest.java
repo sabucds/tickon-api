@@ -21,9 +21,6 @@ import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
 import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.Username;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,15 +41,10 @@ class RegisterUserServiceTest {
 
   private RegisterUserService registerUser;
 
-  private Clock clock;
-
-  private static final Instant FIXED_INSTANT = Instant.parse("2026-01-01T00:00:00Z");
-
   @BeforeEach
   void setUp() {
-    clock = Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC);
     passwordPolicy = new PasswordStrengthPolicy();
-    registerUser = new RegisterUserService(userRepository, passwordHasher, passwordPolicy, clock);
+    registerUser = new RegisterUserService(userRepository, passwordHasher, passwordPolicy);
   }
 
   @Test
@@ -84,8 +76,7 @@ class RegisterUserServiceTest {
     assertThat(savedUser.firstName()).isEqualTo("John");
     assertThat(savedUser.lastName()).isEqualTo("Doe");
     assertThat(savedUser.passwordHash()).isEqualTo(hashedPassword);
-    assertThat(savedUser.createdAt()).isEqualTo(FIXED_INSTANT);
-    assertThat(savedUser.updatedAt()).isEqualTo(FIXED_INSTANT);
+
   }
 
   @Test

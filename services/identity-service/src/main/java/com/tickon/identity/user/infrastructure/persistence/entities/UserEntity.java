@@ -5,6 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import org.hibernate.annotations.SQLDelete;
@@ -34,7 +36,7 @@ public class UserEntity {
   @Column(name = "last_name")
   public String lastName;
 
-  @Column(name = "created_at", nullable = false)
+  @Column(name = "created_at", nullable = false, updatable = false)
   public Instant createdAt = Instant.now();
 
   @Column(name = "updated_at", nullable = false)
@@ -45,4 +47,17 @@ public class UserEntity {
 
   @Column(name = "deleted_at")
   public Instant deletedAt;
+
+  @PrePersist
+  void onCreate() {
+    Instant now = Instant.now();
+    if (createdAt == null)
+      createdAt = now;
+    updatedAt = now;
+  }
+
+  @PreUpdate
+  void onUpdate() {
+    updatedAt = Instant.now();
+  }
 }

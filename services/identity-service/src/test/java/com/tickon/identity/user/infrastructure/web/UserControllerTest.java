@@ -36,8 +36,6 @@ class UserControllerTest {
   @MockBean
   private GetUserByIdUseCase getUserByIdService;
 
-  // POST (REGISTER USER)
-
   @Test
   void shouldRegisterNewUser_WhenValidInput() throws Exception {
     RegisterUserRequest request = new RegisterUserRequest("John", "Doe", "johndoe", "john@example.com",
@@ -46,7 +44,6 @@ class UserControllerTest {
 
     when(registerUserService.register(any(RegisterUserCommand.class))).thenReturn(expectedResponse);
 
-    // When & Then
     mockMvc
         .perform(
             post("/v1/users").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)))
@@ -59,7 +56,6 @@ class UserControllerTest {
   void shouldReturnBadRequest_WhenFirstNameIsBlank() throws Exception {
     RegisterUserRequest request = new RegisterUserRequest("", "Doe", "johndoe", "john@example.com", "SecurePass123!");
 
-    // When & Then
     mockMvc
         .perform(
             post("/v1/users").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)))
@@ -71,7 +67,6 @@ class UserControllerTest {
   void shouldReturnBadRequest_WhenEmailIsInvalid() throws Exception {
     RegisterUserRequest request = new RegisterUserRequest("John", "Doe", "johndoe", "invalid-email", "SecurePass123!");
 
-    // When & Then
     mockMvc
         .perform(
             post("/v1/users").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)))
@@ -82,7 +77,6 @@ class UserControllerTest {
   void shouldReturnBadRequest_WhenPasswordTooShort() throws Exception {
     RegisterUserRequest request = new RegisterUserRequest("John", "Doe", "johndoe", "john@example.com", "123");
 
-    // When & Then
     mockMvc
         .perform(
             post("/v1/users").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)))
@@ -94,7 +88,6 @@ class UserControllerTest {
   void shouldReturnBadRequest_WhenMultipleValidationErrors() throws Exception {
     RegisterUserRequest request = new RegisterUserRequest("", "", "ab", "invalid-email", "123");
 
-    // When & Then
     mockMvc
         .perform(
             post("/v1/users").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)))
@@ -103,7 +96,5 @@ class UserControllerTest {
         .andExpect(jsonPath("$.errors.username").exists()).andExpect(jsonPath("$.errors.email").exists())
         .andExpect(jsonPath("$.errors.password").exists());
   }
-
-  // GET (GET USER BY ID)
 
 }

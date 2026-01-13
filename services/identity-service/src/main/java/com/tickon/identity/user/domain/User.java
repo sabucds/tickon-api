@@ -4,46 +4,60 @@ import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.UserId;
 import com.tickon.identity.user.domain.valueobjects.Username;
-import java.time.Instant;
+import java.util.Objects;
 
 public class User {
+
   private final UserId id;
   private Email email;
   private Username username;
   private String firstName;
   private String lastName;
   private PasswordHash passwordHash;
-  private final Instant createdAt;
-  private Instant updatedAt;
-  private boolean isDeleted;
-  private Instant deletedAt;
 
-  private User(UserId id, Email email, Username username, String firstName, String lastName, PasswordHash passwordHash,
-      Instant createdAt, Instant updatedAt, boolean isDeleted, Instant deletedAt) {
-    this.id = id;
-    this.email = email;
-    this.username = username;
+  private User(UserId id, Email email, Username username, String firstName, String lastName,
+      PasswordHash passwordHash) {
+    this.id = Objects.requireNonNull(id, "id");
+    this.email = Objects.requireNonNull(email, "email");
+    this.username = Objects.requireNonNull(username, "username");
+    this.passwordHash = Objects.requireNonNull(passwordHash, "passwordHash");
     this.firstName = firstName;
     this.lastName = lastName;
-    this.passwordHash = passwordHash;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-    this.isDeleted = isDeleted;
-    this.deletedAt = deletedAt;
-  }
-
-  public static User fromPersistence(UserId id, Email email, Username username, String firstName, String lastName,
-      PasswordHash passwordHash, Instant createdAt, Instant updatedAt, boolean isDeleted, Instant deletedAt) {
-    return new User(id, email, username, firstName, lastName, passwordHash, createdAt, updatedAt, isDeleted, deletedAt);
   }
 
   public static User create(UserId id, Email email, Username username, String firstName, String lastName,
-      PasswordHash passwordHash, Instant now) {
-    return new User(id, email, username, firstName, lastName, passwordHash, now, now, false, null);
+      PasswordHash passwordHash) {
+    return new User(id, email, username, firstName, lastName, passwordHash);
+  }
+
+  public static User fromPersistence(UserId id, Email email, Username username, String firstName, String lastName,
+      PasswordHash passwordHash) {
+    return new User(id, email, username, firstName, lastName, passwordHash);
+  }
+
+  public void changeEmail(Email newEmail) {
+    this.email = Objects.requireNonNull(newEmail, "newEmail");
+  }
+
+  public void changeUsername(Username newUsername) {
+    this.username = Objects.requireNonNull(newUsername, "newUsername");
+  }
+
+  public void changeName(String first, String last) {
+    this.firstName = first;
+    this.lastName = last;
+  }
+
+  public void changePasswordHash(PasswordHash newHash) {
+    this.passwordHash = Objects.requireNonNull(newHash, "newHash");
   }
 
   public UserId id() {
     return id;
+  }
+
+  public Email email() {
+    return email;
   }
 
   public Username username() {
@@ -58,27 +72,8 @@ public class User {
     return lastName;
   }
 
-  public Email email() {
-    return email;
-  }
-
   public PasswordHash passwordHash() {
     return passwordHash;
   }
 
-  public Instant createdAt() {
-    return createdAt;
-  }
-
-  public Instant updatedAt() {
-    return updatedAt;
-  }
-
-  public boolean isDeleted() {
-    return isDeleted;
-  }
-
-  public Instant deletedAt() {
-    return deletedAt;
-  }
 }

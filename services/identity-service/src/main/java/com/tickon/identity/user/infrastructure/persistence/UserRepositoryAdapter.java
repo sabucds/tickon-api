@@ -46,4 +46,10 @@ public class UserRepositoryAdapter implements UserRepository {
   public Optional<User> findByUsernameOrEmail(String usernameOrEmail) {
     return springRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).map(mapper::toDomain);
   }
+
+  @Override
+  public void delete(UserId id) {
+    springRepository.deleteById(id.value().toString());
+  }
+
 }

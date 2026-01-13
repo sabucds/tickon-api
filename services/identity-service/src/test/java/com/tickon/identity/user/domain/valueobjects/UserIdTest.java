@@ -3,7 +3,6 @@ package com.tickon.identity.user.domain.valueobjects;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.tickon.identity.shared.errors.InvalidIdException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -21,7 +20,7 @@ class UserIdTest {
   @NullAndEmptySource
   @ValueSource(strings = { "notAnUuid", "", "1234", "zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz" })
   void shouldThrowException_WhenInvalidUserId(String invalidUserId) {
-    assertThatThrownBy(() -> UserId.from(invalidUserId)).isInstanceOf(InvalidIdException.class);
+    assertThatThrownBy(() -> UserId.from(invalidUserId)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @ParameterizedTest

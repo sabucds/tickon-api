@@ -16,16 +16,11 @@ public class UserPersistenceMapper {
     entity.username = user.username().value();
     entity.email = user.email().value();
     entity.passwordHash = user.passwordHash().value();
-    entity.createdAt = user.createdAt();
-    entity.updatedAt = user.updatedAt();
-    entity.isDeleted = user.isDeleted();
-    entity.deletedAt = user.deletedAt();
     return entity;
   }
 
   public User toDomain(UserEntity entity) {
-    return User.fromPersistence(UserId.from(entity.id), new Email(entity.email), new Username(entity.username),
-        entity.firstName, entity.lastName, new PasswordHash(entity.passwordHash), entity.createdAt, entity.updatedAt,
-        entity.isDeleted, entity.deletedAt);
+    return User.fromPersistence(UserId.from(entity.id), Email.from(entity.email), Username.from(entity.username),
+        entity.firstName, entity.lastName, new PasswordHash(entity.passwordHash));
   }
 }

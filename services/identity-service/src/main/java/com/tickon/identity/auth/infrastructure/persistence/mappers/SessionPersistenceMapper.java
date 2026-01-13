@@ -11,13 +11,12 @@ import com.tickon.identity.user.domain.valueobjects.UserId;
 public class SessionPersistenceMapper {
   public SessionEntity toEntity(Session session) {
     var entity = new SessionEntity();
-    entity.id = session.id().value().toString();
+    entity.id = session.id().value();
     entity.refreshTokenHash = session.refreshTokenHash().value();
-    entity.userId = session.userId().value().toString();
-    entity.familyId = session.familyId().value().toString();
+    entity.userId = session.userId().value();
+    entity.familyId = session.familyId().value();
     entity.deviceId = session.deviceId();
-    entity.rotatedFromSessionId = session.rotatedFromSessionId() != null
-        ? session.rotatedFromSessionId().value().toString()
+    entity.rotatedFromSessionId = session.rotatedFromSessionId() != null ? session.rotatedFromSessionId().value()
         : null;
     entity.expiresAt = session.expiresAt();
     entity.revokedAt = session.revokedAt();
@@ -26,9 +25,9 @@ public class SessionPersistenceMapper {
   }
 
   public Session toDomain(SessionEntity entity) {
-    return Session.fromPersistence(SessionId.from(entity.id), RefreshTokenHash.from(entity.refreshTokenHash),
-        UserId.from(entity.userId), entity.deviceId, FamilyId.from(entity.familyId),
-        entity.rotatedFromSessionId != null ? SessionId.from(entity.rotatedFromSessionId) : null, entity.expiresAt,
+    return Session.fromPersistence(new SessionId(entity.id), RefreshTokenHash.from(entity.refreshTokenHash),
+        new UserId(entity.userId), entity.deviceId, new FamilyId(entity.familyId),
+        entity.rotatedFromSessionId != null ? new SessionId(entity.rotatedFromSessionId) : null, entity.expiresAt,
         entity.revokedAt, entity.revokeReason != null ? RevokeReason.valueOf(entity.revokeReason) : null);
   }
 }

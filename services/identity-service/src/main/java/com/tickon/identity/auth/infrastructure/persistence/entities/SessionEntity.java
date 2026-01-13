@@ -7,27 +7,28 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "sessions")
 public class SessionEntity {
   @Id
-  public String id;
+  public UUID id;
 
   @Column(name = "refresh_token_hash", nullable = false, unique = true)
   public String refreshTokenHash;
 
   @Column(name = "user_id", nullable = false)
-  public String userId;
+  public UUID userId;
 
   @Column(name = "family_id", nullable = false)
-  public String familyId;
+  public UUID familyId;
 
   @Column(name = "device_id", nullable = false)
   public String deviceId;
 
   @Column(name = "rotated_from_session_id")
-  public String rotatedFromSessionId;
+  public UUID rotatedFromSessionId;
 
   @Column(name = "expires_at", nullable = false)
   public Instant expiresAt;

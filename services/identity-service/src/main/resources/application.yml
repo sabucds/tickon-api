@@ -13,8 +13,13 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
+    baseline-on-migrate: true    # useful when introducing Flyway into an existing DB
+    locations: classpath:db/migration,classpath:db/changelog
+    table: flyway_schema_history
+    placeholder-replacement: true
+    placeholders:
+      schemaName: tickon_identity_schema
+    clean-disabled: true 
 
 server:
   port: 8082

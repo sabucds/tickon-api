@@ -1,5 +1,3 @@
-create extension if not exists citext;
-
 create table if not exists users (
   id uuid primary key,
   username citext not null,
@@ -18,7 +16,7 @@ create table if not exists sessions (
   refresh_token_hash text not null unique,
   user_id uuid not null references users (id),
   family_id uuid not null,
-  device_id text not null,
+  device_id uuid not null,
   rotated_from_session_id uuid,
   expires_at timestamptz not null,
   revoked_at timestamptz,

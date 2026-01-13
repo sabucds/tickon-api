@@ -135,6 +135,7 @@ services:
       SERVICE_NAME: identity-service
       SECURITY_JWT_PRIVATE_KEY: ${SECURITY_JWT_PRIVATE_KEY:-}
       SECURITY_JWT_PUBLIC_KEY: ${SECURITY_JWT_PUBLIC_KEY:-}
+      REFRESH_TOKEN_PEPPER: ${REFRESH_TOKEN_PEPPER:-}
     volumes:
       - .:/workspace
       - ./services/identity-service:/app

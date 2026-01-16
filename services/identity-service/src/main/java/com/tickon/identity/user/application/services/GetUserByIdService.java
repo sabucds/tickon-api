@@ -17,8 +17,7 @@ public class GetUserByIdService implements GetUserByIdUseCase {
   }
 
   @Override
-  public Optional<UserResult> handle(String userId) {
-    UserId id = UserId.from(userId);
-    return userRepository.findById(id).map(UserResult::from);
+  public Optional<UserResult> handle(UserId userId) {
+    return userRepository.findById(userId).map(UserResult::from);
   }
 }

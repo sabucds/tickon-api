@@ -3,6 +3,7 @@ package com.tickon.identity.user.infrastructure.web;
 import com.tickon.identity.user.application.ports.in.DeleteUserUseCase;
 import com.tickon.identity.user.application.ports.in.GetUserByIdUseCase;
 import com.tickon.identity.user.application.ports.in.RegisterUserUseCase;
+import com.tickon.identity.user.domain.valueobjects.UserId;
 import com.tickon.identity.user.infrastructure.web.dto.RegisterUserRequest;
 import com.tickon.identity.user.infrastructure.web.dto.UserResponse;
 import com.tickon.identity.user.infrastructure.web.mappers.UserMapper;
@@ -41,13 +42,13 @@ public class UserController {
 
   @GetMapping("/{id}")
   public Optional<UserResponse> getUser(@PathVariable String id) {
-    return getUserById.handle(id).map(UserMapper::toDto);
+    return getUserById.handle(UserId.from(id)).map(UserMapper::toDto);
 
   }
 
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{id}")
   public void deleteUser(@PathVariable String id) {
-    deleteUser.handle(id);
+    deleteUser.handle(UserId.from(id));
   }
 }

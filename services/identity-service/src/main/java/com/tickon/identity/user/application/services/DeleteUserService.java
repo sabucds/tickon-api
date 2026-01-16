@@ -2,6 +2,7 @@ package com.tickon.identity.user.application.services;
 
 import com.tickon.identity.user.application.ports.in.DeleteUserUseCase;
 import com.tickon.identity.user.application.ports.out.UserRepository;
+import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.valueobjects.UserId;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +16,9 @@ public class DeleteUserService implements DeleteUserUseCase {
   }
 
   @Override
-  public void handle(String userId) {
-    UserId id = UserId.from(userId);
-    userRepository.delete(id);
+  public void handle(UserId userId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+    userRepository.delete(user.id());
   }
 }

@@ -1,7 +1,5 @@
-package com.tickon.identity.user.infrastructure.web;
+package com.tickon.identity.shared.errors;
 
-import com.tickon.identity.shared.errors.DomainException;
-import com.tickon.identity.shared.errors.ErrorCode;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;

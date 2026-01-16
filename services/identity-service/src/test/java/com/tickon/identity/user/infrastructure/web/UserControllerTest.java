@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tickon.identity.user.application.dto.RegisterUserCommand;
 import com.tickon.identity.user.application.dto.UserResult;
+import com.tickon.identity.user.application.ports.in.DeleteUserUseCase;
 import com.tickon.identity.user.application.ports.in.GetUserByIdUseCase;
 import com.tickon.identity.user.application.ports.in.RegisterUserUseCase;
 import com.tickon.identity.user.infrastructure.web.dto.RegisterUserRequest;
@@ -35,6 +36,9 @@ class UserControllerTest {
 
   @MockBean
   private GetUserByIdUseCase getUserByIdService;
+
+  @MockBean
+  private DeleteUserUseCase deleteUserUseCase;
 
   @Test
   void shouldRegisterNewUser_WhenValidInput() throws Exception {

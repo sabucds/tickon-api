@@ -27,6 +27,12 @@ public class UserEntity {
   @Column(name = "email", nullable = false, columnDefinition = "citext")
   public String email;
 
+  @Column(name = "email_verified", nullable = false)
+  public boolean emailVerified = false;
+
+  @Column(name = "status", nullable = false)
+  public String status;
+
   @Basic(fetch = FetchType.LAZY)
   @Column(name = "password_hash", nullable = false)
   public String passwordHash;

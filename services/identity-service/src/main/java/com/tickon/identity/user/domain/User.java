@@ -3,6 +3,7 @@ package com.tickon.identity.user.domain;
 import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.UserId;
+import com.tickon.identity.user.domain.valueobjects.UserStatus;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import java.util.Objects;
 
@@ -14,25 +15,28 @@ public class User {
   private String firstName;
   private String lastName;
   private PasswordHash passwordHash;
+  private UserStatus status;
 
-  private User(UserId id, Email email, Username username, String firstName, String lastName,
-      PasswordHash passwordHash) {
+  private User(UserId id, Email email, Username username, String firstName, String lastName, PasswordHash passwordHash,
+      UserStatus status) {
     this.id = Objects.requireNonNull(id, "id");
     this.email = Objects.requireNonNull(email, "email");
     this.username = Objects.requireNonNull(username, "username");
     this.passwordHash = Objects.requireNonNull(passwordHash, "passwordHash");
-    this.firstName = firstName;
-    this.lastName = lastName;
+    this.firstName = Objects.requireNonNull(firstName, "firstName");
+    this.status = Objects.requireNonNull(status, "status");
+    this.lastName = Objects.requireNonNull(lastName, "lastName");
   }
 
   public static User create(UserId id, Email email, Username username, String firstName, String lastName,
       PasswordHash passwordHash) {
-    return new User(id, email, username, firstName, lastName, passwordHash);
+    UserStatus status = UserStatus.ACTIVE;
+    return new User(id, email, username, firstName, lastName, passwordHash, status);
   }
 
-  public static User fromPersistence(UserId id, Email email, Username username, String firstName, String lastName,
-      PasswordHash passwordHash) {
-    return new User(id, email, username, firstName, lastName, passwordHash);
+  public static User restore(UserId id, Email email, Username username, String firstName, String lastName,
+      PasswordHash passwordHash, UserStatus status) {
+    return new User(id, email, username, firstName, lastName, passwordHash, status);
   }
 
   public void changeEmail(Email newEmail) {
@@ -41,11 +45,6 @@ public class User {
 
   public void changeUsername(Username newUsername) {
     this.username = Objects.requireNonNull(newUsername, "newUsername");
-  }
-
-  public void changeName(String first, String last) {
-    this.firstName = first;
-    this.lastName = last;
   }
 
   public void changePasswordHash(PasswordHash newHash) {
@@ -74,6 +73,10 @@ public class User {
 
   public PasswordHash passwordHash() {
     return passwordHash;
+  }
+
+  public UserStatus status() {
+    return status;
   }
 
 }

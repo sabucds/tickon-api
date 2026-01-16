@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.UserId;
+import com.tickon.identity.user.domain.valueobjects.UserStatus;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import org.junit.jupiter.api.Test;
 
@@ -24,10 +25,10 @@ class UserTest {
   }
 
   @Test
-  void shouldRestoreFromPersistence() {
+  void shouldRestore() {
     UserId userId = UserId.generate();
-    User registeredUser = User.fromPersistence(userId, Email.from("john@example.com"), Username.from("john_doe"),
-        "John", "Doe", new PasswordHash("hashed-password"));
+    User registeredUser = User.restore(userId, Email.from("john@example.com"), Username.from("john_doe"), "John", "Doe",
+        new PasswordHash("hashed-password"), UserStatus.ACTIVE);
 
     assertThat(registeredUser.id()).isEqualTo(userId);
     assertThat(registeredUser.email().value()).isEqualTo("john@example.com");

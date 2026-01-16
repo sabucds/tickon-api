@@ -14,9 +14,7 @@ import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
 import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
-import com.tickon.identity.user.domain.exceptions.InvalidEmailException;
 import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
-import com.tickon.identity.user.domain.exceptions.InvalidUsernameException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
 import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
@@ -117,25 +115,10 @@ class RegisterUserServiceTest {
   }
 
   @Test
-  void shouldThrowException_WhenInvalidEmailFormat() {
-    RegisterUserCommand command = aCommand("john_doe", "invalid-email", "SecurePass123!");
-
-    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(InvalidEmailException.class)
-        .hasMessage("Invalid email: invalid-email");
-  }
-
-  @Test
-  void shouldThrowException_WhenInvalidUsernameFormat() {
-    RegisterUserCommand command = aCommand("", "john@example.com", "SecurePass123!");
-
-    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(InvalidUsernameException.class);
-  }
-
-  @Test
   void shouldCreateUniqueUserIds_WhenRegisteringMultipleUsers() {
     RegisterUserCommand command1 = aCommand("john_doe", "john@example.com", "SecurePass123!");
-    RegisterUserCommand command2 = new RegisterUserCommand("Jane", "Smith", "janesmith", "jane@example.com",
-        "SecurePass456!");
+    RegisterUserCommand command2 = new RegisterUserCommand("Jane", "Smith", new Username("janesmith"),
+        new Email("jane@example.com"), "SecurePass456!");
 
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
@@ -161,6 +144,6 @@ class RegisterUserServiceTest {
   }
 
   private RegisterUserCommand aCommand(String username, String email, String password) {
-    return new RegisterUserCommand("John", "Doe", username, email, password);
+    return new RegisterUserCommand("John", "Doe", new Username(username), new Email(email), password);
   }
 }

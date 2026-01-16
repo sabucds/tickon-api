@@ -22,7 +22,7 @@ public final class AuthTestFixtures {
 
   public static Session aSession(Instant now, Duration duration) {
     return Session.create(SessionId.generate(), RefreshTokenHash.from("sample-hash"), UserId.generate(), "device-123",
-        FamilyId.generate(), null, now, duration);
+        FamilyId.generate(), null, duration, now);
   }
 
 }

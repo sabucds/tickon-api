@@ -9,10 +9,8 @@ import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
 import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
-import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.UserId;
-import com.tickon.identity.user.domain.valueobjects.Username;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,23 +28,18 @@ public class RegisterUserService implements RegisterUserUseCase {
   }
 
   @Override
-  public UserResult register(RegisterUserCommand request) {
-    Email email = Email.from(request.email());
-    Username username = Username.from(request.username());
+  public UserResult register(RegisterUserCommand cmd) {
+    if (userRepository.existsByEmail(cmd.email()))
+      throw new DuplicateEmailException(cmd.email().value());
+    if (userRepository.existsByUsername(cmd.username()))
+      throw new DuplicateUsernameException(cmd.username().value());
 
-    if (userRepository.existsByEmail(email)) {
-      throw new DuplicateEmailException(email.value());
-    }
-    if (userRepository.existsByUsername(username)) {
-      throw new DuplicateUsernameException(username.value());
-    }
+    passwordPolicy.validate(cmd.rawPassword());
+    PasswordHash hash = passwordHasher.hash(cmd.rawPassword());
 
-    passwordPolicy.validate(request.rawPassword());
-    PasswordHash hash = passwordHasher.hash(request.rawPassword());
-
-    User user = User.create(UserId.generate(), email, username, request.firstName(), request.lastName(), hash);
-
+    User user = User.create(UserId.generate(), cmd.email(), cmd.username(), cmd.firstName(), cmd.lastName(), hash);
     userRepository.save(user);
     return UserResult.from(user);
   }
+
 }

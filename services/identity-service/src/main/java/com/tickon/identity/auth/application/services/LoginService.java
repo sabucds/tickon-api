@@ -27,28 +27,28 @@ public class LoginService implements LoginUseCase {
   private final SessionRepository sessionRepository;
   private final PasswordHasher passwordHasher;
   private final TokenProvider tokenProvider;
-  private final Duration sessionTtl;
   private final Clock clock;
   private final RefreshTokenHasher refreshTokenHasher;
+  private final Duration sessionDuration;
 
   public LoginService(UserRepository userRepository, SessionRepository sessionRepository, PasswordHasher passwordHasher,
-      TokenProvider tokenProvider, @Value("${security.jwt.session-expiration}") Duration sessionTtl,
+      TokenProvider tokenProvider, @Value("${security.jwt.session-expiration-ms}") long sessionExpirationMs,
       java.time.Clock clock, RefreshTokenHasher refreshTokenHasher) {
     this.userRepository = userRepository;
     this.sessionRepository = sessionRepository;
     this.passwordHasher = passwordHasher;
     this.tokenProvider = tokenProvider;
     this.refreshTokenHasher = refreshTokenHasher;
-    this.sessionTtl = sessionTtl;
     this.clock = clock;
+    this.sessionDuration = Duration.ofMillis(sessionExpirationMs);
   }
 
   @Override
-  public LoginResult login(LoginCommand command) {
-    User user = userRepository.findByUsernameOrEmail(command.usernameOrEmail())
+  public LoginResult login(LoginCommand cmd) {
+    User user = userRepository.findByUsernameOrEmail(cmd.usernameOrEmail())
         .orElseThrow(InvalidCredentialsException::new);
 
-    if (!passwordHasher.verify(command.password(), user.passwordHash())) {
+    if (!passwordHasher.verify(cmd.password(), user.passwordHash())) {
       throw new InvalidCredentialsException();
     }
 
@@ -57,8 +57,8 @@ public class LoginService implements LoginUseCase {
     RefreshTokenHash refreshTokenHash = refreshTokenHasher.hash(refreshToken);
 
     Instant now = clock.instant();
-    Session session = Session.create(SessionId.generate(), refreshTokenHash, user.id(), command.deviceId(),
-        FamilyId.generate(), null, now, sessionTtl);
+    Session session = Session.create(SessionId.generate(), refreshTokenHash, user.id(), cmd.deviceId(),
+        FamilyId.generate(), null, sessionDuration, now);
 
     sessionRepository.save(session);
 

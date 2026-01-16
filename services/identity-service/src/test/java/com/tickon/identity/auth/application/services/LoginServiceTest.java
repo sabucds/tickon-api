@@ -49,15 +49,15 @@ class LoginServiceTest {
 
   private final Instant fixedInstant = Instant.parse("2024-01-01T10:00:00Z");
   private final Clock fixedClock = Clock.fixed(fixedInstant, ZoneOffset.UTC);
-  private final Duration sessionTtl = Duration.ofHours(1);
+  private final long sessionExpirationMS = 1209600000;
 
   private static final String IDENTIFIER = "john@example.com";
   private static final String DEVICE_ID = "device-123";
 
   @BeforeEach
   void setUp() {
-    loginService = new LoginService(userRepository, sessionRepository, passwordHasher, tokenProvider, sessionTtl,
-        fixedClock, refreshTokenHasher);
+    loginService = new LoginService(userRepository, sessionRepository, passwordHasher, tokenProvider,
+        sessionExpirationMS, fixedClock, refreshTokenHasher);
   }
 
   @Test
@@ -80,7 +80,7 @@ class LoginServiceTest {
     assertThat(savedSession.deviceId()).isEqualTo(DEVICE_ID);
     assertThat(savedSession.refreshTokenHash()).isEqualTo(RefreshTokenHash.from("hashed-refresh-token"));
     assertThat(savedSession.isRevoked()).isFalse();
-    assertThat(savedSession.expiresAt()).isEqualTo(fixedInstant.plus(sessionTtl));
+    assertThat(savedSession.absoluteExpiresAt()).isEqualTo(fixedInstant.plus(Duration.ofMillis(sessionExpirationMS)));
   }
 
   @Test

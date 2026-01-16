@@ -27,7 +27,7 @@ public class JwtTokenProvider implements TokenProvider {
 
   public JwtTokenProvider(@Value("${security.jwt.private-key:}") String privateKeyPem,
       @Value("${security.jwt.public-key:}") String publicKeyPem,
-      @Value("${security.jwt.access-token-expiration}") long accessTokenValidityMs,
+      @Value("${security.jwt.access-token-expiration-ms}") long accessTokenValidityMs,
       @Value("${security.jwt.issuer:tickon}") String issuer) {
     KeyPair keyPair = resolveKeyPair(privateKeyPem, publicKeyPem);
     this.signingKey = keyPair.getPrivate();

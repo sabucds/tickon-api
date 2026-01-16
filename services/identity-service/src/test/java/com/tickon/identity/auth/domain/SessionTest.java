@@ -1,7 +1,9 @@
 package com.tickon.identity.auth.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.tickon.identity.auth.domain.exceptions.SessionRevokedException;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
@@ -20,28 +22,28 @@ class SessionTest {
   @Test
   void shouldCreateSessionWithValidParameters() {
     Session session = Session.create(SessionId.generate(), RefreshTokenHash.from("sample-hash"), UserId.generate(),
-        "device-123", FamilyId.generate(), null, FIXED_INSTANT, DURATION_30_DAYS);
+        "device-123", FamilyId.generate(), null, DURATION_30_DAYS, FIXED_INSTANT);
     assertThat(session.id()).isNotNull();
     assertThat(session.refreshTokenHash().value()).isEqualTo("sample-hash");
     assertThat(session.deviceId()).isEqualTo("device-123");
     assertThat(session.isExpired(FIXED_INSTANT)).isFalse();
     assertThat(session.familyId()).isNotNull();
     assertThat(session.rotatedFromSessionId()).isNull();
-    assertThat(session.expiresAt()).isEqualTo(FIXED_INSTANT.plus(DURATION_30_DAYS));
+    assertThat(session.absoluteExpiresAt()).isEqualTo(FIXED_INSTANT.plus(DURATION_30_DAYS));
   }
 
   @Test
-  void shouldRestoreSessionFromPersistence() {
-    Instant expiresAt = FIXED_INSTANT.plus(DURATION_30_DAYS);
-    Session session = Session.fromPersistence(SessionId.generate(), RefreshTokenHash.from("sample-hash"),
-        UserId.generate(), "device-123", FamilyId.generate(), null, expiresAt, null, null);
+  void shouldRestoreSession() {
+    Instant absoluteExpiresAt = FIXED_INSTANT.plus(DURATION_30_DAYS);
+    Session session = Session.restore(SessionId.generate(), RefreshTokenHash.from("sample-hash"), UserId.generate(),
+        "device-123", FamilyId.generate(), null, absoluteExpiresAt, null, null);
     assertThat(session.id()).isNotNull();
     assertThat(session.refreshTokenHash().value()).isEqualTo("sample-hash");
     assertThat(session.deviceId()).isEqualTo("device-123");
     assertThat(session.isExpired(FIXED_INSTANT)).isFalse();
     assertThat(session.familyId()).isNotNull();
     assertThat(session.rotatedFromSessionId()).isNull();
-    assertThat(session.expiresAt()).isEqualTo(expiresAt);
+    assertThat(session.absoluteExpiresAt()).isEqualTo(absoluteExpiresAt);
   }
 
   @Test
@@ -56,14 +58,13 @@ class SessionTest {
   }
 
   @Test
-  void shouldNotRevokeAlreadyRevokedSession() {
+  void shouldThrow_WhenRevokingAnAlreadyRevokedSession() {
     Session session = AuthTestFixtures.aSession(FIXED_INSTANT, DURATION_30_DAYS);
     session.revoke(FIXED_INSTANT.plusSeconds(10), RevokeReason.USER_LOGOUT);
-    Instant firstRevokedAt = session.revokedAt();
-    RevokeReason firstRevokeReason = session.revokeReason();
-    session.revoke(FIXED_INSTANT.plusSeconds(20), RevokeReason.TOKEN_COMPROMISED);
-    assertThat(session.revokedAt()).isEqualTo(firstRevokedAt);
-    assertThat(session.revokeReason()).isEqualTo(firstRevokeReason);
+    Instant revokeTime = FIXED_INSTANT.plusSeconds(20);
+    assertThatThrownBy(() -> session.revoke(revokeTime, RevokeReason.TOKEN_COMPROMISED))
+        .isInstanceOf(SessionRevokedException.class).hasMessage("Session is already revoked for a different reason");
+
   }
 
   @Test

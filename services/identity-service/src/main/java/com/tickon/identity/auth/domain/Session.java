@@ -1,5 +1,7 @@
 package com.tickon.identity.auth.domain;
 
+import com.tickon.identity.auth.domain.exceptions.SessionExpiredException;
+import com.tickon.identity.auth.domain.exceptions.SessionRevokedException;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
@@ -18,56 +20,66 @@ public class Session {
   private final FamilyId familyId;
   private final SessionId rotatedFromSessionId;
 
-  private final Instant expiresAt;
+  private final Instant absoluteExpiresAt;
 
   private Instant revokedAt;
   private RevokeReason revokeReason;
 
   private Session(SessionId id, RefreshTokenHash refreshTokenHash, UserId userId, String deviceId, FamilyId familyId,
-      SessionId rotatedFromSessionId, Instant expiresAt, Instant revokedAt, RevokeReason revokeReason) {
+      SessionId rotatedFromSessionId, Instant absoluteExpiresAt, Instant revokedAt, RevokeReason revokeReason) {
     this.id = Objects.requireNonNull(id, "id");
     this.refreshTokenHash = Objects.requireNonNull(refreshTokenHash, "refreshTokenHash");
     this.userId = Objects.requireNonNull(userId, "userId");
     this.deviceId = Objects.requireNonNull(deviceId, "deviceId");
     this.familyId = Objects.requireNonNull(familyId, "familyId");
     this.rotatedFromSessionId = rotatedFromSessionId;
-
-    this.expiresAt = Objects.requireNonNull(expiresAt, "expiresAt");
+    this.absoluteExpiresAt = Objects.requireNonNull(absoluteExpiresAt, "absoluteExpiresAt");
+    this.revokedAt = revokedAt;
+    this.revokeReason = revokeReason;
 
     if (deviceId.isBlank()) {
       throw new IllegalArgumentException("deviceId cannot be blank");
     }
-
-    if ((revokedAt == null) != (revokeReason == null)) {
-      throw new IllegalArgumentException("revokedAt and revokeReason are inconsistent");
-    }
-
-    this.revokedAt = revokedAt;
-    this.revokeReason = revokeReason;
+    this.validateRevocationConsistency();
   }
 
   public static Session create(SessionId id, RefreshTokenHash refreshTokenHash, UserId userId, String deviceId,
-      FamilyId familyId, SessionId rotatedFromSessionId, Instant now, Duration ttl) {
+      FamilyId familyId, SessionId rotatedFromSessionId, Duration sessionDuration, Instant now) {
+    Objects.requireNonNull(sessionDuration, "sessionDuration");
     Objects.requireNonNull(now, "now");
-    Objects.requireNonNull(ttl, "ttl");
-    if (ttl.isZero() || ttl.isNegative()) {
-      throw new IllegalArgumentException("ttl must be positive");
+    if (sessionDuration.isZero() || sessionDuration.isNegative()) {
+      throw new IllegalArgumentException("sessionDuration must be positive");
     }
-
-    return new Session(id, refreshTokenHash, userId, deviceId, familyId, rotatedFromSessionId, now.plus(ttl), null,
+    Instant absoluteExpiresAt = now.plus(sessionDuration);
+    return new Session(id, refreshTokenHash, userId, deviceId, familyId, rotatedFromSessionId, absoluteExpiresAt, null,
         null);
   }
 
-  public static Session fromPersistence(SessionId id, RefreshTokenHash refreshTokenHash, UserId userId, String deviceId,
-      FamilyId familyId, SessionId rotatedFromSessionId, Instant expiresAt, Instant revokedAt,
+  public static Session restore(SessionId id, RefreshTokenHash refreshTokenHash, UserId userId, String deviceId,
+      FamilyId familyId, SessionId rotatedFromSessionId, Instant absoluteExpiresAt, Instant revokedAt,
       RevokeReason revokeReason) {
-    return new Session(id, refreshTokenHash, userId, deviceId, familyId, rotatedFromSessionId, expiresAt, revokedAt,
-        revokeReason);
+    return new Session(id, refreshTokenHash, userId, deviceId, familyId, rotatedFromSessionId, absoluteExpiresAt,
+        revokedAt, revokeReason);
+  }
+
+  public Session rotateTo(Instant now, RefreshTokenHash newRefreshTokenHash, SessionId newSessionId) {
+    if (isExpired(now)) {
+      throw new SessionExpiredException();
+    }
+    revoke(now, RevokeReason.SESSION_ROTATED);
+    return new Session(newSessionId, newRefreshTokenHash, userId, deviceId, familyId, id, absoluteExpiresAt, null,
+        null);
+  }
+
+  private void validateRevocationConsistency() {
+    if ((revokedAt == null) != (revokeReason == null)) {
+      throw new IllegalStateException("revokedAt and revokeReason are inconsistent");
+    }
   }
 
   public boolean isExpired(Instant now) {
     Objects.requireNonNull(now, "now");
-    return !now.isBefore(expiresAt);
+    return !now.isBefore(absoluteExpiresAt);
   }
 
   public boolean isRevoked() {
@@ -78,12 +90,11 @@ public class Session {
     Objects.requireNonNull(now, "now");
     Objects.requireNonNull(reason, "reason");
 
-    if (revokedAt != null) {
-      return;
+    if (revokedAt != null && revokeReason != reason) {
+      throw new SessionRevokedException();
     }
     this.revokedAt = now;
     this.revokeReason = reason;
-
   }
 
   public SessionId id() {
@@ -110,8 +121,8 @@ public class Session {
     return rotatedFromSessionId;
   }
 
-  public Instant expiresAt() {
-    return expiresAt;
+  public Instant absoluteExpiresAt() {
+    return absoluteExpiresAt;
   }
 
   public Instant revokedAt() {

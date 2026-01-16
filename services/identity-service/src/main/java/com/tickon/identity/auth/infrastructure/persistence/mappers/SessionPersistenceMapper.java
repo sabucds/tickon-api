@@ -18,16 +18,17 @@ public class SessionPersistenceMapper {
     entity.deviceId = session.deviceId();
     entity.rotatedFromSessionId = session.rotatedFromSessionId() != null ? session.rotatedFromSessionId().value()
         : null;
-    entity.expiresAt = session.expiresAt();
+    entity.absoluteExpiresAt = session.absoluteExpiresAt();
     entity.revokedAt = session.revokedAt();
     entity.revokeReason = session.revokeReason() != null ? session.revokeReason().name() : null;
     return entity;
   }
 
   public Session toDomain(SessionEntity entity) {
-    return Session.fromPersistence(new SessionId(entity.id), RefreshTokenHash.from(entity.refreshTokenHash),
+    return Session.restore(new SessionId(entity.id), RefreshTokenHash.from(entity.refreshTokenHash),
         new UserId(entity.userId), entity.deviceId, new FamilyId(entity.familyId),
-        entity.rotatedFromSessionId != null ? new SessionId(entity.rotatedFromSessionId) : null, entity.expiresAt,
-        entity.revokedAt, entity.revokeReason != null ? RevokeReason.valueOf(entity.revokeReason) : null);
+        entity.rotatedFromSessionId != null ? new SessionId(entity.rotatedFromSessionId) : null,
+        entity.absoluteExpiresAt, entity.revokedAt,
+        entity.revokeReason != null ? RevokeReason.valueOf(entity.revokeReason) : null);
   }
 }

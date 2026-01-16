@@ -30,8 +30,8 @@ public class SessionEntity {
   @Column(name = "rotated_from_session_id")
   public UUID rotatedFromSessionId;
 
-  @Column(name = "expires_at", nullable = false)
-  public Instant expiresAt;
+  @Column(name = "absolute_expires_at", nullable = false)
+  public Instant absoluteExpiresAt;
 
   @Column(name = "revoked_at")
   public Instant revokedAt;

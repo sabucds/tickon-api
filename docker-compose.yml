@@ -76,6 +76,7 @@ services:
     environment:
       SPRING_DEVTOOLS_RESTART_ENABLED: true
       SERVICE_NAME: api-gateway
+      SECURITY_JWT_PUBLIC_KEY: ${SECURITY_JWT_PUBLIC_KEY:-}
     volumes:
       - .:/workspace
       - ./services/api-gateway:/app

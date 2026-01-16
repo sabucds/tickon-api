@@ -43,7 +43,14 @@ security:
   jwt:
     private-key: "${SECURITY_JWT_PRIVATE_KEY:}"
     public-key: "${SECURITY_JWT_PUBLIC_KEY:}"
-    access-token-expiration: 900000 # 15 minutes
-    session-expiration: 1209600000 # 14 days
+    access-token-expiration-ms: 900000 
+    session-expiration-ms: 1209600000 # 14 days
     issuer: tickon-identity
     refresh-token-pepper: "${REFRESH_TOKEN_PEPPER:}"
+
+springdoc:
+  swagger-ui:
+    operations-sorter: method
+    config-url: /api/identity/v3/api-docs/swagger-config
+    url: /api/identity/v3/api-docs
+    disable-swagger-default-url: true

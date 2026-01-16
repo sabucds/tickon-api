@@ -4,6 +4,12 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: identity-swagger-docs
+          uri: no://op
+          predicates:
+            - Path=/api/identity/docs,/api/identity/docs/**
+          filters:
+            - RedirectTo=302,/api/identity/swagger-ui/index.html
         - id: event-service
           uri: lb://EVENT-SERVICE
           predicates:
@@ -41,3 +47,7 @@ management:
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
+
+security:
+  jwt:
+    public-key: "${SECURITY_JWT_PUBLIC_KEY:}"

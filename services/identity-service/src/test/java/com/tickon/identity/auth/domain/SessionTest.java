@@ -3,6 +3,7 @@ package com.tickon.identity.auth.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.tickon.identity.auth.domain.exceptions.SessionExpiredException;
 import com.tickon.identity.auth.domain.exceptions.SessionRevokedException;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
@@ -75,4 +76,72 @@ class SessionTest {
     assertThat(session.isExpired(FIXED_INSTANT.plusSeconds(15))).isTrue();
   }
 
+  @Test
+  void shouldRotateFromAnotherSession() {
+    Session originalSession = AuthTestFixtures.aSession(FIXED_INSTANT, DURATION_30_DAYS);
+    Session rotatedSession = originalSession.rotateTo(FIXED_INSTANT.plusSeconds(10), RefreshTokenHash.from("new-hash"),
+        SessionId.generate());
+
+    assertThat(rotatedSession.id()).isNotEqualTo(originalSession.id());
+    assertThat(rotatedSession.refreshTokenHash().value()).isEqualTo("new-hash");
+    assertThat(rotatedSession.userId()).isEqualTo(originalSession.userId());
+    assertThat(rotatedSession.deviceId()).isEqualTo(originalSession.deviceId());
+    assertThat(rotatedSession.familyId()).isEqualTo(originalSession.familyId());
+    assertThat(rotatedSession.rotatedFromSessionId()).isEqualTo(originalSession.id());
+    assertThat(rotatedSession.absoluteExpiresAt()).isEqualTo(originalSession.absoluteExpiresAt());
+  }
+
+  @Test
+  void shouldThrow_WhenRotatingAnExpiredSession() {
+    Session originalSession = AuthTestFixtures.aSession(FIXED_INSTANT, Duration.ofSeconds(10));
+    Instant rotateTime = FIXED_INSTANT.plusSeconds(15);
+    assertThatThrownBy(
+        () -> originalSession.rotateTo(rotateTime, RefreshTokenHash.from("new-hash"), SessionId.generate()))
+        .isInstanceOf(SessionExpiredException.class).hasMessage("Session is already expired");
+  }
+
+  @Test
+  void shouldIdentifyRevokedSession() {
+    Session session = AuthTestFixtures.aSession(FIXED_INSTANT, DURATION_30_DAYS);
+    assertThat(session.isRevoked()).isFalse();
+
+    session.revoke(FIXED_INSTANT.plusSeconds(10), RevokeReason.USER_LOGOUT);
+    assertThat(session.isRevoked()).isTrue();
+  }
+
+  @Test
+  void shouldThrow_WhenRestoringSessionWithInconsistentRevocationData() {
+    Instant absoluteExpiresAt = FIXED_INSTANT.plus(DURATION_30_DAYS);
+    assertThatThrownBy(() -> Session.restore(SessionId.generate(), RefreshTokenHash.from("sample-hash"),
+        UserId.generate(), "device-123", FamilyId.generate(), null, absoluteExpiresAt, null, RevokeReason.USER_LOGOUT))
+        .isInstanceOf(IllegalStateException.class).hasMessage("revokedAt and revokeReason are inconsistent");
+
+    assertThatThrownBy(() -> Session.restore(SessionId.generate(), RefreshTokenHash.from("sample-hash"),
+        UserId.generate(), "device-123", FamilyId.generate(), null, absoluteExpiresAt, FIXED_INSTANT, null))
+        .isInstanceOf(IllegalStateException.class).hasMessage("revokedAt and revokeReason are inconsistent");
+  }
+
+  @Test
+  void shouldThrow_WhenCreatingSessionWithNullNow() {
+    assertThatThrownBy(() -> Session.create(SessionId.generate(), RefreshTokenHash.from("sample-hash"),
+        UserId.generate(), "device-123", FamilyId.generate(), null, DURATION_30_DAYS, null))
+        .isInstanceOf(NullPointerException.class).hasMessage("now");
+  }
+
+  @Test
+  void shouldThrow_WhenCreatingSessionWithNonPositiveDuration() {
+    assertThatThrownBy(() -> Session.create(SessionId.generate(), RefreshTokenHash.from("sample-hash"),
+        UserId.generate(), "device-123", FamilyId.generate(), null, Duration.ofSeconds(0), FIXED_INSTANT))
+        .isInstanceOf(IllegalArgumentException.class).hasMessage("sessionDuration must be positive");
+    assertThatThrownBy(() -> Session.create(SessionId.generate(), RefreshTokenHash.from("sample-hash"),
+        UserId.generate(), "device-123", FamilyId.generate(), null, Duration.ofSeconds(-10), FIXED_INSTANT))
+        .isInstanceOf(IllegalArgumentException.class).hasMessage("sessionDuration must be positive");
+  }
+
+  @Test
+  void shouldThrow_WhenCreatingSessionWithBlankDeviceId() {
+    assertThatThrownBy(() -> Session.create(SessionId.generate(), RefreshTokenHash.from("sample-hash"),
+        UserId.generate(), "", FamilyId.generate(), null, DURATION_30_DAYS, FIXED_INSTANT))
+        .isInstanceOf(IllegalArgumentException.class).hasMessage("deviceId cannot be blank");
+  }
 }

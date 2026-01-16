@@ -3,7 +3,6 @@ package com.tickon.identity.user.application.services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import com.tickon.identity.user.application.dto.UserResult;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.valueobjects.UserId;
@@ -16,34 +15,35 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class GetUserByIdServiceTest {
+class DeleteUserServiceTest {
 
-  private GetUserByIdService getUserByIdService;
+  private DeleteUserService deleteUserService;
 
   @Mock
   private UserRepository userRepository;
 
   @BeforeEach
   void setUp() {
-    getUserByIdService = new GetUserByIdService(userRepository);
+    deleteUserService = new DeleteUserService(userRepository);
   }
 
   @Test
-  void shouldGetUserById_WhenUserExists() {
+  void shouldDeleteUserById_WhenUserExists() {
     String userId = "123e4567-e89b-12d3-a456-426614174000";
     User user = UserTestFixtures.aUserWithId(userId);
     when(userRepository.findById(UserId.from(userId))).thenReturn(Optional.of(user));
-    Optional<UserResult> result = getUserByIdService.handle(UserId.from(userId));
-    assertThat(result).isPresent();
-    assertThat(result.get().username()).isEqualTo(user.username().value());
+    deleteUserService.handle(UserId.from(userId));
   }
 
   @Test
-  void shouldReturnEmpty_WhenUserDoesNotExist() {
+  void shouldThrowException_WhenUserDoesNotExist() {
     String userId = "123e4567-e89b-12d3-a456-426614174999";
     when(userRepository.findById(UserId.from(userId))).thenReturn(Optional.empty());
-    Optional<UserResult> result = getUserByIdService.handle(UserId.from(userId));
-    assertThat(result).isNotPresent();
+    try {
+      deleteUserService.handle(UserId.from(userId));
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage()).isEqualTo("User not found with id: " + UserId.from(userId));
+    }
   }
 
 }

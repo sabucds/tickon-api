@@ -1,4 +1,4 @@
-package com.tickon.identity.user.domain.valueobjects;
+package com.tickon.identity.auth.domain.valueobjects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -8,27 +8,27 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class UserIdTest {
+class SessionIdTest {
 
   @ParameterizedTest
   @ValueSource(strings = { "b350b3cd-2fbd-4248-b35f-bd1917367794", "00000000-0000-0000-0000-000000000001" })
-  void shouldCreateUserId_WhenValid(String validUserId) {
-    UserId userId = UserId.from(validUserId);
-    assertThat(userId.value().toString()).isEqualTo(validUserId);
+  void shouldCreateSessionId_WhenValid(String validSessionId) {
+    SessionId sessionId = SessionId.from(validSessionId);
+    assertThat(sessionId.value().toString()).isEqualTo(validSessionId);
   }
 
   @ParameterizedTest
   @NullAndEmptySource
   @ValueSource(strings = { "notAnUuid", "", "1234", "zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz" })
-  void shouldThrowException_WhenInvalidUserId(String invalidUserId) {
-    assertThatThrownBy(() -> UserId.from(invalidUserId)).isInstanceOf(IllegalArgumentException.class);
+  void shouldThrowException_WhenInvalidSessionId(String invalidSessionId) {
+    assertThatThrownBy(() -> SessionId.from(invalidSessionId)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @ParameterizedTest
   @ValueSource(ints = { 1, 2 })
   void shouldGenerateUniqueIds(int run) {
-    UserId generatedId1 = UserId.generate();
-    UserId generatedId2 = UserId.generate();
+    SessionId generatedId1 = SessionId.generate();
+    SessionId generatedId2 = SessionId.generate();
     assertThat(generatedId1).isNotEqualTo(generatedId2);
     assertThat(generatedId1.value()).isNotNull();
     assertThat(generatedId2.value()).isNotNull();
@@ -37,15 +37,15 @@ class UserIdTest {
   @ParameterizedTest
   @ValueSource(strings = { "b350b3cd-2fbd-4248-b35f-bd1917367794" })
   void shouldBeEqual_WhenSameId(String id) {
-    UserId userId1 = UserId.from(id);
-    UserId userId2 = UserId.from(id);
-    assertThat(userId1).isEqualTo(userId2);
-    assertThat(userId1.hashCode()).isEqualTo(userId2.hashCode());
+    SessionId sessionId1 = SessionId.from(id);
+    SessionId sessionId2 = SessionId.from(id);
+    assertThat(sessionId1).isEqualTo(sessionId2);
+    assertThat(sessionId1.hashCode()).isEqualTo(sessionId2.hashCode());
   }
 
   @Test
   void shouldThrow_WhenPassingNullToConstructor() {
-    assertThatThrownBy(() -> new UserId(null)).isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Invalid UserId: null value");
+    assertThatThrownBy(() -> new SessionId(null)).isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Invalid SessionId: null value");
   }
 }

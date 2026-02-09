@@ -1,13 +1,15 @@
 package com.tickon.identity.user.domain;
 
+import com.tickon.common.domain.AggregateRoot;
+import com.tickon.common.identity.domain.valueobjects.PasswordHash;
+import com.tickon.common.identity.domain.valueobjects.UserId;
+import com.tickon.common.identity.domain.valueobjects.UserStatus;
+import com.tickon.identity.user.domain.events.UserCreatedEvent;
 import com.tickon.identity.user.domain.valueobjects.Email;
-import com.tickon.identity.user.domain.valueobjects.PasswordHash;
-import com.tickon.identity.user.domain.valueobjects.UserId;
-import com.tickon.identity.user.domain.valueobjects.UserStatus;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import java.util.Objects;
 
-public class User {
+public class User extends AggregateRoot {
 
   private final UserId id;
   private Email email;
@@ -31,7 +33,9 @@ public class User {
   public static User create(UserId id, Email email, Username username, String firstName, String lastName,
       PasswordHash passwordHash) {
     UserStatus status = UserStatus.ACTIVE;
-    return new User(id, email, username, firstName, lastName, passwordHash, status);
+    User user = new User(id, email, username, firstName, lastName, passwordHash, status);
+    user.registerEvent(new UserCreatedEvent(id, email));
+    return user;
   }
 
   public static User restore(UserId id, Email email, Username username, String firstName, String lastName,

@@ -1,17 +1,20 @@
 package com.tickon.identity.auth.domain;
 
+import com.tickon.common.domain.AggregateRoot;
+import com.tickon.common.identity.domain.valueobjects.UserId;
+import com.tickon.identity.auth.domain.events.SessionCreatedEvent;
+import com.tickon.identity.auth.domain.events.SessionRevokedEvent;
 import com.tickon.identity.auth.domain.exceptions.SessionExpiredException;
 import com.tickon.identity.auth.domain.exceptions.SessionRevokedException;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
-import com.tickon.identity.user.domain.valueobjects.UserId;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 
-public class Session {
+public class Session extends AggregateRoot {
 
   private final SessionId id;
   private final RefreshTokenHash refreshTokenHash;
@@ -51,8 +54,10 @@ public class Session {
       throw new IllegalArgumentException("sessionDuration must be positive");
     }
     Instant absoluteExpiresAt = now.plus(sessionDuration);
-    return new Session(id, refreshTokenHash, userId, deviceId, familyId, rotatedFromSessionId, absoluteExpiresAt, null,
-        null);
+    Session session = new Session(id, refreshTokenHash, userId, deviceId, familyId, rotatedFromSessionId,
+        absoluteExpiresAt, null, null);
+    session.registerEvent(new SessionCreatedEvent(id, userId));
+    return session;
   }
 
   public static Session restore(SessionId id, RefreshTokenHash refreshTokenHash, UserId userId, String deviceId,
@@ -67,8 +72,10 @@ public class Session {
       throw new SessionExpiredException();
     }
     revoke(now, RevokeReason.SESSION_ROTATED);
-    return new Session(newSessionId, newRefreshTokenHash, userId, deviceId, familyId, id, absoluteExpiresAt, null,
-        null);
+    Session newSession = new Session(newSessionId, newRefreshTokenHash, userId, deviceId, familyId, id,
+        absoluteExpiresAt, null, null);
+    newSession.registerEvent(new SessionCreatedEvent(newSessionId, userId));
+    return newSession;
   }
 
   private void validateRevocationConsistency() {
@@ -95,6 +102,7 @@ public class Session {
     }
     this.revokedAt = now;
     this.revokeReason = reason;
+    registerEvent(new SessionRevokedEvent(id, reason));
   }
 
   public SessionId id() {

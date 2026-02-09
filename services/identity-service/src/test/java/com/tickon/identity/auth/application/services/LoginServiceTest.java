@@ -7,23 +7,29 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.tickon.common.domain.DomainEvent;
 import com.tickon.identity.auth.application.dto.LoginCommand;
 import com.tickon.identity.auth.application.dto.LoginResult;
+import com.tickon.identity.auth.application.ports.out.PasswordHasher;
 import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
 import com.tickon.identity.auth.application.ports.out.SessionRepository;
 import com.tickon.identity.auth.application.ports.out.TokenProvider;
+import com.tickon.identity.auth.domain.AuthUser;
 import com.tickon.identity.auth.domain.Session;
+import com.tickon.identity.auth.domain.events.SessionCreatedEvent;
 import com.tickon.identity.auth.domain.exceptions.InvalidCredentialsException;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.shared.AuthTestFixtures;
-import com.tickon.identity.user.application.ports.out.PasswordHasher;
-import com.tickon.identity.user.application.ports.out.UserRepository;
-import com.tickon.identity.user.domain.User;
+import com.tickon.common.queries.QueryBus;
+import com.tickon.common.queries.QueryResult;
+import com.tickon.identity.shared.contracts.queries.GetUserByUsernameOrEmailQuery;
+import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
+import com.tickon.identity.shared.ports.out.DomainEventPublisher;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Optional;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,11 +37,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/**
+ * Test for LoginService using QueryBus for cross-module communication.
+ */
 @ExtendWith(MockitoExtension.class)
 class LoginServiceTest {
 
   @Mock
-  private UserRepository userRepository;
+  private QueryBus queryBus;
   @Mock
   private SessionRepository sessionRepository;
   @Mock
@@ -44,6 +53,8 @@ class LoginServiceTest {
   private TokenProvider tokenProvider;
   @Mock
   private RefreshTokenHasher refreshTokenHasher;
+  @Mock
+  private DomainEventPublisher eventPublisher;
 
   private LoginService loginService;
 
@@ -56,13 +67,13 @@ class LoginServiceTest {
 
   @BeforeEach
   void setUp() {
-    loginService = new LoginService(userRepository, sessionRepository, passwordHasher, tokenProvider,
-        sessionExpirationMS, fixedClock, refreshTokenHasher);
+    loginService = new LoginService(queryBus, sessionRepository, passwordHasher, tokenProvider, sessionExpirationMS,
+        fixedClock, refreshTokenHasher, eventPublisher);
   }
 
   @Test
   void shouldLoginAndPersistSession_WhenCredentialsAreValid() {
-    User user = AuthTestFixtures.aUser();
+    AuthUser user = AuthTestFixtures.anAuthUser();
     stubUserFound(user);
     stubValidPassword("plain-password", user);
     stubTokens(user, "access-token", "refresh-token", "hashed-refresh-token");
@@ -81,11 +92,20 @@ class LoginServiceTest {
     assertThat(savedSession.refreshTokenHash()).isEqualTo(RefreshTokenHash.from("hashed-refresh-token"));
     assertThat(savedSession.isRevoked()).isFalse();
     assertThat(savedSession.absoluteExpiresAt()).isEqualTo(fixedInstant.plus(Duration.ofMillis(sessionExpirationMS)));
+
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<List<DomainEvent>> eventsCaptor = ArgumentCaptor.forClass(List.class);
+    verify(eventPublisher).publishAll(eventsCaptor.capture());
+
+    List<DomainEvent> publishedEvents = eventsCaptor.getValue();
+    assertThat(publishedEvents).hasSize(1);
+    assertThat(publishedEvents.get(0)).isInstanceOf(SessionCreatedEvent.class);
   }
 
   @Test
   void shouldThrow_WhenUserNotFound() {
-    when(userRepository.findByUsernameOrEmail("missing")).thenReturn(Optional.empty());
+    when(queryBus.execute(any(GetUserByUsernameOrEmailQuery.class)))
+        .thenReturn(new QueryResult.NotFound<>());
 
     assertThatThrownBy(() -> loginService.login(new LoginCommand("missing", "any", DEVICE_ID)))
         .isInstanceOf(InvalidCredentialsException.class).hasMessageContaining("Invalid credentials");
@@ -95,7 +115,7 @@ class LoginServiceTest {
 
   @Test
   void shouldThrow_WhenPasswordIsInvalid() {
-    User user = AuthTestFixtures.aUser();
+    AuthUser user = AuthTestFixtures.anAuthUser();
     stubUserFound(user);
     stubInvalidPassword("wrong-password", user);
 
@@ -105,21 +125,23 @@ class LoginServiceTest {
     verify(sessionRepository, never()).save(any());
   }
 
-  private void stubUserFound(User user) {
-    when(userRepository.findByUsernameOrEmail(IDENTIFIER)).thenReturn(Optional.of(user));
+  private void stubUserFound(AuthUser user) {
+    UserAuthDataDTO dto = new UserAuthDataDTO(user.id().value(), user.passwordHash().value(), user.status().name());
+    when(queryBus.execute(any(GetUserByUsernameOrEmailQuery.class)))
+        .thenReturn(new QueryResult.Success<>(dto));
   }
 
-  private void stubValidPassword(String raw, User user) {
+  private void stubValidPassword(String raw, AuthUser user) {
     when(passwordHasher.verify(raw, user.passwordHash())).thenReturn(true);
   }
 
-  private void stubInvalidPassword(String raw, User user) {
+  private void stubInvalidPassword(String raw, AuthUser user) {
     when(passwordHasher.verify(raw, user.passwordHash())).thenReturn(false);
   }
 
-  private void stubTokens(User user, String access, String refresh, String refreshHash) {
-    when(tokenProvider.generateAccessToken(user)).thenReturn(access);
-    when(tokenProvider.generateRefreshToken(user)).thenReturn(refresh);
+  private void stubTokens(AuthUser user, String access, String refresh, String refreshHash) {
+    when(tokenProvider.generateAccessToken(any(AuthUser.class))).thenReturn(access);
+    when(tokenProvider.generateRefreshToken(any(AuthUser.class))).thenReturn(refresh);
     when(refreshTokenHasher.hash(refresh)).thenReturn(RefreshTokenHash.from(refreshHash));
   }
 }

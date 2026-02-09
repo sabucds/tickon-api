@@ -1,10 +1,10 @@
 package com.tickon.identity.auth.domain.exceptions;
 
-import com.tickon.identity.shared.errors.DomainException;
-import com.tickon.identity.shared.errors.ErrorCode;
+import com.tickon.identity.shared.exceptions.IdentityDomainException;
+import com.tickon.identity.shared.exceptions.IdentityExceptionCodes;
 
-public class SessionExpiredException extends DomainException {
+public class SessionExpiredException extends IdentityDomainException {
   public SessionExpiredException() {
-    super(ErrorCode.SESSION_EXPIRED, "Session is already expired");
+    super(IdentityExceptionCodes.SESSION_EXPIRED, "Session is already expired");
   }
 }

@@ -1,10 +1,10 @@
 package com.tickon.identity.user.domain.exceptions;
 
-import com.tickon.identity.shared.errors.DomainException;
-import com.tickon.identity.shared.errors.ErrorCode;
+import com.tickon.identity.shared.exceptions.IdentityDomainException;
+import com.tickon.identity.shared.exceptions.IdentityExceptionCodes;
 
-public class InvalidUsernameException extends DomainException {
+public class InvalidUsernameException extends IdentityDomainException {
   public InvalidUsernameException(String username) {
-    super(ErrorCode.INVALID_USERNAME, "Invalid username: " + username);
+    super(IdentityExceptionCodes.INVALID_USERNAME, "Invalid username: " + username);
   }
 }

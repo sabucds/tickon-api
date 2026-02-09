@@ -1,10 +1,10 @@
 package com.tickon.identity.auth.domain.exceptions;
 
-import com.tickon.identity.shared.errors.DomainException;
-import com.tickon.identity.shared.errors.ErrorCode;
+import com.tickon.identity.shared.exceptions.IdentityDomainException;
+import com.tickon.identity.shared.exceptions.IdentityExceptionCodes;
 
-public class SessionRevokedException extends DomainException {
+public class SessionRevokedException extends IdentityDomainException {
   public SessionRevokedException() {
-    super(ErrorCode.SESSION_REVOKED, "Session is already revoked for a different reason");
+    super(IdentityExceptionCodes.SESSION_REVOKED, "Session is already revoked for a different reason");
   }
 }

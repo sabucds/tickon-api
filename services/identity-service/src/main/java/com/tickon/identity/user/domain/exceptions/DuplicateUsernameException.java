@@ -1,10 +1,10 @@
 package com.tickon.identity.user.domain.exceptions;
 
-import com.tickon.identity.shared.errors.DomainException;
-import com.tickon.identity.shared.errors.ErrorCode;
+import com.tickon.identity.shared.exceptions.IdentityDomainException;
+import com.tickon.identity.shared.exceptions.IdentityExceptionCodes;
 
-public class DuplicateUsernameException extends DomainException {
+public class DuplicateUsernameException extends IdentityDomainException {
   public DuplicateUsernameException(String username) {
-    super(ErrorCode.DUPLICATE_USERNAME, "Username already in use: " + username);
+    super(IdentityExceptionCodes.DUPLICATE_USERNAME, "Username already in use: " + username);
   }
 }

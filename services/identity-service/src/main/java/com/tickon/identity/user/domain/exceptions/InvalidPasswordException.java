@@ -1,10 +1,10 @@
 package com.tickon.identity.user.domain.exceptions;
 
-import com.tickon.identity.shared.errors.DomainException;
-import com.tickon.identity.shared.errors.ErrorCode;
+import com.tickon.identity.shared.exceptions.IdentityDomainException;
+import com.tickon.identity.shared.exceptions.IdentityExceptionCodes;
 
-public class InvalidPasswordException extends DomainException {
+public class InvalidPasswordException extends IdentityDomainException {
   public InvalidPasswordException(String message) {
-    super(ErrorCode.INVALID_PASSWORD, message);
+    super(IdentityExceptionCodes.INVALID_PASSWORD, message);
   }
 }

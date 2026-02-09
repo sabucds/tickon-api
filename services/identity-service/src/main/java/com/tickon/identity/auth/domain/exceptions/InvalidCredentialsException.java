@@ -1,10 +1,10 @@
 package com.tickon.identity.auth.domain.exceptions;
 
-import com.tickon.identity.shared.errors.DomainException;
-import com.tickon.identity.shared.errors.ErrorCode;
+import com.tickon.identity.shared.exceptions.IdentityDomainException;
+import com.tickon.identity.shared.exceptions.IdentityExceptionCodes;
 
-public class InvalidCredentialsException extends DomainException {
+public class InvalidCredentialsException extends IdentityDomainException {
   public InvalidCredentialsException() {
-    super(ErrorCode.INVALID_CREDENTIALS, "Invalid credentials");
+    super(IdentityExceptionCodes.INVALID_CREDENTIALS, "Invalid credentials");
   }
 }

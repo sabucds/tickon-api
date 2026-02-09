@@ -1,10 +1,10 @@
 package com.tickon.identity.user.domain.exceptions;
 
-import com.tickon.identity.shared.errors.DomainException;
-import com.tickon.identity.shared.errors.ErrorCode;
+import com.tickon.identity.shared.exceptions.IdentityDomainException;
+import com.tickon.identity.shared.exceptions.IdentityExceptionCodes;
 
-public class InvalidEmailException extends DomainException {
+public class InvalidEmailException extends IdentityDomainException {
   public InvalidEmailException(String email) {
-    super(ErrorCode.INVALID_EMAIL, "Invalid email: " + email);
+    super(IdentityExceptionCodes.INVALID_EMAIL, "Invalid email: " + email);
   }
 }

@@ -1,6 +1,6 @@
 # Testing Guidelines
 
-We follow **TDD**: Red → Green → Refactor.
+This document outlines the testing strategy for each layer of the architecture. For a guide on the TDD workflow, command-line operations, and general conventions, see [WORKFLOW.md](WORKFLOW.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## What to test (by layer)
 
@@ -31,10 +31,6 @@ Test:
 - optional integration tests (JPA/Testcontainers)
 
 Controllers: prefer a small number of integration tests (MockMvc) for wiring + validation.
-
-## Conventions
-- Class: `{ClassName}Test`
-- Method: `should{ExpectedBehavior}_When{Condition}`
 
 ## Unit test template (service)
 - Use `@ExtendWith(MockitoExtension.class)`

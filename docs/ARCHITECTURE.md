@@ -69,7 +69,7 @@ com.tickon.{service}/
 - Timestamp captured at construction.
 
 ### Exceptions
-- Domain exceptions extend `DomainException` and include an `ErrorCode`.
+- Domain exceptions extend `{Service}DomainException` and include an `ErrorCode`.
 
 ## Application rules (use cases are the API)
 - 1 interface per operation: `RegisterUserUseCase`

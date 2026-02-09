@@ -1,9 +1,9 @@
 package com.tickon.identity.user.application.services;
 
+import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.user.application.ports.in.DeleteUserUseCase;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
-import com.tickon.identity.user.domain.valueobjects.UserId;
 import org.springframework.stereotype.Service;
 
 @Service

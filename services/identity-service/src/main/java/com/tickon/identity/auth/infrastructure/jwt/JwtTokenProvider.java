@@ -1,7 +1,7 @@
 package com.tickon.identity.auth.infrastructure.jwt;
 
 import com.tickon.identity.auth.application.ports.out.TokenProvider;
-import com.tickon.identity.user.domain.User;
+import com.tickon.identity.auth.domain.AuthUser;
 import io.jsonwebtoken.Jwts;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -37,16 +37,16 @@ public class JwtTokenProvider implements TokenProvider {
   }
 
   @Override
-  public String generateAccessToken(User user) {
+  public String generateAccessToken(AuthUser user) {
     return generateToken(user, accessTokenValidityMs);
   }
 
   @Override
-  public String generateRefreshToken(User user) {
+  public String generateRefreshToken(AuthUser user) {
     return generateSecureRandomToken();
   }
 
-  private String generateToken(User user, long validityMs) {
+  private String generateToken(AuthUser user, long validityMs) {
     Instant now = Instant.now();
     return Jwts.builder().subject(user.id().value().toString()).issuer(issuer).issuedAt(Date.from(now))
         .expiration(Date.from(now.plusMillis(validityMs))).claim("userId", user.id().value().toString())

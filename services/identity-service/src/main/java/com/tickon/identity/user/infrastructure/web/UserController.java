@@ -1,9 +1,9 @@
 package com.tickon.identity.user.infrastructure.web;
 
+import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.user.application.ports.in.DeleteUserUseCase;
 import com.tickon.identity.user.application.ports.in.GetUserByIdUseCase;
 import com.tickon.identity.user.application.ports.in.RegisterUserUseCase;
-import com.tickon.identity.user.domain.valueobjects.UserId;
 import com.tickon.identity.user.infrastructure.web.dto.RegisterUserRequest;
 import com.tickon.identity.user.infrastructure.web.dto.UserResponse;
 import com.tickon.identity.user.infrastructure.web.mappers.UserMapper;

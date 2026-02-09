@@ -1,12 +1,12 @@
 package com.tickon.identity.auth.infrastructure.persistence.mappers;
 
+import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.auth.infrastructure.persistence.entities.SessionEntity;
-import com.tickon.identity.user.domain.valueobjects.UserId;
 
 public class SessionPersistenceMapper {
   public SessionEntity toEntity(Session session) {

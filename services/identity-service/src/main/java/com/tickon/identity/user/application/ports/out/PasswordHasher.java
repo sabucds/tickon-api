@@ -1,6 +1,6 @@
 package com.tickon.identity.user.application.ports.out;
 
-import com.tickon.identity.user.domain.valueobjects.PasswordHash;
+import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 
 public interface PasswordHasher {
   PasswordHash hash(String rawPassword);

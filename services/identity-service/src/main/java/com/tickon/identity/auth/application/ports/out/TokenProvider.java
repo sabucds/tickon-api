@@ -1,10 +1,10 @@
 package com.tickon.identity.auth.application.ports.out;
 
-import com.tickon.identity.user.domain.User;
+import com.tickon.identity.auth.domain.AuthUser;
 
 public interface TokenProvider {
 
-  String generateAccessToken(User user);
+  String generateAccessToken(AuthUser user);
 
-  String generateRefreshToken(User user);
+  String generateRefreshToken(AuthUser user);
 }

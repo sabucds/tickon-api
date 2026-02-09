@@ -1,111 +1,75 @@
-# Tickon API - Claude Context
+# Tickon API — Claude Context
 
-Ticket booking microservice platform built with Spring Boot 3, Java 21, and PostgreSQL.
+Ticket booking microservice platform (Spring Boot 3, Java 21, PostgreSQL).
 
-## Architecture
+## Non-negotiables (truth + quality)
+- If unsure about codebase context, assumptions, or APIs: **ask for clarification**. **Do not invent code** or files.
+- Prefer **quoting real references**: file paths, class names, method signatures.
+- When fixing a bug, add a brief comment explaining intent:
+  `// Fixed: Changed X to Y to prevent Z (as per spec/test).`
 
-**Hexagonal Architecture** with strict layer separation:
+## Architecture (Hexagonal + DDD)
+**Layers (dependency points inward):**
+- `domain/` → Entities, Value Objects, Domain Events, Policies, Domain Exceptions
+- `application/` → Use case interfaces (ports/in), services (use case impl), repo interfaces (ports/out), DTOs
+- `infrastructure/` → Controllers, persistence/security adapters, mappers
 
-```
-domain/           → Entities, Value Objects, Domain Exceptions, Policies
-application/      → Use Cases (ports/in), Repository interfaces (ports/out), DTOs, Services
-infrastructure/   → Controllers, Persistence Adapters, Security implementations
-```
+Controllers are **thin**: validate input → call use case → return response.
 
-**Dependency Rule**: Dependencies point inward. Infrastructure → Application → Domain.
+## Domain rules
+- Aggregates extend `AggregateRoot`
+  - `create()` for new entities (registers events)
+  - `restore()` for persistence rehydration (no events)
+- Value Objects: **records** with validation in compact constructor
+- Domain Events: records implementing `DomainEvent`, named `{Entity}{Action}Event`
+- Exceptions: extend `DomainException` + `ErrorCode`
 
-## Key Patterns
+## Application rules
+- One use case interface per operation (e.g. `RegisterUserUseCase`)
+- Services orchestrate domain + publish events via `DomainEventPublisher`
+- DTOs:
+  - `*Command` input
+  - `*Result` output
 
-### Domain Layer
-- **Aggregates**: Extend `AggregateRoot`, private constructor, `create()` for new entities (registers events), `restore()` for persistence (no events)
-- **Value Objects**: Java records with validation in compact constructor
-- **Domain Events**: Records implementing `DomainEvent`, named `{Entity}{Action}Event`
-- **Exceptions**: Extend `DomainException` with `ErrorCode`
+## Bounded Contexts (modules)
+Modules inside a service are separate bounded contexts.
+- ❌ No imports from another module’s `domain/`, `application/` or `infrastructure/`
 
-### Application Layer
-- **Use Cases**: One interface per operation (e.g., `RegisterUserUseCase`)
-- **Services**: Implement use cases, orchestrate domain objects, publish domain events
-- **DTOs**: `*Command` for input, `*Result` for output
-- **Output Ports**: `DomainEventPublisher` for event publishing
+### Cross-module reads: Query Bus only
+✅ Use Query Bus for **synchronous, read-only** lookups across modules.  
+❌ Not for writes. ❌ Not for async notifications (use domain events).
 
-### Infrastructure Layer
-- **Adapters**: Implement port interfaces (e.g., `UserRepositoryAdapter implements UserRepository`)
-- **Mappers**: `toDomain()` and `toEntity()` methods
-- **Controllers**: Thin, delegate to use cases immediately
+Queries live in `shared/contracts/queries/` and return `QueryResult<DTO>`.
+Handlers live in owner module: `application/queryhandlers/`.
 
-## Bounded Contexts
+### Shared infrastructure only
+Modules never import each other’s infrastructure.
+Shared DB entities/repos go in `shared/infrastructure/`.
 
-Modules within a service (e.g., `auth` and `user` in `identity-service`) are **separate bounded contexts**. They must not import from each other's domain or application layers.
+## TDD workflow (required)
+1) Write failing test (behavior)  
+2) Minimal code to pass  
+3) Refactor safely (tests stay green)
 
-**Rule**: If module A needs data from module B:
-1. Module A defines its own **port interface** (application layer)
-2. Module A defines its own **domain representation** (domain layer)
-3. The **infrastructure layer can share** persistence entities (JPA entities, etc.)
-
-```
-❌ Wrong: auth imports from user's domain/application layers
-   auth/application/services/LoginService.java
-   └── import com.tickon.identity.user.application.ports.out.UserRepository;
-   └── import com.tickon.identity.user.domain.User;
-
-✅ Correct: auth defines its own port and domain model
-   auth/application/ports/out/AuthUserRepository.java  → auth's own interface
-   auth/domain/AuthUser.java                           → auth's view of user data (read-only projection)
-   auth/infrastructure/persistence/AuthUserRepositoryAdapter.java → uses shared JpaUserRepository
-```
-
-**Infrastructure Sharing**: The adapter can import from user's infrastructure layer (e.g., `JpaUserRepository`, `UserEntity`) because:
-- Infrastructure is where integration naturally happens
-- Avoids duplicate JPA entities for the same table
-- Single source of truth for database schema
-- Proper handling of soft-delete filters, lifecycle callbacks, etc.
-
-```
-user module                              auth module
-───────────                              ───────────
-User (domain)                            AuthUser (domain)        ✅ Separate
-UserRepository (port)                    AuthUserRepository (port) ✅ Separate
-        │                                        │
-        └──► JpaUserRepository / UserEntity ◄────┘               ✅ Shared in infrastructure
-```
-
-This ensures:
-- Modules evolve independently at domain/application layers
-- Each module owns its domain model
-- No duplicate persistence entities for the same table
-
-## TDD Workflow
-
-1. **Write the failing test first** - Define expected behavior
-2. **Make it pass** - Minimum code to satisfy the test
-3. **Refactor** - Clean up while keeping tests green
-
-### Test Conventions
-- Test class: `{ClassName}Test`
-- Test method: `should{ExpectedBehavior}_When{Condition}`
-- Use `@ExtendWith(MockitoExtension.class)` for unit tests
-- Use `ArgumentCaptor` to verify domain objects passed to repositories
-- Use `verifyNoMoreInteractions()` to ensure no unexpected calls
+### Test conventions
+- Class: `{ClassName}Test`
+- Method: `should{ExpectedBehavior}_When{Condition}`
+- Unit tests: `@ExtendWith(MockitoExtension.class)`
+- Use `ArgumentCaptor` for domain objects passed to repositories
+- Use `verifyNoMoreInteractions()` to catch unexpected calls
 
 ## Commands
-
-```bash
-mvn test                           # Run all tests
-mvn test -pl services/identity-service  # Run tests for specific service
-mvn spotless:apply                 # Format code
-mvn verify                         # Full build with checks
-```
+- `mvn test`
+- `mvn test -pl services/identity-service`
+- `mvn spotless:apply`
+- `mvn verify`
 
 ## Services
+- identity-service (8082): users/auth/sessions
+- event-service (8081): events
+- api-gateway (8080): routing/JWT validation
+- eureka-server (8761): discovery
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| identity-service | 8082 | User registration, authentication, sessions |
-| event-service | 8081 | Event management |
-| api-gateway | 8080 | Routing, JWT validation |
-| eureka-server | 8761 | Service discovery |
-
-## See Also
-
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Detailed architecture guidelines
-- [docs/TESTING.md](docs/TESTING.md) - TDD patterns and examples
+## References (read when needed)
+- docs/ARCHITECTURE.md
+- docs/TESTING.md

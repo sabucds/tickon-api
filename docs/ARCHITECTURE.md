@@ -143,7 +143,7 @@ public abstract class AggregateRoot {
     }
 
     public List<DomainEvent> domainEvents() {
-        return Collections.unmodifiableList(domainEvents);
+        return new ArrayList<>(domainEvents);  // Defensive copy for safe event publishing
     }
 
     public void clearEvents() {
@@ -200,7 +200,7 @@ public record Email(String value) {
 ### Domain Exceptions
 
 ```java
-public class DuplicateEmailException extends DomainException {
+public class DuplicateEmailException extends IdentityDomainException {
     public DuplicateEmailException(String email) {
         super(ErrorCode.DUPLICATE_EMAIL, "Email already in use: " + email);
     }
@@ -334,6 +334,86 @@ public class UserController {
     }
 }
 ```
+
+## Bounded Context Communication
+
+Modules within a service (e.g., `auth` and `user`) are separate bounded contexts. Separation applies to **domain and application layers**, while **infrastructure can be shared**.
+
+### Layer-by-Layer Rules
+
+| Layer | Can Import From Other Module? | Reason |
+|-------|------------------------------|--------|
+| **Domain** | ❌ No | Each context owns its domain model |
+| **Application** | ❌ No | Ports/services are context-specific |
+| **Infrastructure** | ✅ Yes | Integration point, avoids duplication |
+
+### Example: Auth Accessing User Data
+
+```
+user module                              auth module
+───────────                              ───────────
+User (domain)                            AuthUser (domain)        ← Different models
+UserRepository (port)                    AuthUserRepository (port) ← Different ports
+UserRepositoryAdapter                    AuthUserRepositoryAdapter
+        │                                        │
+        └──────► JpaUserRepository ◄─────────────┘               ← Shared JPA repo
+                        │
+                   UserEntity                                     ← Single entity
+                        │
+                   [users table]
+```
+
+### Auth Module Implementation
+
+```java
+// auth/domain/AuthUser.java - Auth's own domain model (read-only projection)
+public class AuthUser {
+    private final UserId id;
+    private final PasswordHash passwordHash;
+    private final UserStatus status;
+    // Only fields auth cares about - no email, username, etc.
+}
+
+// auth/application/ports/out/AuthUserRepository.java - Auth's own port
+public interface AuthUserRepository {
+    Optional<AuthUser> findById(UserId id);
+    Optional<AuthUser> findByUsernameOrEmail(String usernameOrEmail);
+}
+
+// auth/infrastructure/persistence/AuthUserRepositoryAdapter.java
+@Repository
+public class AuthUserRepositoryAdapter implements AuthUserRepository {
+    private final JpaUserRepository jpaRepository;  // ✅ Shared from user's infrastructure
+
+    @Override
+    public Optional<AuthUser> findByUsernameOrEmail(String usernameOrEmail) {
+        return jpaRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+            .map(this::toAuthUser);  // Maps UserEntity → AuthUser
+    }
+
+    private AuthUser toAuthUser(UserEntity entity) {
+        return new AuthUser(
+            new UserId(entity.id),
+            new PasswordHash(entity.passwordHash),
+            UserStatus.valueOf(entity.status)
+        );
+    }
+}
+```
+
+### Why Share Infrastructure?
+
+1. **Single source of truth** - One JPA entity per table
+2. **Consistent behavior** - Soft-delete filters, lifecycle callbacks applied once
+3. **No Hibernate conflicts** - Avoids L2 cache issues with multiple entities
+4. **Easier maintenance** - Schema changes in one place
+
+### What NOT to Share
+
+- Domain entities (`User` vs `AuthUser`)
+- Application ports (`UserRepository` vs `AuthUserRepository`)
+- Application services
+- Domain events (unless explicitly designed for cross-context communication)
 
 ## Naming Conventions
 

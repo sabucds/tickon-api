@@ -1,0 +1,124 @@
+# CodeRabbit Configuration for Tickon API
+# Documentation: https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: en-US
+tone_instructions: "Be concise, technical, and focus on architectural patterns, security, and maintainability."
+
+reviews:
+  # Review settings
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+
+  # Path-based review rules
+  path_filters:
+    - "!**/target/**"
+    - "!**/.mvn/**"
+    - "!**/mvnw*"
+
+  path_instructions:
+    - path: "services/*/src/main/java/**/domain/**"
+      instructions: |
+        - Verify pure business logic with no framework dependencies
+        - Check for rich domain models (behavior, not just data)
+        - Ensure value objects are immutable
+        - Validate domain events are properly defined
+        - No infrastructure concerns (DB, HTTP, etc.)
+
+    - path: "services/*/src/main/java/**/application/**"
+      instructions: |
+        - Verify use cases orchestrate domain logic
+        - Check that ports (interfaces) are properly defined
+        - Ensure no direct infrastructure dependencies
+        - Validate command/query separation
+        - Review transaction boundaries
+
+    - path: "services/*/src/main/java/**/infrastructure/**"
+      instructions: |
+        - Check adapters implement application ports
+        - Verify proper exception handling and mapping
+        - Review configuration and dependency injection
+        - Ensure no domain logic leaks into infrastructure
+        - Validate database migrations if present
+
+    - path: "services/*/src/test/**"
+      instructions: |
+        - Verify tests follow TDD principles
+        - Check unit tests don't require infrastructure
+        - Validate integration tests use proper test containers
+        - Review test naming and clarity
+        - Ensure edge cases are covered
+
+# Architecture-specific checks
+checks:
+  # Security concerns
+  - name: "Security vulnerabilities"
+    enabled: true
+
+  # Code quality
+  - name: "Code duplication"
+    enabled: true
+
+  - name: "Test coverage"
+    enabled: true
+
+  - name: "Code complexity"
+    enabled: true
+
+# Custom review instructions
+custom_review_instructions: |
+  ## Architecture Rules (Hexagonal + DDD)
+
+  ### Layer Dependencies (must point inward only)
+  - Domain layer: NO external dependencies (frameworks, libraries)
+  - Application layer: May depend on domain, defines ports (interfaces)
+  - Infrastructure layer: Implements ports, depends on application & domain
+
+  ### Module Isolation
+  - Services contain bounded contexts that MUST be isolated
+  - No compile-time dependencies between modules within a service
+  - Communication via QueryBus (sync, read-only) or Domain Events (async)
+
+  ### Code Style
+  - Project uses Spotless with Google Java Format
+  - All code should be formatted before committing
+  - Follow existing conventions in the codebase
+
+  ### Testing Requirements
+  - TDD is mandatory: tests should be written first
+  - Unit tests: Domain and application logic (no infrastructure)
+  - Integration tests: Infrastructure adapters (use Testcontainers)
+  - E2E tests: Full service workflows
+
+  ### Security Concerns
+  - Review authentication and authorization logic carefully
+  - Check for SQL injection, XSS, and other OWASP Top 10 vulnerabilities
+  - Validate input at API boundaries
+  - Ensure sensitive data is not logged
+
+  ### Specific Patterns to Check
+  - Domain entities should have behavior, not just getters/setters
+  - Value objects must be immutable
+  - Use cases should orchestrate, not contain business logic
+  - Repository interfaces belong in application layer
+  - Adapters should translate between external and internal models
+
+  ### Red Flags
+  - Infrastructure dependencies in domain layer
+  - Direct module-to-module calls (should use QueryBus or events)
+  - Business logic in controllers or adapters
+  - Missing tests for new functionality
+  - Mutable value objects
+  - Transaction management in domain layer
+
+# Chat settings
+chat:
+  auto_reply: true

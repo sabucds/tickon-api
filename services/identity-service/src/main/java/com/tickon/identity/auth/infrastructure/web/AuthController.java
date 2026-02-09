@@ -1,9 +1,11 @@
 package com.tickon.identity.auth.infrastructure.web;
 
 import com.tickon.identity.auth.application.ports.in.LoginUseCase;
+import com.tickon.identity.auth.application.ports.in.LogoutUseCase;
 import com.tickon.identity.auth.application.ports.in.RefreshTokenUseCase;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginResponse;
+import com.tickon.identity.auth.infrastructure.web.dto.LogoutRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.RefreshTokenRequest;
 import com.tickon.identity.auth.infrastructure.web.mappers.LoginMapper;
 import jakarta.validation.Valid;
@@ -20,10 +22,12 @@ public class AuthController {
 
   private final LoginUseCase loginUser;
   private final RefreshTokenUseCase refreshToken;
+  private final LogoutUseCase logoutUser;
 
-  AuthController(LoginUseCase loginUser, RefreshTokenUseCase refreshToken) {
+  AuthController(LoginUseCase loginUser, RefreshTokenUseCase refreshToken, LogoutUseCase logoutUser) {
     this.loginUser = loginUser;
     this.refreshToken = refreshToken;
+    this.logoutUser = logoutUser;
   }
 
   @ResponseStatus(HttpStatus.OK)
@@ -38,6 +42,12 @@ public class AuthController {
   public LoginResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
     var appResponse = refreshToken.refresh(LoginMapper.toRefreshTokenCommand(request));
     return LoginMapper.toLoginResponse(appResponse);
+  }
+
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PostMapping("/logout")
+  public void logout(@Valid @RequestBody LogoutRequest request) {
+    logoutUser.logout(LoginMapper.toLogoutCommand(request));
   }
 
 }

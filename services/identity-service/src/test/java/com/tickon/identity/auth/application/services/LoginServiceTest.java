@@ -8,6 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.domain.DomainEvent;
+import com.tickon.common.queries.QueryBus;
+import com.tickon.common.queries.QueryResult;
 import com.tickon.identity.auth.application.dto.LoginCommand;
 import com.tickon.identity.auth.application.dto.LoginResult;
 import com.tickon.identity.auth.application.ports.out.PasswordHasher;
@@ -20,8 +22,6 @@ import com.tickon.identity.auth.domain.events.SessionCreatedEvent;
 import com.tickon.identity.auth.domain.exceptions.InvalidCredentialsException;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.shared.AuthTestFixtures;
-import com.tickon.common.queries.QueryBus;
-import com.tickon.common.queries.QueryResult;
 import com.tickon.identity.shared.contracts.queries.GetUserByUsernameOrEmailQuery;
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;
@@ -127,8 +127,7 @@ class LoginServiceTest {
 
   private void stubUserFound(AuthUser user) {
     UserAuthDataDTO dto = new UserAuthDataDTO(user.id().value(), user.passwordHash().value(), user.status().name());
-    when(queryBus.execute(any(GetUserByUsernameOrEmailQuery.class)))
-        .thenReturn(new QueryResult.Success<>(dto));
+    when(queryBus.execute(any(GetUserByUsernameOrEmailQuery.class))).thenReturn(new QueryResult.Success<>(dto));
   }
 
   private void stubValidPassword(String raw, AuthUser user) {

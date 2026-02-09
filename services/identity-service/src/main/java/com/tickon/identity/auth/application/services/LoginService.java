@@ -1,5 +1,6 @@
 package com.tickon.identity.auth.application.services;
 
+import com.tickon.common.queries.QueryBus;
 import com.tickon.identity.auth.application.dto.*;
 import com.tickon.identity.auth.application.ports.in.LoginUseCase;
 import com.tickon.identity.auth.application.ports.out.*;
@@ -7,7 +8,6 @@ import com.tickon.identity.auth.domain.AuthUser;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.exceptions.InvalidCredentialsException;
 import com.tickon.identity.auth.domain.valueobjects.*;
-import com.tickon.common.queries.QueryBus;
 import com.tickon.identity.shared.contracts.queries.GetUserByUsernameOrEmailQuery;
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;

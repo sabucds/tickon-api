@@ -10,6 +10,8 @@ import static org.mockito.Mockito.when;
 
 import com.tickon.common.domain.DomainEvent;
 import com.tickon.common.identity.domain.valueobjects.UserId;
+import com.tickon.common.queries.QueryBus;
+import com.tickon.common.queries.QueryResult;
 import com.tickon.identity.auth.application.dto.LoginResult;
 import com.tickon.identity.auth.application.dto.RefreshTokenCommand;
 import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
@@ -25,8 +27,6 @@ import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.auth.shared.AuthTestFixtures;
-import com.tickon.common.queries.QueryBus;
-import com.tickon.common.queries.QueryResult;
 import com.tickon.identity.shared.contracts.queries.GetUserAuthDataQuery;
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;
@@ -138,8 +138,7 @@ class RefreshTokenServiceTest {
     Session session = createValidSession(user);
     stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
     stubSessionFound(REFRESH_TOKEN_HASH, session);
-    when(queryBus.execute(any(GetUserAuthDataQuery.class)))
-        .thenReturn(new QueryResult.NotFound<>());
+    when(queryBus.execute(any(GetUserAuthDataQuery.class))).thenReturn(new QueryResult.NotFound<>());
 
     assertThatThrownBy(() -> refreshTokenService.refresh(new RefreshTokenCommand(REFRESH_TOKEN)))
         .isInstanceOf(InvalidRefreshTokenException.class).hasMessageContaining("Invalid refresh token");
@@ -231,8 +230,7 @@ class RefreshTokenServiceTest {
 
   private void stubUserFound(AuthUser user) {
     UserAuthDataDTO dto = new UserAuthDataDTO(user.id().value(), user.passwordHash().value(), user.status().name());
-    when(queryBus.execute(any(GetUserAuthDataQuery.class)))
-        .thenReturn(new QueryResult.Success<>(dto));
+    when(queryBus.execute(any(GetUserAuthDataQuery.class))).thenReturn(new QueryResult.Success<>(dto));
   }
 
   private void stubNewTokens(AuthUser user) {

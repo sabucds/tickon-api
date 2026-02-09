@@ -11,7 +11,7 @@ tickon-api/
 │   ├── eureka-server/        # Service discovery server
 │   ├── api-gateway/          # API Gateway (port 8080)
 │   ├── event-service/        # Event management service (port 8081)
-│   └── Identity-service/         # Identity management service (port 8082)
+│   └── identity-service/         # Identity management service (port 8082)
 ├── docker-compose.yml        # Docker compose for local development
 ├── prometheus.yml            # Prometheus configuration
 └── pom.xml                   # Parent POM
@@ -84,4 +84,4 @@ Each service can be developed independently. The common module contains shared m
 
 - Actuator endpoints exposed for health checks
 - Prometheus metrics available at `/actuator/prometheus`
-- Grafana dashboards for visualization# tickon-api
+- Grafana dashboards for visualization

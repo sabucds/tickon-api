@@ -1,0 +1,7 @@
+package com.tickon.identity.auth.infrastructure.web.dto;
+
+import jakarta.validation.constraints.NotBlank;
+
+public record LoginRequest(@NotBlank(message = "Username or email is required") String usernameOrEmail,
+    @NotBlank(message = "Password is required") String password,
+    @NotBlank(message = "Device ID is required") String deviceId) {}

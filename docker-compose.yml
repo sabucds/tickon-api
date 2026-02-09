@@ -1,0 +1,188 @@
+services:
+  # PostgreSQL databases
+  postgres-events:
+    image: postgres:15-alpine
+    container_name: tickon-postgres-events
+    environment:
+      POSTGRES_DB: tickon_events
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-events-data:/var/lib/postgresql/data
+    networks:
+      - tickon-network
+
+  postgres-identity:
+    image: postgres:15-alpine
+    container_name: tickon-postgres-identity
+    environment:
+      POSTGRES_DB: tickon_identity
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-identity-data:/var/lib/postgresql/data
+    networks:
+      - tickon-network
+
+  # Eureka Server
+  eureka-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        SERVICE_PATH: services/eureka-server
+    container_name: tickon-eureka
+    develop:
+      watch:
+        - action: rebuild
+          path: services/eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_DEVTOOLS_RESTART_ENABLED: true
+      SERVICE_NAME: eureka-server
+    volumes:
+      - .:/workspace
+      - ./services/eureka-server:/app
+      - maven-cache:/root/.m2/repository
+    networks:
+      - tickon-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        SERVICE_PATH: services/api-gateway
+    container_name: tickon-gateway
+    develop:
+      watch:
+        - action: rebuild
+          path: services/api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DEVTOOLS_RESTART_ENABLED: true
+      SERVICE_NAME: api-gateway
+      SECURITY_JWT_PUBLIC_KEY: ${SECURITY_JWT_PUBLIC_KEY:-}
+    volumes:
+      - .:/workspace
+      - ./services/api-gateway:/app
+      - maven-cache:/root/.m2/repository
+    depends_on:
+      - eureka-server
+    networks:
+      - tickon-network
+
+  # Event Service
+  event-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        SERVICE_PATH: services/event-service
+    container_name: tickon-event-service
+    develop:
+      watch:
+        - action: rebuild
+          path: services/event-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-events:5432/tickon_events
+      SPRING_DEVTOOLS_RESTART_ENABLED: true
+      SERVICE_NAME: event-service
+    volumes:
+      - .:/workspace
+      - ./services/event-service:/app
+      - maven-cache:/root/.m2/repository
+    depends_on:
+      - postgres-events
+      - eureka-server
+    networks:
+      - tickon-network
+
+  # Identity Service
+  identity-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        SERVICE_PATH: services/identity-service
+    container_name: tickon-identity-service
+    develop:
+      watch:
+        - action: rebuild
+          path: services/identity-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-identity:5432/tickon_identity
+      SPRING_DEVTOOLS_RESTART_ENABLED: true
+      SERVICE_NAME: identity-service
+      SECURITY_JWT_PRIVATE_KEY: ${SECURITY_JWT_PRIVATE_KEY:-}
+      SECURITY_JWT_PUBLIC_KEY: ${SECURITY_JWT_PUBLIC_KEY:-}
+      REFRESH_TOKEN_PEPPER: ${REFRESH_TOKEN_PEPPER:-}
+    volumes:
+      - .:/workspace
+      - ./services/identity-service:/app
+      - maven-cache:/root/.m2/repository
+    depends_on:
+      - postgres-identity
+      - eureka-server
+    networks:
+      - tickon-network
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tickon-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    networks:
+      - tickon-network
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: tickon-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - tickon-network
+
+volumes:
+  postgres-events-data:
+  postgres-identity-data:
+  prometheus-data:
+  grafana-data:
+  maven-cache:
+
+networks:
+  tickon-network:
+    driver: bridge

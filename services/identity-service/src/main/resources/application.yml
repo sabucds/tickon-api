@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: identity-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tickon_identity
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true    # useful when introducing Flyway into an existing DB
+    locations: classpath:db/migration,classpath:db/changelog
+    table: flyway_schema_history
+    placeholder-replacement: true
+    placeholders:
+      schemaName: tickon_identity_schema
+    clean-disabled: true 
+
+server:
+  port: 8082
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka
+  instance:
+    hostname: identity-service
+    prefer-ip-address: false
+    instance-id: ${spring.application.name}:${random.value}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+security:
+  jwt:
+    private-key: "${SECURITY_JWT_PRIVATE_KEY:}"
+    public-key: "${SECURITY_JWT_PUBLIC_KEY:}"
+    access-token-expiration-ms: 900000 
+    session-expiration-ms: 1209600000 # 14 days
+    issuer: tickon-identity
+    refresh-token-pepper: "${REFRESH_TOKEN_PEPPER:}"
+
+springdoc:
+  swagger-ui:
+    operations-sorter: method
+    config-url: /api/identity/v3/api-docs/swagger-config
+    url: /api/identity/v3/api-docs
+    disable-swagger-default-url: true

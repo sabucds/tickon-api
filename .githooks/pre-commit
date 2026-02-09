@@ -1,0 +1,6 @@
+#!/bin/sh
+# Format code before commit
+echo "Running Spotless formatting..."
+./mvnw spotless:apply
+git add -u
+echo "Code formatted successfully!"

@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: identity-swagger-docs
+          uri: no://op
+          predicates:
+            - Path=/api/identity/docs,/api/identity/docs/**
+          filters:
+            - RedirectTo=302,/api/identity/swagger-ui/index.html
+        - id: event-service
+          uri: lb://EVENT-SERVICE
+          predicates:
+            - Path=/api/events/**
+          filters:
+            - RewritePath=/api/events/(?<segment>.*), /${segment}
+        - id: identity-service
+          uri: lb://IDENTITY-SERVICE
+          predicates:
+            - Path=/api/identity/**
+          filters:
+            - RewritePath=/api/identity/(?<segment>.*), /${segment}
+      discovery:
+        locator:
+          enabled: false
+
+server:
+  port: 8080
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka
+  instance:
+    hostname: api-gateway
+    prefer-ip-address: false
+    instance-id: ${spring.application.name}:${random.value}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+
+security:
+  jwt:
+    public-key: "${SECURITY_JWT_PUBLIC_KEY:}"

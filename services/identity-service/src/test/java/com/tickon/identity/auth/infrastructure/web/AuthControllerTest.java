@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tickon.identity.auth.application.dto.LoginCommand;
 import com.tickon.identity.auth.application.dto.LoginResult;
 import com.tickon.identity.auth.application.ports.in.LoginUseCase;
+import com.tickon.identity.auth.application.ports.in.RefreshTokenUseCase;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ class AuthControllerTest {
 
   @MockBean
   private LoginUseCase loginUseCase;
+
+  @MockBean
+  private RefreshTokenUseCase refreshTokenUseCase;
 
   @Test
   void shouldLoginAndReturnTokens_WhenValidRequest() throws Exception {

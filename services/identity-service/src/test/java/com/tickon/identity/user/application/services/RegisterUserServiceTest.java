@@ -7,18 +7,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.tickon.common.domain.DomainEvent;
+import com.tickon.common.identity.domain.valueobjects.PasswordHash;
+import com.tickon.identity.shared.ports.out.DomainEventPublisher;
 import com.tickon.identity.user.application.dto.RegisterUserCommand;
 import com.tickon.identity.user.application.dto.UserResult;
 import com.tickon.identity.user.application.ports.out.PasswordHasher;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
+import com.tickon.identity.user.domain.events.UserCreatedEvent;
 import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
 import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
 import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
 import com.tickon.identity.user.domain.valueobjects.Email;
-import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.Username;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +39,9 @@ class RegisterUserServiceTest {
   @Mock
   private PasswordHasher passwordHasher;
 
+  @Mock
+  private DomainEventPublisher eventPublisher;
+
   private PasswordStrengthPolicy passwordPolicy;
 
   private RegisterUserService registerUser;
@@ -42,7 +49,7 @@ class RegisterUserServiceTest {
   @BeforeEach
   void setUp() {
     passwordPolicy = new PasswordStrengthPolicy();
-    registerUser = new RegisterUserService(userRepository, passwordHasher, passwordPolicy);
+    registerUser = new RegisterUserService(userRepository, passwordHasher, passwordPolicy, eventPublisher);
   }
 
   @Test
@@ -75,6 +82,13 @@ class RegisterUserServiceTest {
     assertThat(savedUser.lastName()).isEqualTo("Doe");
     assertThat(savedUser.passwordHash()).isEqualTo(hashedPassword);
 
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<List<DomainEvent>> eventsCaptor = ArgumentCaptor.forClass(List.class);
+    verify(eventPublisher).publishAll(eventsCaptor.capture());
+
+    List<DomainEvent> publishedEvents = eventsCaptor.getValue();
+    assertThat(publishedEvents).hasSize(1);
+    assertThat(publishedEvents.get(0)).isInstanceOf(UserCreatedEvent.class);
   }
 
   @Test
@@ -86,7 +100,7 @@ class RegisterUserServiceTest {
     assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(DuplicateEmailException.class)
         .hasMessage("Email already in use: john@example.com");
     verify(userRepository).existsByEmail(any(Email.class));
-    verifyNoMoreInteractions(userRepository, passwordHasher);
+    verifyNoMoreInteractions(userRepository, passwordHasher, eventPublisher);
   }
 
   @Test
@@ -100,7 +114,7 @@ class RegisterUserServiceTest {
         .hasMessage("Username already in use: john_doe");
     verify(userRepository).existsByEmail(any(Email.class));
     verify(userRepository).existsByUsername(any(Username.class));
-    verifyNoMoreInteractions(userRepository, passwordHasher);
+    verifyNoMoreInteractions(userRepository, passwordHasher, eventPublisher);
   }
 
   @Test

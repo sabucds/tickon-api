@@ -101,7 +101,7 @@ jobs:
           cache: "maven"
 
       - name: Validate architecture boundaries
-        run: mvn enforcer:enforce -B
+        run: mvn validate -B
         continue-on-error: false
 
       - name: Check for cross-module dependencies

@@ -1,6 +1,8 @@
 package com.tickon.identity.auth.infrastructure.web;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -9,9 +11,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tickon.identity.auth.application.dto.LoginCommand;
 import com.tickon.identity.auth.application.dto.LoginResult;
+import com.tickon.identity.auth.application.dto.LogoutCommand;
 import com.tickon.identity.auth.application.ports.in.LoginUseCase;
+import com.tickon.identity.auth.application.ports.in.LogoutUseCase;
 import com.tickon.identity.auth.application.ports.in.RefreshTokenUseCase;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginRequest;
+import com.tickon.identity.auth.infrastructure.web.dto.LogoutRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,6 +41,9 @@ class AuthControllerTest {
   @MockBean
   private RefreshTokenUseCase refreshTokenUseCase;
 
+  @MockBean
+  private LogoutUseCase logoutUseCase;
+
   @Test
   void shouldLoginAndReturnTokens_WhenValidRequest() throws Exception {
     LoginRequest request = new LoginRequest("john@example.com", "plain-password", "device-123");
@@ -56,5 +64,25 @@ class AuthControllerTest {
 
     mockMvc.perform(post("/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request))).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void shouldReturnNoContent_WhenValidLogoutRequest() throws Exception {
+    LogoutRequest request = new LogoutRequest("valid-refresh-token");
+
+    mockMvc.perform(post("/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request))).andExpect(status().isNoContent());
+
+    verify(logoutUseCase).logout(any(LogoutCommand.class));
+  }
+
+  @Test
+  void shouldReturnBadRequest_WhenLogoutRequestIsInvalid() throws Exception {
+    LogoutRequest request = new LogoutRequest("");
+
+    mockMvc.perform(post("/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request))).andExpect(status().isBadRequest());
+
+    verify(logoutUseCase, never()).logout(any(LogoutCommand.class));
   }
 }

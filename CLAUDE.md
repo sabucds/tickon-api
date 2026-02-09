@@ -1,111 +1,45 @@
-# Tickon API - Claude Context
+# Tickon API — Claude Context
 
-Ticket booking microservice platform built with Spring Boot 3, Java 21, and PostgreSQL.
+This document is a high-level summary for developers. For detailed guides, see the `docs/` directory.
 
-## Architecture
+## Workflow: How to Approach Tasks
 
-**Hexagonal Architecture** with strict layer separation:
+**For ANY non-trivial task, follow this workflow:**
 
-```
-domain/           → Entities, Value Objects, Domain Exceptions, Policies
-application/      → Use Cases (ports/in), Repository interfaces (ports/out), DTOs, Services
-infrastructure/   → Controllers, Persistence Adapters, Security implementations
-```
+1. **Research** - Read relevant files to understand the current implementation. Use `@` mentions to reference specific files if needed.
+2. **Plan** - Propose a clear, step-by-step plan. Consider edge cases. Wait for approval before implementing.
+3. **Implement** - Use TDD: write failing tests first, then implement to pass them.
+4. **Validate** - Run `mvn clean verify` to ensure tests pass and code style is correct.
 
-**Dependency Rule**: Dependencies point inward. Infrastructure → Application → Domain.
+**TDD is mandatory**: Always write tests before implementation. Tests define the contract and provide a verifiable target.
 
-## Key Patterns
+**Context management**: Use `/clear` when switching to a new logical task. Keep context focused on the current work.
 
-### Domain Layer
-- **Aggregates**: Extend `AggregateRoot`, private constructor, `create()` for new entities (registers events), `restore()` for persistence (no events)
-- **Value Objects**: Java records with validation in compact constructor
-- **Domain Events**: Records implementing `DomainEvent`, named `{Entity}{Action}Event`
-- **Exceptions**: Extend `DomainException` with `ErrorCode`
+**Edge cases**: During planning, articulate potential edge cases (null values, invalid states, concurrency issues, boundary conditions).
 
-### Application Layer
-- **Use Cases**: One interface per operation (e.g., `RegisterUserUseCase`)
-- **Services**: Implement use cases, orchestrate domain objects, publish domain events
-- **DTOs**: `*Command` for input, `*Result` for output
-- **Output Ports**: `DomainEventPublisher` for event publishing
+**For guidance on specific topics, read these docs BEFORE starting work:**
+- Architecture patterns & module boundaries → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- Testing strategy by layer → [docs/TESTING.md](docs/TESTING.md)
+- Detailed workflow, git conventions, commit format → [docs/WORKFLOW.md](docs/WORKFLOW.md)
 
-### Infrastructure Layer
-- **Adapters**: Implement port interfaces (e.g., `UserRepositoryAdapter implements UserRepository`)
-- **Mappers**: `toDomain()` and `toEntity()` methods
-- **Controllers**: Thin, delegate to use cases immediately
+## Architecture (Hexagonal + DDD)
 
-## Bounded Contexts
+**Layers (dependency points inward):**
+- `domain/` → Business rules, entities, value objects. No frameworks.
+- `application/` → Use case orchestration, ports (interfaces).
+- `infrastructure/` → Frameworks, adapters (DB, web), configuration.
 
-Modules within a service (e.g., `auth` and `user` in `identity-service`) are **separate bounded contexts**. They must not import from each other's domain or application layers.
+**Key principle:** Services contain multiple internal modules (Bounded Contexts). Modules are isolated - no compile-time dependencies between modules. Communication via QueryBus (sync, read-only) or Domain Events (async).
 
-**Rule**: If module A needs data from module B:
-1. Module A defines its own **port interface** (application layer)
-2. Module A defines its own **domain representation** (domain layer)
-3. The **infrastructure layer can share** persistence entities (JPA entities, etc.)
+## Essential Commands
 
-```
-❌ Wrong: auth imports from user's domain/application layers
-   auth/application/services/LoginService.java
-   └── import com.tickon.identity.user.application.ports.out.UserRepository;
-   └── import com.tickon.identity.user.domain.User;
-
-✅ Correct: auth defines its own port and domain model
-   auth/application/ports/out/AuthUserRepository.java  → auth's own interface
-   auth/domain/AuthUser.java                           → auth's view of user data (read-only projection)
-   auth/infrastructure/persistence/AuthUserRepositoryAdapter.java → uses shared JpaUserRepository
-```
-
-**Infrastructure Sharing**: The adapter can import from user's infrastructure layer (e.g., `JpaUserRepository`, `UserEntity`) because:
-- Infrastructure is where integration naturally happens
-- Avoids duplicate JPA entities for the same table
-- Single source of truth for database schema
-- Proper handling of soft-delete filters, lifecycle callbacks, etc.
-
-```
-user module                              auth module
-───────────                              ───────────
-User (domain)                            AuthUser (domain)        ✅ Separate
-UserRepository (port)                    AuthUserRepository (port) ✅ Separate
-        │                                        │
-        └──► JpaUserRepository / UserEntity ◄────┘               ✅ Shared in infrastructure
-```
-
-This ensures:
-- Modules evolve independently at domain/application layers
-- Each module owns its domain model
-- No duplicate persistence entities for the same table
-
-## TDD Workflow
-
-1. **Write the failing test first** - Define expected behavior
-2. **Make it pass** - Minimum code to satisfy the test
-3. **Refactor** - Clean up while keeping tests green
-
-### Test Conventions
-- Test class: `{ClassName}Test`
-- Test method: `should{ExpectedBehavior}_When{Condition}`
-- Use `@ExtendWith(MockitoExtension.class)` for unit tests
-- Use `ArgumentCaptor` to verify domain objects passed to repositories
-- Use `verifyNoMoreInteractions()` to ensure no unexpected calls
-
-## Commands
-
-```bash
-mvn test                           # Run all tests
-mvn test -pl services/identity-service  # Run tests for specific service
-mvn spotless:apply                 # Format code
-mvn verify                         # Full build with checks
-```
+- `mvn clean verify` - Run all tests and style checks. Use this to validate your changes.
+- `mvn spotless:apply` - Auto-format code. Run before committing.
+- `mvn test -pl services/identity-service` - Run tests for a specific service.
 
 ## Services
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| identity-service | 8082 | User registration, authentication, sessions |
-| event-service | 8081 | Event management |
-| api-gateway | 8080 | Routing, JWT validation |
-| eureka-server | 8761 | Service discovery |
-
-## See Also
-
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Detailed architecture guidelines
-- [docs/TESTING.md](docs/TESTING.md) - TDD patterns and examples
+- `identity-service` (8082): User management, authentication, and sessions.
+- `event-service` (8081): Event creation and management.
+- `api-gateway` (8080): Public-facing entry point, routing, and JWT validation.
+- `eureka-server` (8761): Service discovery.

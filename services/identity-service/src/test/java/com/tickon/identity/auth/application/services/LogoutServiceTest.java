@@ -1,0 +1,156 @@
+package com.tickon.identity.auth.application.services;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.tickon.common.domain.DomainEvent;
+import com.tickon.common.identity.domain.valueobjects.UserId;
+import com.tickon.identity.auth.application.dto.LogoutCommand;
+import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
+import com.tickon.identity.auth.application.ports.out.SessionRepository;
+import com.tickon.identity.auth.domain.AuthUser;
+import com.tickon.identity.auth.domain.Session;
+import com.tickon.identity.auth.domain.events.SessionRevokedEvent;
+import com.tickon.identity.auth.domain.valueobjects.FamilyId;
+import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
+import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
+import com.tickon.identity.auth.domain.valueobjects.SessionId;
+import com.tickon.identity.auth.shared.AuthTestFixtures;
+import com.tickon.identity.shared.ports.out.DomainEventPublisher;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class LogoutServiceTest {
+
+  @Mock
+  private SessionRepository sessionRepository;
+  @Mock
+  private RefreshTokenHasher refreshTokenHasher;
+  @Mock
+  private DomainEventPublisher eventPublisher;
+
+  private LogoutService logoutService;
+
+  private final Instant fixedInstant = Instant.parse("2024-01-01T10:00:00Z");
+  private final Clock fixedClock = Clock.fixed(fixedInstant, ZoneOffset.UTC);
+  private final Duration sessionDuration = Duration.ofDays(14);
+
+  private static final UserId USER_ID = UserId.generate();
+  private static final String REFRESH_TOKEN = "refresh-token";
+  private static final String REFRESH_TOKEN_HASH = "hashed-refresh-token";
+
+  @BeforeEach
+  void setUp() {
+    logoutService = new LogoutService(sessionRepository, refreshTokenHasher, fixedClock, eventPublisher);
+  }
+
+  @Test
+  void shouldRevokeSession_WhenValidRefreshToken() {
+    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
+    Session session = createValidSession(user);
+    stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
+    stubSessionFound(REFRESH_TOKEN_HASH, session);
+
+    logoutService.logout(new LogoutCommand(REFRESH_TOKEN));
+
+    ArgumentCaptor<Session> sessionCaptor = ArgumentCaptor.forClass(Session.class);
+    verify(sessionRepository).save(sessionCaptor.capture());
+
+    Session savedSession = sessionCaptor.getValue();
+    assertThat(savedSession.isRevoked()).isTrue();
+    assertThat(savedSession.revokeReason()).isEqualTo(RevokeReason.USER_LOGOUT);
+    assertThat(savedSession.revokedAt()).isEqualTo(fixedInstant);
+  }
+
+  @Test
+  void shouldNotThrowException_WhenRefreshTokenNotFound() {
+    stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
+    when(sessionRepository.findByRefreshTokenHash(REFRESH_TOKEN_HASH)).thenReturn(Optional.empty());
+
+    logoutService.logout(new LogoutCommand(REFRESH_TOKEN));
+
+    verify(sessionRepository, never()).save(any());
+    verify(eventPublisher, never()).publishAll(any());
+  }
+
+  @Test
+  void shouldNotThrowException_WhenSessionAlreadyRevoked() {
+    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
+    Session session = createRevokedSession(user);
+    stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
+    stubSessionFound(REFRESH_TOKEN_HASH, session);
+
+    logoutService.logout(new LogoutCommand(REFRESH_TOKEN));
+
+    verify(sessionRepository, never()).save(any());
+    verify(eventPublisher, never()).publishAll(any());
+  }
+
+  @Test
+  void shouldHashRefreshToken_BeforeLookup() {
+    stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
+    when(sessionRepository.findByRefreshTokenHash(REFRESH_TOKEN_HASH)).thenReturn(Optional.empty());
+
+    logoutService.logout(new LogoutCommand(REFRESH_TOKEN));
+
+    verify(refreshTokenHasher).hash(REFRESH_TOKEN);
+    verify(sessionRepository).findByRefreshTokenHash(REFRESH_TOKEN_HASH);
+  }
+
+  @Test
+  void shouldPublishSessionRevokedEvent_WhenSessionRevoked() {
+    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
+    Session session = createValidSession(user);
+    stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
+    stubSessionFound(REFRESH_TOKEN_HASH, session);
+
+    logoutService.logout(new LogoutCommand(REFRESH_TOKEN));
+
+    @SuppressWarnings("unchecked")
+    ArgumentCaptor<List<DomainEvent>> eventsCaptor = ArgumentCaptor.forClass(List.class);
+    verify(eventPublisher).publishAll(eventsCaptor.capture());
+
+    List<DomainEvent> events = eventsCaptor.getValue();
+    assertThat(events).hasSize(1);
+    assertThat(events.get(0)).isInstanceOf(SessionRevokedEvent.class);
+
+    SessionRevokedEvent event = (SessionRevokedEvent) events.get(0);
+    assertThat(event.reason()).isEqualTo(RevokeReason.USER_LOGOUT);
+  }
+
+  private Session createValidSession(AuthUser user) {
+    Session session = Session.create(SessionId.generate(), RefreshTokenHash.from(REFRESH_TOKEN_HASH), user.id(),
+        "device-123", FamilyId.generate(), null, sessionDuration, fixedInstant);
+    session.clearEvents();
+    return session;
+  }
+
+  private Session createRevokedSession(AuthUser user) {
+    Session session = createValidSession(user);
+    session.revoke(fixedInstant, RevokeReason.USER_LOGOUT);
+    session.clearEvents();
+    return session;
+  }
+
+  private void stubRefreshTokenHash(String token, String hash) {
+    when(refreshTokenHasher.hash(token)).thenReturn(RefreshTokenHash.from(hash));
+  }
+
+  private void stubSessionFound(String hash, Session session) {
+    when(sessionRepository.findByRefreshTokenHash(hash)).thenReturn(Optional.of(session));
+  }
+}

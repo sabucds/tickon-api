@@ -1,0 +1,114 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better analysis
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Verify code style with Spotless
+        run: mvn spotless:check
+        continue-on-error: false
+
+      - name: Run tests and verify
+        run: mvn clean verify -B
+        env:
+          MAVEN_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
+
+      - name: Generate JaCoCo coverage report
+        run: mvn jacoco:report-aggregate
+        if: always()
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            **/target/surefire-reports/
+            **/target/failsafe-reports/
+          retention-days: 7
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: |
+            **/target/site/jacoco/
+          retention-days: 7
+
+      - name: Comment test results on PR
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            **/target/surefire-reports/*.xml
+            **/target/failsafe-reports/*.xml
+          comment_title: '🧪 Test Results'
+          check_name: 'Test Results'
+
+      - name: Add coverage comment to PR
+        uses: madrapps/jacoco-report@v1.6.1
+        if: always()
+        with:
+          paths: |
+            ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 70
+          min-coverage-changed-files: 80
+          title: '📊 Code Coverage Report'
+          update-comment: true
+
+  architecture-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Validate architecture boundaries
+        run: mvn enforcer:enforce -B
+        continue-on-error: false
+
+      - name: Check for cross-module dependencies
+        run: |
+          echo "Checking for forbidden cross-service dependencies..."
+          if grep -r "com.example:identity-service\|com.example:event-service\|com.example:api-gateway" services/*/pom.xml; then
+            echo "❌ ERROR: Found forbidden cross-service dependencies!"
+            exit 1
+          else
+            echo "✅ No cross-service dependencies found"
+          fi

@@ -37,9 +37,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Test for LoginService using QueryBus for cross-module communication.
- */
 @ExtendWith(MockitoExtension.class)
 class LoginServiceTest {
 

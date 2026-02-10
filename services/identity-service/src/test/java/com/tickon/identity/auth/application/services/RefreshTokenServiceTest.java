@@ -43,9 +43,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Test for RefreshTokenService using QueryBus for cross-module communication.
- */
 @ExtendWith(MockitoExtension.class)
 class RefreshTokenServiceTest {
 

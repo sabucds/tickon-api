@@ -43,10 +43,13 @@ security:
   jwt:
     private-key: "${SECURITY_JWT_PRIVATE_KEY:}"
     public-key: "${SECURITY_JWT_PUBLIC_KEY:}"
-    access-token-expiration-ms: 900000 
+    access-token-expiration-ms: 900000
     session-expiration-ms: 1209600000 # 14 days
     issuer: tickon-identity
     refresh-token-pepper: "${REFRESH_TOKEN_PEPPER:}"
+  password-reset:
+    token-expiration-ms: 3600000  # 1 hour
+    token-pepper: "${PASSWORD_RESET_TOKEN_PEPPER:changeme-dev-only}"
 
 springdoc:
   swagger-ui:

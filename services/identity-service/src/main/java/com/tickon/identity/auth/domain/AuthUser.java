@@ -6,10 +6,6 @@ import com.tickon.common.identity.domain.valueobjects.UserStatus;
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
 import java.util.Objects;
 
-/**
- * Auth module's representation of a user for authentication purposes. This is a
- * simple value object constructed from query results.
- */
 public class AuthUser {
   private final UserId id;
   private PasswordHash passwordHash;
@@ -21,12 +17,6 @@ public class AuthUser {
     this.status = Objects.requireNonNull(status, "status");
   }
 
-  /**
-   * Create AuthUser from a DTO received via QueryBus.
-   *
-   * @param dto the DTO from user module
-   * @return AuthUser instance
-   */
   public static AuthUser fromDTO(UserAuthDataDTO dto) {
     return new AuthUser(new UserId(dto.id()), new PasswordHash(dto.passwordHash()), UserStatus.valueOf(dto.status()));
   }

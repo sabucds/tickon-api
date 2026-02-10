@@ -11,10 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-/**
- * Handler for GetUserAuthDataQuery. User module provides authentication data to
- * auth module via query bus.
- */
 @Component
 public class GetUserAuthDataQueryHandler implements QueryHandler<GetUserAuthDataQuery, UserAuthDataDTO> {
   private static final Logger log = LoggerFactory.getLogger(GetUserAuthDataQueryHandler.class);

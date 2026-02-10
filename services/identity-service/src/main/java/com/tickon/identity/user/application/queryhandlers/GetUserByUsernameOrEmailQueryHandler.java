@@ -10,10 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-/**
- * Handler for GetUserByUsernameOrEmailQuery. User module provides
- * authentication data to auth module via query bus.
- */
 @Component
 public class GetUserByUsernameOrEmailQueryHandler
     implements QueryHandler<GetUserByUsernameOrEmailQuery, UserAuthDataDTO> {

@@ -11,75 +11,63 @@ import com.tickon.common.queries.exceptions.QueryHandlerNotFoundException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit tests for SpringQueryBus. Tests handler registration, query execution,
- * error handling, and validation.
- */
 class SpringQueryBusTest {
 
   @Test
   void shouldExecuteQuery_WhenHandlerExists() {
-    // Given
+
     TestQuery query = new TestQuery("test-param");
     TestQueryHandler handler = new TestQueryHandler("test-result");
     SpringQueryBus queryBus = new SpringQueryBus(List.of(handler));
 
-    // When
     QueryResult<String> result = queryBus.execute(query);
 
-    // Then
     assertThat(result).isInstanceOf(QueryResult.Success.class);
     assertThat(result.toOptional()).hasValue("test-result");
   }
 
   @Test
   void shouldReturnNotFound_WhenHandlerReturnsNotFound() {
-    // Given
+
     TestQuery query = new TestQuery("test-param");
-    TestQueryHandler handler = new TestQueryHandler((String) null); // Returns NotFound
+    TestQueryHandler handler = new TestQueryHandler((String) null);
     SpringQueryBus queryBus = new SpringQueryBus(List.of(handler));
 
-    // When
     QueryResult<String> result = queryBus.execute(query);
 
-    // Then
     assertThat(result).isInstanceOf(QueryResult.NotFound.class);
     assertThat(result.toOptional()).isEmpty();
   }
 
   @Test
   void shouldReturnError_WhenHandlerReturnsError() {
-    // Given
+
     TestQuery query = new TestQuery("test-param");
     TestQueryHandler handler = new TestQueryHandler(new RuntimeException("test-error"));
     SpringQueryBus queryBus = new SpringQueryBus(List.of(handler));
 
-    // When
     QueryResult<String> result = queryBus.execute(query);
 
-    // Then
     assertThat(result).isInstanceOf(QueryResult.Error.class);
     assertThat(result.isError()).isTrue();
   }
 
   @Test
   void shouldThrowException_WhenNoHandlerRegistered() {
-    // Given
+
     TestQuery query = new TestQuery("test-param");
     SpringQueryBus queryBus = new SpringQueryBus(List.of());
 
-    // When & Then
     assertThatThrownBy(() -> queryBus.execute(query)).isInstanceOf(QueryHandlerNotFoundException.class)
         .hasMessageContaining("No handler registered for query").hasMessageContaining("TestQuery");
   }
 
   @Test
   void shouldThrowException_WhenDuplicateHandlersRegistered() {
-    // Given
+
     TestQueryHandler handler1 = new TestQueryHandler("result1");
     TestQueryHandler handler2 = new TestQueryHandler("result2");
 
-    // When & Then
     assertThatThrownBy(() -> new SpringQueryBus(List.of(handler1, handler2))).isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("Multiple handlers registered").hasMessageContaining("TestQuery")
         .hasMessageContaining("TestQueryHandler");
@@ -87,16 +75,14 @@ class SpringQueryBusTest {
 
   @Test
   void shouldRegisterMultipleHandlers_ForDifferentQueries() {
-    // Given
+
     TestQueryHandler handler1 = new TestQueryHandler("result1");
     AnotherTestQueryHandler handler2 = new AnotherTestQueryHandler(42);
     SpringQueryBus queryBus = new SpringQueryBus(List.of(handler1, handler2));
 
-    // When
     QueryResult<String> result1 = queryBus.execute(new TestQuery("param"));
     QueryResult<Integer> result2 = queryBus.execute(new AnotherTestQuery("param"));
 
-    // Then
     assertThat(queryBus.getHandlerCount()).isEqualTo(2);
     assertThat(result1.toOptional()).hasValue("result1");
     assertThat(result2.toOptional()).hasValue(42);
@@ -104,32 +90,27 @@ class SpringQueryBusTest {
 
   @Test
   void shouldWrapUnexpectedExceptions_InQueryExecutionException() {
-    // Given
+
     TestQuery query = new TestQuery("test-param");
     FailingQueryHandler handler = new FailingQueryHandler();
     SpringQueryBus queryBus = new SpringQueryBus(List.of(handler));
 
-    // When & Then
     assertThatThrownBy(() -> queryBus.execute(query)).isInstanceOf(QueryExecutionException.class)
         .hasMessageContaining("Query execution failed").hasCauseInstanceOf(RuntimeException.class);
   }
 
   @Test
   void shouldUseCustomQueryName_WhenProvided() {
-    // Given
+
     CustomNameQuery query = new CustomNameQuery();
     CustomNameQueryHandler handler = new CustomNameQueryHandler();
     SpringQueryBus queryBus = new SpringQueryBus(List.of(handler));
 
-    // When
     QueryResult<String> result = queryBus.execute(query);
 
-    // Then
     assertThat(result.toOptional()).hasValue("custom");
     assertThat(query.getQueryName()).isEqualTo("CustomQuery.v1");
   }
-
-  // Test fixtures
 
   record TestQuery(String param) implements Query<String> {}
 

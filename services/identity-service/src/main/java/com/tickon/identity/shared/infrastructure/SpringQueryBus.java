@@ -14,32 +14,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-/**
- * Spring-based QueryBus implementation. Automatically discovers and registers
- * all QueryHandler beans. Provides logging, validation, and error handling for
- * cross-module queries.
- */
 @Component
 public class SpringQueryBus implements QueryBus {
   private static final Logger log = LoggerFactory.getLogger(SpringQueryBus.class);
 
   private final Map<Class<?>, QueryHandler<?, ?>> handlers = new HashMap<>();
 
-  /**
-   * Constructor that auto-registers all QueryHandler beans. Validates that no
-   * duplicate handlers exist for the same query type.
-   *
-   * @param handlers list of all QueryHandler beans from Spring context
-   * @throws IllegalStateException if duplicate handlers are found for any query
-   */
   public SpringQueryBus(List<QueryHandler<?, ?>> handlers) {
     log.info("Initializing QueryBus with {} handler(s)", handlers.size());
 
-    // Group handlers by query class to detect duplicates
     Map<Class<?>, List<QueryHandler<?, ?>>> grouped = handlers.stream()
         .collect(Collectors.groupingBy(QueryHandler::getQueryClass));
 
-    // Validate no duplicate handlers and register
     grouped.forEach((queryClass, handlerList) -> {
       if (handlerList.size() > 1) {
         String handlerNames = handlerList.stream().map(h -> h.getClass().getSimpleName())
@@ -82,7 +68,7 @@ public class SpringQueryBus implements QueryBus {
 
       return result;
     } catch (QueryHandlerNotFoundException e) {
-      // Re-throw handler not found exceptions as-is
+
       throw e;
     } catch (Exception e) {
       long duration = System.currentTimeMillis() - startTime;
@@ -102,12 +88,6 @@ public class SpringQueryBus implements QueryBus {
     }
   }
 
-  /**
-   * Returns the number of registered handlers. Useful for testing and
-   * diagnostics.
-   *
-   * @return the handler count
-   */
   public int getHandlerCount() {
     return handlers.size();
   }

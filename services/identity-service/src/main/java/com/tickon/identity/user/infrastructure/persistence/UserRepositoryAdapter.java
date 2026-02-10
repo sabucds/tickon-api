@@ -49,6 +49,11 @@ public class UserRepositoryAdapter implements UserRepository {
   }
 
   @Override
+  public Optional<User> findByEmail(Email email) {
+    return jpaRepository.findByEmail(email.value()).map(mapper::toDomain);
+  }
+
+  @Override
   public void delete(UserId id) {
     jpaRepository.deleteById(id.value());
   }

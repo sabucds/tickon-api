@@ -17,10 +17,6 @@ import java.time.Instant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-/**
- * Login service using QueryBus for cross-module communication. Auth module
- * queries user data without directly importing user module.
- */
 @Service
 public class LoginService implements LoginUseCase {
 
@@ -48,11 +44,9 @@ public class LoginService implements LoginUseCase {
 
   @Override
   public LoginResult login(LoginCommand cmd) {
-    // Query user data from user module via QueryBus
     UserAuthDataDTO userDTO = queryBus.execute(new GetUserByUsernameOrEmailQuery(cmd.usernameOrEmail()))
         .orElseThrow(result -> new InvalidCredentialsException());
 
-    // Convert DTO to auth's domain model
     AuthUser user = AuthUser.fromDTO(userDTO);
 
     if (!passwordHasher.verify(cmd.password(), user.passwordHash())) {

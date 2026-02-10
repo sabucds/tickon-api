@@ -17,6 +17,7 @@ reviews:
     drafts: false
     base_branches:
       - main
+      - development
 
   # Path-based review rules
   path_filters:

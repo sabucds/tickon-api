@@ -4,7 +4,13 @@ on:
   pull_request:
     branches:
       - main
+      - development
     types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
 
 jobs:
   validate:
@@ -14,14 +20,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for better analysis
+          fetch-depth: 0 # Full history for better analysis
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: 'maven'
+          java-version: "21"
+          distribution: "temurin"
+          cache: "maven"
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -70,8 +76,8 @@ jobs:
           files: |
             **/target/surefire-reports/*.xml
             **/target/failsafe-reports/*.xml
-          comment_title: '🧪 Test Results'
-          check_name: 'Test Results'
+          comment_title: "🧪 Test Results"
+          check_name: "Test Results"
 
       - name: Add coverage comment to PR
         uses: madrapps/jacoco-report@v1.6.1
@@ -82,7 +88,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 70
           min-coverage-changed-files: 80
-          title: '📊 Code Coverage Report'
+          title: "📊 Code Coverage Report"
           update-comment: true
 
   architecture-check:
@@ -95,12 +101,12 @@ jobs:
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: 'maven'
+          java-version: "21"
+          distribution: "temurin"
+          cache: "maven"
 
       - name: Validate architecture boundaries
-        run: mvn enforcer:enforce -B
+        run: mvn validate -B
         continue-on-error: false
 
       - name: Check for cross-module dependencies

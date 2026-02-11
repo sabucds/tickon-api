@@ -69,7 +69,7 @@ public class RequestPasswordResetService implements RequestPasswordResetUseCase 
     resetTokenRepository.invalidateAllForUser(userId, now);
 
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId, command.email(),
-        tokenDuration, now);
+        tokenDuration, now, plainToken);
 
     resetTokenRepository.save(token);
 

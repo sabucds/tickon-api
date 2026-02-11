@@ -1,12 +1,12 @@
 package com.tickon.identity.auth.domain;
 
 import com.tickon.common.domain.AggregateRoot;
+import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.events.PasswordResetCompletedEvent;
 import com.tickon.identity.auth.domain.events.PasswordResetRequestedEvent;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenId;
-import com.tickon.identity.user.domain.valueobjects.Email;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
@@ -32,16 +32,17 @@ public class PasswordResetToken extends AggregateRoot {
   }
 
   public static PasswordResetToken create(ResetTokenId id, ResetTokenHash tokenHash, UserId userId, Email email,
-      Duration duration, Instant now) {
+      Duration duration, Instant now, String plainToken) {
     Objects.requireNonNull(duration, "duration");
     Objects.requireNonNull(now, "now");
+    Objects.requireNonNull(plainToken, "plainToken");
     if (duration.isZero() || duration.isNegative()) {
       throw new IllegalArgumentException("Token duration must be positive");
     }
 
     Instant absoluteExpiresAt = now.plus(duration);
     PasswordResetToken token = new PasswordResetToken(id, tokenHash, userId, email, absoluteExpiresAt, null);
-    token.registerEvent(new PasswordResetRequestedEvent(userId, email));
+    token.registerEvent(new PasswordResetRequestedEvent(userId, email, plainToken));
     return token;
   }
 

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.tickon.common.commands.CommandBus;
 import com.tickon.common.commands.CommandResult;
+import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.application.dto.ResetPasswordCommand;
 import com.tickon.identity.auth.application.ports.out.ResetTokenHasher;
@@ -18,7 +19,6 @@ import com.tickon.identity.auth.domain.exceptions.InvalidResetTokenException;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenId;
 import com.tickon.identity.shared.contracts.commands.ChangePasswordCommand;
-import com.tickon.identity.user.domain.valueobjects.Email;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -59,7 +59,7 @@ class ResetPasswordServiceTest {
     UserId userId = UserId.generate();
 
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId,
-        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minusSeconds(30));
+        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minusSeconds(30), "test-plain-token");
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(token));
@@ -84,7 +84,7 @@ class ResetPasswordServiceTest {
     UserId userId = UserId.generate();
 
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId,
-        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minusSeconds(30));
+        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minusSeconds(30), "test-plain-token");
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(token));
@@ -126,7 +126,8 @@ class ResetPasswordServiceTest {
 
     // Token created 2 hours ago, expired after 1 hour
     PasswordResetToken expiredToken = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId,
-        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minus(Duration.ofHours(2)));
+        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minus(Duration.ofHours(2)),
+        "test-plain-token");
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(expiredToken));
@@ -163,7 +164,7 @@ class ResetPasswordServiceTest {
     UserId userId = UserId.generate();
 
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId,
-        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minusSeconds(30));
+        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minusSeconds(30), "test-plain-token");
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(token));

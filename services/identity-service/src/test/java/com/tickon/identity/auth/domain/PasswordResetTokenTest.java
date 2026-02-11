@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.tickon.common.domain.DomainEvent;
+import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.events.PasswordResetCompletedEvent;
 import com.tickon.identity.auth.domain.events.PasswordResetRequestedEvent;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenId;
-import com.tickon.identity.user.domain.valueobjects.Email;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -27,7 +27,8 @@ class PasswordResetTokenTest {
     ResetTokenId tokenId = ResetTokenId.generate();
     ResetTokenHash tokenHash = ResetTokenHash.from("sample-hash");
 
-    PasswordResetToken token = PasswordResetToken.create(tokenId, tokenHash, USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT);
+    PasswordResetToken token = PasswordResetToken.create(tokenId, tokenHash, USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT,
+        "test-plain-token");
 
     assertThat(token.id()).isEqualTo(tokenId);
     assertThat(token.tokenHash()).isEqualTo(tokenHash);
@@ -43,7 +44,7 @@ class PasswordResetTokenTest {
   void shouldRegisterPasswordResetRequestedEvent_WhenCreatingToken() {
     ResetTokenId tokenId = ResetTokenId.generate();
     PasswordResetToken token = PasswordResetToken.create(tokenId, ResetTokenHash.from("sample-hash"), USER_ID, EMAIL,
-        ONE_HOUR, FIXED_INSTANT);
+        ONE_HOUR, FIXED_INSTANT, "test-plain-token");
 
     List<DomainEvent> events = token.domainEvents();
     assertThat(events).hasSize(1);
@@ -83,7 +84,7 @@ class PasswordResetTokenTest {
   @Test
   void shouldMarkAsUsed() {
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("sample-hash"),
-        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT);
+        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT, "test-plain-token");
     assertThat(token.usedAt()).isNull();
     assertThat(token.isUsed()).isFalse();
 
@@ -97,7 +98,7 @@ class PasswordResetTokenTest {
   @Test
   void shouldRegisterPasswordResetCompletedEvent_WhenMarkingAsUsed() {
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("sample-hash"),
-        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT);
+        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT, "test-plain-token");
     token.clearEvents();
 
     Instant usedTime = FIXED_INSTANT.plusSeconds(30);
@@ -116,7 +117,7 @@ class PasswordResetTokenTest {
   @Test
   void shouldThrow_WhenMarkingAsUsedTwice() {
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("sample-hash"),
-        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT);
+        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT, "test-plain-token");
 
     token.markAsUsed(FIXED_INSTANT.plusSeconds(30));
 
@@ -127,7 +128,7 @@ class PasswordResetTokenTest {
   @Test
   void shouldThrow_WhenMarkingExpiredTokenAsUsed() {
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("sample-hash"),
-        USER_ID, EMAIL, Duration.ofSeconds(30), FIXED_INSTANT);
+        USER_ID, EMAIL, Duration.ofSeconds(30), FIXED_INSTANT, "test-plain-token");
 
     Instant afterExpiration = FIXED_INSTANT.plusSeconds(60);
     assertThat(token.isExpired(afterExpiration)).isTrue();
@@ -139,7 +140,7 @@ class PasswordResetTokenTest {
   @Test
   void shouldIdentifyExpiredToken() {
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("sample-hash"),
-        USER_ID, EMAIL, Duration.ofSeconds(30), FIXED_INSTANT);
+        USER_ID, EMAIL, Duration.ofSeconds(30), FIXED_INSTANT, "test-plain-token");
 
     assertThat(token.isExpired(FIXED_INSTANT.plusSeconds(15))).isFalse();
     assertThat(token.isExpired(FIXED_INSTANT.plusSeconds(30))).isTrue(); // Exactly at expiration
@@ -149,7 +150,7 @@ class PasswordResetTokenTest {
   @Test
   void shouldIdentifyUsedToken() {
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("sample-hash"),
-        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT);
+        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT, "test-plain-token");
 
     assertThat(token.isUsed()).isFalse();
 
@@ -160,41 +161,39 @@ class PasswordResetTokenTest {
   @Test
   void shouldThrow_WhenCreatingTokenWithNullNow() {
     assertThatThrownBy(() -> PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("sample-hash"),
-        USER_ID, EMAIL, ONE_HOUR, null)).isInstanceOf(NullPointerException.class).hasMessage("now");
+        USER_ID, EMAIL, ONE_HOUR, null, "test-plain-token")).isInstanceOf(NullPointerException.class).hasMessage("now");
   }
 
   @Test
   void shouldThrow_WhenCreatingTokenWithNonPositiveDuration() {
     assertThatThrownBy(() -> PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("sample-hash"),
-        USER_ID, EMAIL, Duration.ofSeconds(0), FIXED_INSTANT)).isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("duration must be positive");
+        USER_ID, EMAIL, Duration.ofSeconds(0), FIXED_INSTANT, "test-plain-token"))
+        .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("duration must be positive");
 
     assertThatThrownBy(() -> PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("sample-hash"),
-        USER_ID, EMAIL, Duration.ofSeconds(-10), FIXED_INSTANT)).isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("duration must be positive");
+        USER_ID, EMAIL, Duration.ofSeconds(-10), FIXED_INSTANT, "test-plain-token"))
+        .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("duration must be positive");
   }
 
   @Test
   void shouldThrow_WhenCreatingTokenWithNullParameters() {
-    assertThatThrownBy(
-        () -> PasswordResetToken.create(null, ResetTokenHash.from("hash"), USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT))
-        .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> PasswordResetToken.create(null, ResetTokenHash.from("hash"), USER_ID, EMAIL, ONE_HOUR,
+        FIXED_INSTANT, "test-plain-token")).isInstanceOf(NullPointerException.class);
 
-    assertThatThrownBy(
-        () -> PasswordResetToken.create(ResetTokenId.generate(), null, USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT))
-        .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> PasswordResetToken.create(ResetTokenId.generate(), null, USER_ID, EMAIL, ONE_HOUR,
+        FIXED_INSTANT, "test-plain-token")).isInstanceOf(NullPointerException.class);
 
     assertThatThrownBy(() -> PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("hash"), null,
-        EMAIL, ONE_HOUR, FIXED_INSTANT)).isInstanceOf(NullPointerException.class);
+        EMAIL, ONE_HOUR, FIXED_INSTANT, "test-plain-token")).isInstanceOf(NullPointerException.class);
 
     assertThatThrownBy(() -> PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("hash"), USER_ID,
-        null, ONE_HOUR, FIXED_INSTANT)).isInstanceOf(NullPointerException.class);
+        null, ONE_HOUR, FIXED_INSTANT, "test-plain-token")).isInstanceOf(NullPointerException.class);
   }
 
   @Test
   void shouldThrow_WhenMarkingAsUsedWithNullTime() {
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("sample-hash"),
-        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT);
+        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT, "test-plain-token");
 
     assertThatThrownBy(() -> token.markAsUsed(null)).isInstanceOf(NullPointerException.class);
   }
@@ -202,7 +201,7 @@ class PasswordResetTokenTest {
   @Test
   void shouldThrow_WhenCheckingExpirationWithNullTime() {
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), ResetTokenHash.from("sample-hash"),
-        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT);
+        USER_ID, EMAIL, ONE_HOUR, FIXED_INSTANT, "test-plain-token");
 
     assertThatThrownBy(() -> token.isExpired(null)).isInstanceOf(NullPointerException.class);
   }

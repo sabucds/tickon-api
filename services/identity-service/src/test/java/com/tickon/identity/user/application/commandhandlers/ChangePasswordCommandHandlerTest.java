@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.commands.CommandResult;
+import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.common.identity.domain.valueobjects.UserStatus;
@@ -18,7 +19,6 @@ import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
-import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import java.util.Optional;
 import java.util.UUID;

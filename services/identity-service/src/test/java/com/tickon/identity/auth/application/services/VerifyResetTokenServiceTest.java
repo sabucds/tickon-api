@@ -3,6 +3,7 @@ package com.tickon.identity.auth.application.services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.application.dto.VerifyResetTokenCommand;
 import com.tickon.identity.auth.application.dto.VerifyResetTokenResult;
@@ -11,7 +12,6 @@ import com.tickon.identity.auth.application.ports.out.ResetTokenRepository;
 import com.tickon.identity.auth.domain.PasswordResetToken;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenId;
-import com.tickon.identity.user.domain.valueobjects.Email;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -47,7 +47,7 @@ class VerifyResetTokenServiceTest {
     String plainToken = "valid-token";
     ResetTokenHash tokenHash = ResetTokenHash.from("hashed");
     PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, UserId.generate(),
-        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minusSeconds(30));
+        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minusSeconds(30), "test-plain-token");
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(token));
@@ -81,7 +81,8 @@ class VerifyResetTokenServiceTest {
     String plainToken = "expired-token";
     ResetTokenHash tokenHash = ResetTokenHash.from("hashed");
     PasswordResetToken expiredToken = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, UserId.generate(),
-        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minus(Duration.ofHours(2)));
+        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minus(Duration.ofHours(2)),
+        "test-plain-token");
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(expiredToken));

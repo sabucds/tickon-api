@@ -1,6 +1,6 @@
 package com.tickon.identity.auth.application.ports.out;
 
-import com.tickon.identity.user.domain.valueobjects.Email;
+import com.tickon.common.identity.domain.valueobjects.Email;
 
 public interface EmailSender {
   void sendPasswordResetEmail(Email to, String resetToken, String recipientName);

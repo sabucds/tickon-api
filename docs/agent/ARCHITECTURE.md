@@ -13,10 +13,12 @@ Infrastructure → Application → Domain
 ## Services and modules
 - A service contains multiple modules (bounded contexts).
 - Modules are isolated:
-  - ❌ no compile-time imports between modules’ `domain/`, `application/`, or `infrastructure/`
+  - ❌ no compile-time imports between modules' `domain/`, `application/`, or `infrastructure/`
+  - ❌ no direct imports from other modules' domain (e.g., `com.tickon.<service>.<module>.domain.*`)
   - ✅ shared contracts live under `shared/contracts/`
   - ✅ shared infrastructure primitives live under `shared/infrastructure/`
   - ✅ shared abstractions (not owned models) may live under `shared/domain/`
+  - ✅ truly shared value objects (Email, UserId, etc.) belong in the common module: `com.tickon.common.identity.domain.valueobjects.*`
 
 ## Package structure (example)
 `com.tickon.<service>/`

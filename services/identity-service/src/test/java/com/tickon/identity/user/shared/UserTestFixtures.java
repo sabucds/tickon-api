@@ -1,9 +1,9 @@
 package com.tickon.identity.user.shared;
 
+import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.user.domain.User;
-import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.Username;
 
 public final class UserTestFixtures {

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.domain.DomainEvent;
+import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;
 import com.tickon.identity.user.application.dto.RegisterUserCommand;
@@ -20,7 +21,6 @@ import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
 import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
 import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
-import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

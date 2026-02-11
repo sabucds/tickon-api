@@ -1,11 +1,11 @@
 package com.tickon.identity.auth.infrastructure.persistence.mappers;
 
+import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.PasswordResetToken;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenId;
 import com.tickon.identity.auth.infrastructure.persistence.entities.PasswordResetTokenEntity;
-import com.tickon.identity.user.domain.valueobjects.Email;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -11,6 +11,7 @@ import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ChangePasswordCommandHandler implements CommandHandler<ChangePasswordCommand, Void> {
@@ -28,6 +29,7 @@ public class ChangePasswordCommandHandler implements CommandHandler<ChangePasswo
   }
 
   @Override
+  @Transactional
   public CommandResult<Void> handle(ChangePasswordCommand command) {
     log.debug("Changing password for user: {}", command.userId().value());
 

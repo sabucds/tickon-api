@@ -51,6 +51,13 @@ security:
     token-expiration-ms: 3600000  # 1 hour
     token-pepper: "${PASSWORD_RESET_TOKEN_PEPPER:changeme-dev-only}"
 
+email:
+  sendgrid:
+    api-key: "${SENDGRID_API_KEY:}"
+    from-email: "${SENDGRID_FROM_EMAIL:noreply@tickon.com}"
+    from-name: "${SENDGRID_FROM_NAME:Tickon}"
+    reset-url-base: "${RESET_URL_BASE:http://localhost:3000/reset-password}"
+
 springdoc:
   swagger-ui:
     operations-sorter: method

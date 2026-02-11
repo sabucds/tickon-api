@@ -17,7 +17,7 @@ public class MacResetTokenHasher implements ResetTokenHasher {
   private static final String HMAC_ALG = "HmacSHA256";
   private final byte[] pepperBytes;
 
-  public MacResetTokenHasher(@Value("${security.password-reset.token-pepper:changeme-dev-only}") String pepper) {
+  public MacResetTokenHasher(@Value("${security.password-reset.token-pepper}") String pepper) {
     if (pepper == null || pepper.isBlank()) {
       throw new IllegalStateException("Missing security.password-reset.token-pepper configuration");
     }

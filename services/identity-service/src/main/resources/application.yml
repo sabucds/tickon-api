@@ -49,7 +49,7 @@ security:
     refresh-token-pepper: "${REFRESH_TOKEN_PEPPER:}"
   password-reset:
     token-expiration-ms: 3600000  # 1 hour
-    token-pepper: "${PASSWORD_RESET_TOKEN_PEPPER:changeme-dev-only}"
+    token-pepper: "${PASSWORD_RESET_TOKEN_PEPPER}"
 
 email:
   sendgrid:

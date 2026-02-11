@@ -56,30 +56,30 @@ public class RequestPasswordResetService implements RequestPasswordResetUseCase 
     QueryResult<UserAuthDataDTO> result = queryBus.execute(new GetUserByEmailQuery(command.email().value()));
 
     return switch (result) {
-      case QueryResult.Success<UserAuthDataDTO>(UserAuthDataDTO userDTO) -> {
-        UserId userId = new UserId(userDTO.id());
+    case QueryResult.Success<UserAuthDataDTO>(UserAuthDataDTO userDTO) -> {
+      UserId userId = new UserId(userDTO.id());
 
-        String plainToken = resetTokenGenerator.generateSecureToken();
-        ResetTokenHash tokenHash = resetTokenHasher.hash(plainToken);
-        Instant now = clock.instant();
+      String plainToken = resetTokenGenerator.generateSecureToken();
+      ResetTokenHash tokenHash = resetTokenHasher.hash(plainToken);
+      Instant now = clock.instant();
 
-        resetTokenRepository.invalidateAllForUser(userId, now);
+      resetTokenRepository.invalidateAllForUser(userId, now);
 
-        PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId,
-            command.email(), tokenDuration, now, plainToken);
+      PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId, command.email(),
+          tokenDuration, now, plainToken);
 
-        resetTokenRepository.save(token);
+      resetTokenRepository.save(token);
 
-        eventPublisher.publishAll(token.domainEvents());
-        token.clearEvents();
+      eventPublisher.publishAll(token.domainEvents());
+      token.clearEvents();
 
-        yield RequestPasswordResetResult.success();
-      }
-      case QueryResult.NotFound<UserAuthDataDTO> notFound -> RequestPasswordResetResult.success();
-      case QueryResult.Error<UserAuthDataDTO>(String message, Throwable cause) -> {
-        log.error("Failed to query user by email: {}", message, cause);
-        yield RequestPasswordResetResult.success();
-      }
+      yield RequestPasswordResetResult.success();
+    }
+    case QueryResult.NotFound<UserAuthDataDTO> notFound -> RequestPasswordResetResult.success();
+    case QueryResult.Error<UserAuthDataDTO>(String message,Throwable cause) -> {
+      log.error("Failed to query user by email: {}", message, cause);
+      yield RequestPasswordResetResult.success();
+    }
     };
   }
 }

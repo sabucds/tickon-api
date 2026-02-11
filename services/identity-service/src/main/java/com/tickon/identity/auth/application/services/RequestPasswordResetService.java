@@ -18,12 +18,15 @@ import com.tickon.identity.shared.ports.out.DomainEventPublisher;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RequestPasswordResetService implements RequestPasswordResetUseCase {
+  private static final Logger log = LoggerFactory.getLogger(RequestPasswordResetService.class);
 
   private final QueryBus queryBus;
   private final ResetTokenRepository resetTokenRepository;
@@ -52,30 +55,31 @@ public class RequestPasswordResetService implements RequestPasswordResetUseCase 
 
     QueryResult<UserAuthDataDTO> result = queryBus.execute(new GetUserByEmailQuery(command.email().value()));
 
-    if (result instanceof QueryResult.NotFound) {
+    if (result instanceof QueryResult.Success<UserAuthDataDTO> success) {
+      UserAuthDataDTO userDTO = success.value();
+      UserId userId = new UserId(userDTO.id());
+
+      String plainToken = resetTokenGenerator.generateSecureToken();
+      ResetTokenHash tokenHash = resetTokenHasher.hash(plainToken);
+      Instant now = clock.instant();
+
+      resetTokenRepository.invalidateAllForUser(userId, now);
+
+      PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId,
+          command.email(), tokenDuration, now, plainToken);
+
+      resetTokenRepository.save(token);
+
+      eventPublisher.publishAll(token.domainEvents());
+      token.clearEvents();
 
       return RequestPasswordResetResult.success();
+    } else if (result instanceof QueryResult.NotFound) {
+      return RequestPasswordResetResult.success();
+    } else {
+      QueryResult.Error<UserAuthDataDTO> error = (QueryResult.Error<UserAuthDataDTO>) result;
+      log.error("Failed to query user by email: {}", error.message(), error.cause());
+      return RequestPasswordResetResult.success();
     }
-
-    UserAuthDataDTO userDTO = ((QueryResult.Success<UserAuthDataDTO>) result).value();
-    UserId userId = new UserId(userDTO.id());
-
-    String plainToken = resetTokenGenerator.generateSecureToken();
-
-    ResetTokenHash tokenHash = resetTokenHasher.hash(plainToken);
-
-    Instant now = clock.instant();
-
-    resetTokenRepository.invalidateAllForUser(userId, now);
-
-    PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId, command.email(),
-        tokenDuration, now, plainToken);
-
-    resetTokenRepository.save(token);
-
-    eventPublisher.publishAll(token.domainEvents());
-    token.clearEvents();
-
-    return RequestPasswordResetResult.success();
   }
 }

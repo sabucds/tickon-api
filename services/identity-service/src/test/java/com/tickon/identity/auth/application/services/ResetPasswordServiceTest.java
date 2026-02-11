@@ -172,7 +172,8 @@ class ResetPasswordServiceTest {
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(token));
-    doThrow(new CommandExecutionException(ChangePasswordCommand.class, new IllegalArgumentException("Password too weak")))
+    doThrow(
+        new CommandExecutionException(ChangePasswordCommand.class, new IllegalArgumentException("Password too weak")))
         .when(commandBus).execute(any(ChangePasswordCommand.class));
 
     // Act & Assert

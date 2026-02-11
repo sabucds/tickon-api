@@ -88,8 +88,7 @@ class ChangePasswordCommandHandlerTest {
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
     // Act & Assert
-    assertThatThrownBy(() -> handler.handle(command))
-        .isInstanceOf(IllegalStateException.class)
+    assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("User not found");
 
     verify(passwordHasher).hash(plainPassword);
@@ -113,9 +112,7 @@ class ChangePasswordCommandHandlerTest {
     doThrow(new RuntimeException("Database error")).when(userRepository).save(any(User.class));
 
     // Act & Assert
-    assertThatThrownBy(() -> handler.handle(command))
-        .isInstanceOf(RuntimeException.class)
-        .hasMessage("Database error");
+    assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(RuntimeException.class).hasMessage("Database error");
 
     verify(passwordHasher).hash(plainPassword);
     verify(userRepository).findById(userId);
@@ -130,8 +127,7 @@ class ChangePasswordCommandHandlerTest {
     ChangePasswordCommand command = new ChangePasswordCommand(userId, weakPassword);
 
     // Act & Assert
-    assertThatThrownBy(() -> handler.handle(command))
-        .isInstanceOf(InvalidPasswordException.class)
+    assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(InvalidPasswordException.class)
         .hasMessageContaining("Password must be at least");
 
     verify(passwordHasher, never()).hash(any());

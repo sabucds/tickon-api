@@ -19,7 +19,7 @@ public sealed interface CommandResult<T> {
 
   default Optional<T> toOptional() {
     return switch (this) {
-    case Success<T> success -> Optional.of(success.value());
+    case Success<T> success -> Optional.ofNullable(success.value());
     case Error<T> ignored -> Optional.empty();
     };
   }

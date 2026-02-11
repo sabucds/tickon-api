@@ -176,4 +176,13 @@ class CommandResultTest {
     assertThat(result.isSuccess()).isTrue();
     assertThat(result.orElse("default")).isNull();
   }
+
+  @Test
+  void shouldConvertSuccessWithNullToEmptyOptional() {
+    CommandResult<String> result = new CommandResult.Success<>(null);
+
+    Optional<String> optional = result.toOptional();
+
+    assertThat(optional).isEmpty();
+  }
 }

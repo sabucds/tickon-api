@@ -1,7 +1,6 @@
 package com.tickon.identity.auth.application.services;
 
 import com.tickon.common.commands.CommandBus;
-import com.tickon.common.commands.CommandResult;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.application.dto.ResetPasswordCommand;
 import com.tickon.identity.auth.application.ports.in.ResetPasswordUseCase;
@@ -54,11 +53,7 @@ public class ResetPasswordService implements ResetPasswordUseCase {
     }
 
     UserId userId = token.userId();
-    CommandResult<Void> result = commandBus.execute(new ChangePasswordCommand(userId, command.newPassword()));
-
-    if (result instanceof CommandResult.Error<Void> error) {
-      throw new IllegalStateException("Failed to change password: " + error.message(), error.cause());
-    }
+    commandBus.execute(new ChangePasswordCommand(userId, command.newPassword()));
 
     token.markAsUsed(now);
     resetTokenRepository.save(token);

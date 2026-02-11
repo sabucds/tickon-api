@@ -1,6 +1,7 @@
 package com.tickon.identity.user.application.commandhandlers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
@@ -76,7 +77,7 @@ class ChangePasswordCommandHandlerTest {
   }
 
   @Test
-  void shouldReturnError_WhenUserNotFound() {
+  void shouldThrowException_WhenUserNotFound() {
     // Arrange
     UserId userId = new UserId(UUID.randomUUID());
     String plainPassword = "NewSecure123!";
@@ -86,20 +87,18 @@ class ChangePasswordCommandHandlerTest {
     when(passwordHasher.hash(plainPassword)).thenReturn(newPasswordHash);
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-    // Act
-    CommandResult<Void> result = handler.handle(command);
+    // Act & Assert
+    assertThatThrownBy(() -> handler.handle(command))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("User not found");
 
-    // Assert
-    assertThat(result.isError()).isTrue();
-    assertThat(result).isInstanceOf(CommandResult.Error.class)
-        .extracting(r -> ((CommandResult.Error<Void>) r).message()).isEqualTo("Failed to change password");
     verify(passwordHasher).hash(plainPassword);
     verify(userRepository).findById(userId);
     verify(userRepository, never()).save(any());
   }
 
   @Test
-  void shouldReturnError_WhenRepositorySaveFails() {
+  void shouldThrowException_WhenRepositorySaveFails() {
     // Arrange
     UserId userId = new UserId(UUID.randomUUID());
     String plainPassword = "NewSecure123!";
@@ -113,35 +112,28 @@ class ChangePasswordCommandHandlerTest {
     when(userRepository.findById(userId)).thenReturn(Optional.of(user));
     doThrow(new RuntimeException("Database error")).when(userRepository).save(any(User.class));
 
-    // Act
-    CommandResult<Void> result = handler.handle(command);
+    // Act & Assert
+    assertThatThrownBy(() -> handler.handle(command))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessage("Database error");
 
-    // Assert
-    assertThat(result.isError()).isTrue();
-    CommandResult.Error<Void> error = (CommandResult.Error<Void>) result;
-    assertThat(error.message()).isEqualTo("Failed to change password");
-    assertThat(error.cause()).isInstanceOf(RuntimeException.class);
-    assertThat(error.cause()).hasMessage("Database error");
     verify(passwordHasher).hash(plainPassword);
     verify(userRepository).findById(userId);
     verify(userRepository).save(any(User.class));
   }
 
   @Test
-  void shouldReturnError_WhenPasswordValidationFails() {
+  void shouldThrowException_WhenPasswordValidationFails() {
     // Arrange
     UserId userId = new UserId(UUID.randomUUID());
     String weakPassword = "weak";
     ChangePasswordCommand command = new ChangePasswordCommand(userId, weakPassword);
 
-    // Act
-    CommandResult<Void> result = handler.handle(command);
+    // Act & Assert
+    assertThatThrownBy(() -> handler.handle(command))
+        .isInstanceOf(InvalidPasswordException.class)
+        .hasMessageContaining("Password must be at least");
 
-    // Assert
-    assertThat(result.isError()).isTrue();
-    CommandResult.Error<Void> error = (CommandResult.Error<Void>) result;
-    assertThat(error.message()).isEqualTo("Failed to change password");
-    assertThat(error.cause()).isInstanceOf(InvalidPasswordException.class);
     verify(passwordHasher, never()).hash(any());
     verify(userRepository, never()).findById(any());
     verify(userRepository, never()).save(any());

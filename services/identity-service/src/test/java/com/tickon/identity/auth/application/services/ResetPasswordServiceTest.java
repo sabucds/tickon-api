@@ -3,12 +3,13 @@ package com.tickon.identity.auth.application.services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.commands.CommandBus;
-import com.tickon.common.commands.CommandResult;
+import com.tickon.common.commands.exceptions.CommandExecutionException;
 import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.application.dto.ResetPasswordCommand;
@@ -91,13 +92,13 @@ class ResetPasswordServiceTest {
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(token));
-    when(commandBus.execute(any(ChangePasswordCommand.class)))
-        .thenReturn(new CommandResult.Error<>("User not found", new RuntimeException("Database error")));
+    doThrow(new CommandExecutionException(ChangePasswordCommand.class, new RuntimeException("Database error")))
+        .when(commandBus).execute(any(ChangePasswordCommand.class));
 
     // Act & Assert
     assertThatThrownBy(() -> service.resetPassword(new ResetPasswordCommand(plainToken, newPassword)))
-        .isInstanceOf(IllegalStateException.class).hasMessageContaining("Failed to change password")
-        .hasMessageContaining("User not found");
+        .isInstanceOf(CommandExecutionException.class)
+        .hasMessageContaining("Error executing command: ChangePasswordCommand");
 
     assertThat(token.isUsed()).isFalse();
     verify(resetTokenRepository, never()).save(any());
@@ -171,13 +172,13 @@ class ResetPasswordServiceTest {
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(token));
-    when(commandBus.execute(any(ChangePasswordCommand.class)))
-        .thenReturn(new CommandResult.Error<>("Password too weak", new IllegalArgumentException()));
+    doThrow(new CommandExecutionException(ChangePasswordCommand.class, new IllegalArgumentException("Password too weak")))
+        .when(commandBus).execute(any(ChangePasswordCommand.class));
 
     // Act & Assert
     assertThatThrownBy(() -> service.resetPassword(new ResetPasswordCommand(plainToken, weakPassword)))
-        .isInstanceOf(IllegalStateException.class).hasMessageContaining("Failed to change password")
-        .hasMessageContaining("Password too weak");
+        .isInstanceOf(CommandExecutionException.class)
+        .hasMessageContaining("Error executing command: ChangePasswordCommand");
 
     assertThat(token.isUsed()).isFalse();
     verify(resetTokenRepository, never()).save(any());

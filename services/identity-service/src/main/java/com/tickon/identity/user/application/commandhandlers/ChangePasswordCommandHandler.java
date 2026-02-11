@@ -29,24 +29,19 @@ public class ChangePasswordCommandHandler implements CommandHandler<ChangePasswo
 
   @Override
   public CommandResult<Void> handle(ChangePasswordCommand command) {
-    try {
-      log.debug("Changing password for user: {}", command.userId().value());
+    log.debug("Changing password for user: {}", command.userId().value());
 
-      passwordPolicy.validate(command.newPlainPassword());
-      PasswordHash hashedPassword = passwordHasher.hash(command.newPlainPassword());
+    passwordPolicy.validate(command.newPlainPassword());
+    PasswordHash hashedPassword = passwordHasher.hash(command.newPlainPassword());
 
-      User user = userRepository.findById(command.userId())
-          .orElseThrow(() -> new IllegalStateException("User not found: " + command.userId().value()));
+    User user = userRepository.findById(command.userId())
+        .orElseThrow(() -> new IllegalStateException("User not found: " + command.userId().value()));
 
-      user.changePasswordHash(hashedPassword);
-      userRepository.save(user);
+    user.changePasswordHash(hashedPassword);
+    userRepository.save(user);
 
-      log.info("Password changed successfully for user: {}", command.userId().value());
-      return new CommandResult.Success<>(null);
-    } catch (Exception e) {
-      log.error("Failed to change password for user: {}", command.userId().value(), e);
-      return new CommandResult.Error<>("Failed to change password", e);
-    }
+    log.info("Password changed successfully for user: {}", command.userId().value());
+    return new CommandResult.Success<>(null);
   }
 
   @Override

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.common.queries.QueryBus;
 import com.tickon.common.queries.QueryResult;
@@ -17,7 +18,6 @@ import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.shared.contracts.queries.GetUserByEmailQuery;
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;
-import com.tickon.identity.user.domain.valueobjects.Email;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;

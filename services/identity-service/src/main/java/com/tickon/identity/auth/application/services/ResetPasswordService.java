@@ -7,7 +7,6 @@ import com.tickon.identity.auth.application.ports.in.ResetPasswordUseCase;
 import com.tickon.identity.auth.application.ports.out.ResetTokenHasher;
 import com.tickon.identity.auth.application.ports.out.ResetTokenRepository;
 import com.tickon.identity.auth.domain.PasswordResetToken;
-import com.tickon.identity.auth.domain.events.PasswordResetCompletedEvent;
 import com.tickon.identity.auth.domain.exceptions.InvalidResetTokenException;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.shared.contracts.commands.ChangePasswordCommand;
@@ -58,9 +57,7 @@ public class ResetPasswordService implements ResetPasswordUseCase {
     token.markAsUsed(now);
     resetTokenRepository.save(token);
 
-    var event = new PasswordResetCompletedEvent(userId, token.id(), now);
-    eventPublisher.publish(event);
-
+    eventPublisher.publishAll(token.domainEvents());
     token.clearEvents();
   }
 }

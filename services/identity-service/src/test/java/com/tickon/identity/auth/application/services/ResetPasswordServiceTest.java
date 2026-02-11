@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.commands.CommandBus;
+import com.tickon.common.commands.CommandResult;
 import com.tickon.common.commands.exceptions.CommandExecutionException;
 import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.UserId;

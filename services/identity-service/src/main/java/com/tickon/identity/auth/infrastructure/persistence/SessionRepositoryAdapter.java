@@ -1,5 +1,6 @@
 package com.tickon.identity.auth.infrastructure.persistence;
 
+import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.application.ports.out.SessionRepository;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
@@ -8,6 +9,7 @@ import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.auth.infrastructure.persistence.entities.SessionEntity;
 import com.tickon.identity.auth.infrastructure.persistence.mappers.SessionPersistenceMapper;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,19 @@ public class SessionRepositoryAdapter implements SessionRepository {
   @Transactional
   public void revokeAllByFamilyId(FamilyId familyId, Instant revokedAt, RevokeReason reason) {
     jpaRepository.revokeAllByFamilyId(familyId.value(), revokedAt, reason.name());
+  }
+
+  @Override
+  @Transactional
+  public void revokeAllByUserId(UserId userId, Instant now, RevokeReason reason) {
+    List<SessionEntity> sessions = jpaRepository.findByUserIdAndRevokedAtIsNull(userId.value());
+    for (SessionEntity entity : sessions) {
+      Session session = mapper.toDomain(entity);
+      if (!session.isRevoked()) {
+        session.revoke(now, reason);
+        jpaRepository.save(mapper.toEntity(session));
+      }
+    }
   }
 
 }

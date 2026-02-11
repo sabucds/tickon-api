@@ -19,6 +19,7 @@ import com.tickon.identity.auth.domain.exceptions.InvalidResetTokenException;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenId;
 import com.tickon.identity.shared.contracts.commands.ChangePasswordCommand;
+import com.tickon.identity.shared.ports.out.DomainEventPublisher;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -39,6 +40,8 @@ class ResetPasswordServiceTest {
   private ResetTokenHasher resetTokenHasher;
   @Mock
   private CommandBus commandBus;
+  @Mock
+  private DomainEventPublisher eventPublisher;
 
   private ResetPasswordService service;
 
@@ -47,7 +50,7 @@ class ResetPasswordServiceTest {
 
   @BeforeEach
   void setUp() {
-    service = new ResetPasswordService(resetTokenRepository, resetTokenHasher, fixedClock, commandBus);
+    service = new ResetPasswordService(resetTokenRepository, resetTokenHasher, fixedClock, commandBus, eventPublisher);
   }
 
   @Test

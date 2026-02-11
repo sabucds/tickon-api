@@ -1,5 +1,6 @@
 package com.tickon.identity.auth.application.ports.out;
 
+import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
@@ -16,4 +17,6 @@ public interface SessionRepository {
   Optional<Session> findByRefreshTokenHash(String refreshToken);
 
   void revokeAllByFamilyId(FamilyId familyId, Instant revokedAt, RevokeReason reason);
+
+  void revokeAllByUserId(UserId userId, Instant now, RevokeReason reason);
 }

@@ -1,4 +1,4 @@
-package com.tickon.identity.shared.infrastructure.persistence.entities;
+package com.tickon.identity.user.infrastructure.persistence.entities;
 
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;

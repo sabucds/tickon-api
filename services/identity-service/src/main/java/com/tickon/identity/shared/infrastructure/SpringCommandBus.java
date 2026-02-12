@@ -77,11 +77,8 @@ public class SpringCommandBus implements CommandBus {
   }
 
   private void logCommandResult(String commandName, CommandResult<?> result, long duration) {
-    switch (result) {
-    case CommandResult.Success<?> success ->
+    if (result instanceof CommandResult.Success<?>) {
       log.debug("Command executed successfully: {} ({}ms)", commandName, duration);
-    case CommandResult.Error<?> error ->
-      log.warn("Command executed with error: {} ({}ms) - {}", commandName, duration, error.message());
     }
   }
 

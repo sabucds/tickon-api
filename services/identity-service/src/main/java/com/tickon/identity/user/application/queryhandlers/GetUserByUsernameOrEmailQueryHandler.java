@@ -6,13 +6,14 @@ import com.tickon.identity.shared.contracts.queries.GetUserByUsernameOrEmailQuer
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GetUserByUsernameOrEmailQueryHandler
-    implements QueryHandler<GetUserByUsernameOrEmailQuery, UserAuthDataDTO> {
+    implements QueryHandler<GetUserByUsernameOrEmailQuery, Optional<UserAuthDataDTO>> {
   private static final Logger log = LoggerFactory.getLogger(GetUserByUsernameOrEmailQueryHandler.class);
 
   private final UserRepository userRepository;
@@ -22,17 +23,12 @@ public class GetUserByUsernameOrEmailQueryHandler
   }
 
   @Override
-  public QueryResult<UserAuthDataDTO> handle(GetUserByUsernameOrEmailQuery query) {
-    try {
-      return userRepository.findByUsernameOrEmail(query.usernameOrEmail()).map(this::toDTO)
-          .<QueryResult<UserAuthDataDTO>>map(QueryResult.Success::new).orElseGet(() -> {
-            log.debug("User not found for username/email: {}", query.usernameOrEmail());
-            return new QueryResult.NotFound<>();
-          });
-    } catch (Exception e) {
-      log.error("Failed to fetch user by username/email: {}", query.usernameOrEmail(), e);
-      return new QueryResult.Error<>("Failed to fetch user by username/email", e);
+  public QueryResult<Optional<UserAuthDataDTO>> handle(GetUserByUsernameOrEmailQuery query) {
+    Optional<UserAuthDataDTO> userOpt = userRepository.findByUsernameOrEmail(query.usernameOrEmail()).map(this::toDTO);
+    if (userOpt.isEmpty()) {
+      log.debug("User not found for username/email: {}", query.usernameOrEmail());
     }
+    return new QueryResult.Success<>(userOpt);
   }
 
   @Override

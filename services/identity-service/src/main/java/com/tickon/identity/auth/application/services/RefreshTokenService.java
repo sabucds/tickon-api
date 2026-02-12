@@ -60,8 +60,8 @@ public class RefreshTokenService implements RefreshTokenUseCase {
       throw new InvalidRefreshTokenException();
     }
 
-    UserAuthDataDTO userDTO = queryBus.execute(new GetUserAuthDataQuery(session.userId().value()))
-        .orElseThrow(result -> new InvalidRefreshTokenException());
+    UserAuthDataDTO userDTO = queryBus.execute(new GetUserAuthDataQuery(session.userId().value())).orElseThrow()
+        .orElseThrow(() -> new InvalidRefreshTokenException()); // Unwrap Optional
 
     AuthUser user = AuthUser.fromDTO(userDTO);
 

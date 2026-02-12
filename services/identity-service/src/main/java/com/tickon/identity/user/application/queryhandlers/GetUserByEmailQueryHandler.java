@@ -7,10 +7,11 @@ import com.tickon.identity.shared.contracts.queries.GetUserByEmailQuery;
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GetUserByEmailQueryHandler implements QueryHandler<GetUserByEmailQuery, UserAuthDataDTO> {
+public class GetUserByEmailQueryHandler implements QueryHandler<GetUserByEmailQuery, Optional<UserAuthDataDTO>> {
 
   private final UserRepository userRepository;
 
@@ -19,9 +20,8 @@ public class GetUserByEmailQueryHandler implements QueryHandler<GetUserByEmailQu
   }
 
   @Override
-  public QueryResult<UserAuthDataDTO> handle(GetUserByEmailQuery query) {
-    return userRepository.findByEmail(Email.from(query.email())).map(this::toDTO)
-        .<QueryResult<UserAuthDataDTO>>map(QueryResult.Success::new).orElseGet(() -> new QueryResult.NotFound<>());
+  public QueryResult<Optional<UserAuthDataDTO>> handle(GetUserByEmailQuery query) {
+    return new QueryResult.Success<>(userRepository.findByEmail(Email.from(query.email())).map(this::toDTO));
   }
 
   @Override

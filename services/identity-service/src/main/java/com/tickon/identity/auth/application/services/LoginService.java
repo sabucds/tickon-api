@@ -44,8 +44,8 @@ public class LoginService implements LoginUseCase {
 
   @Override
   public LoginResult login(LoginCommand cmd) {
-    UserAuthDataDTO userDTO = queryBus.execute(new GetUserByUsernameOrEmailQuery(cmd.usernameOrEmail()))
-        .orElseThrow(result -> new InvalidCredentialsException());
+    UserAuthDataDTO userDTO = queryBus.execute(new GetUserByUsernameOrEmailQuery(cmd.usernameOrEmail())).orElseThrow()
+        .orElseThrow(() -> new InvalidCredentialsException());
 
     AuthUser user = AuthUser.fromDTO(userDTO);
 

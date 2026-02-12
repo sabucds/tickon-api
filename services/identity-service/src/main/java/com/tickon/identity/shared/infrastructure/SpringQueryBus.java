@@ -78,13 +78,8 @@ public class SpringQueryBus implements QueryBus {
   }
 
   private void logQueryResult(String queryName, QueryResult<?> result, long duration) {
-    switch (result) {
-    case QueryResult.Success<?> success ->
-      log.debug("Query executed successfully: {} ({}ms) - result present", queryName, duration);
-    case QueryResult.NotFound<?> notFound ->
-      log.debug("Query executed successfully: {} ({}ms) - not found", queryName, duration);
-    case QueryResult.Error<?> error ->
-      log.warn("Query executed with error: {} ({}ms) - {}", queryName, duration, error.message());
+    if (result instanceof QueryResult.Success<?>) {
+      log.debug("Query executed successfully: {} ({}ms)", queryName, duration);
     }
   }
 

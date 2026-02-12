@@ -22,6 +22,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,7 +64,7 @@ class RequestPasswordResetServiceTest {
     UserId userId = new UserId(UUID.randomUUID());
     UserAuthDataDTO userDTO = new UserAuthDataDTO(userId.value(), "password-hash", "ACTIVE");
 
-    when(queryBus.execute(any(GetUserByEmailQuery.class))).thenReturn(new QueryResult.Success<>(userDTO));
+    when(queryBus.execute(any(GetUserByEmailQuery.class))).thenReturn(new QueryResult.Success<>(Optional.of(userDTO)));
     when(resetTokenGenerator.generateSecureToken()).thenReturn("plain-token-abc123");
     when(resetTokenHasher.hash("plain-token-abc123")).thenReturn(ResetTokenHash.from("hashed-token"));
 
@@ -87,7 +88,7 @@ class RequestPasswordResetServiceTest {
   void shouldReturnSuccess_WhenUserDoesNotExist() {
 
     Email email = Email.from("nonexistent@example.com");
-    when(queryBus.execute(any(GetUserByEmailQuery.class))).thenReturn(new QueryResult.NotFound<>());
+    when(queryBus.execute(any(GetUserByEmailQuery.class))).thenReturn(new QueryResult.Success<>(Optional.empty()));
 
     RequestPasswordResetResult result = service.requestPasswordReset(new RequestPasswordResetCommand(email));
 
@@ -104,7 +105,7 @@ class RequestPasswordResetServiceTest {
     UserId userId = new UserId(UUID.randomUUID());
     UserAuthDataDTO userDTO = new UserAuthDataDTO(userId.value(), "hash", "ACTIVE");
 
-    when(queryBus.execute(any(GetUserByEmailQuery.class))).thenReturn(new QueryResult.Success<>(userDTO));
+    when(queryBus.execute(any(GetUserByEmailQuery.class))).thenReturn(new QueryResult.Success<>(Optional.of(userDTO)));
     when(resetTokenGenerator.generateSecureToken()).thenReturn("token");
     when(resetTokenHasher.hash(any())).thenReturn(ResetTokenHash.from("hash"));
 

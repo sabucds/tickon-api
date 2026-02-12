@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,7 +103,7 @@ class LoginServiceTest {
   @Test
   void shouldThrow_WhenUserNotFound() {
     when(queryBus.execute(any(GetUserByUsernameOrEmailQuery.class)))
-        .thenReturn(new QueryResult.NotFound<>());
+        .thenReturn(new QueryResult.Success<>(Optional.empty()));
 
     assertThatThrownBy(() -> loginService.login(new LoginCommand("missing", "any", DEVICE_ID)))
         .isInstanceOf(InvalidCredentialsException.class).hasMessageContaining("Invalid credentials");
@@ -124,7 +125,8 @@ class LoginServiceTest {
 
   private void stubUserFound(AuthUser user) {
     UserAuthDataDTO dto = new UserAuthDataDTO(user.id().value(), user.passwordHash().value(), user.status().name());
-    when(queryBus.execute(any(GetUserByUsernameOrEmailQuery.class))).thenReturn(new QueryResult.Success<>(dto));
+    when(queryBus.execute(any(GetUserByUsernameOrEmailQuery.class)))
+        .thenReturn(new QueryResult.Success<>(Optional.of(dto)));
   }
 
   private void stubValidPassword(String raw, AuthUser user) {

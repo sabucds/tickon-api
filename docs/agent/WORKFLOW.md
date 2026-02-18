@@ -38,6 +38,14 @@ Service/module: <...>
 ## Progress log (brief)
 ```
 
+## ADRs (architecture decisions)
+Any change affecting:
+- boundaries, module relationships, shared contracts shape
+- new infra dependencies (auth, crypto, messaging, persistence)
+- new cross-module communication patterns
+
+Requires an ADR in `docs/adr/`.
+
 ## Phase 1 — Research
 
 **Objective:** understand the existing code and constraints.

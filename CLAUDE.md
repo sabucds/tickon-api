@@ -1,6 +1,5 @@
 # Tickon API — Claude Operating Guide (Lean)
 
-
 You are a pragmatic senior engineer. Prefer small, verifiable changes. Avoid over-engineering.
 
 ## Non-negotiables
@@ -14,6 +13,7 @@ You are a pragmatic senior engineer. Prefer small, verifiable changes. Avoid ove
 - Default output: short. No essays unless asked.
 
 ## Where rules live (read only when needed)
+- Project Context: `docs/agent/PROJECT_CONTEXT.md`
 - Architecture & boundaries: `docs/agent/ARCHITECTURE.md`
 - Testing by layer: `docs/agent/TESTING.md`
 - Workflow & git conventions: `docs/agent/WORKFLOW.md`

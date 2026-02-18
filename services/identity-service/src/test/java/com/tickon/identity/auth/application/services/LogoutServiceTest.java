@@ -19,7 +19,9 @@ import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.auth.shared.AuthTestFixtures;
+import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -42,6 +44,7 @@ class LogoutServiceTest {
   private RefreshTokenHasher refreshTokenHasher;
   @Mock
   private DomainEventPublisher eventPublisher;
+  private final IdentityMetrics metrics = new IdentityMetrics(new SimpleMeterRegistry());
 
   private LogoutService logoutService;
 
@@ -55,7 +58,7 @@ class LogoutServiceTest {
 
   @BeforeEach
   void setUp() {
-    logoutService = new LogoutService(sessionRepository, refreshTokenHasher, fixedClock, eventPublisher);
+    logoutService = new LogoutService(sessionRepository, refreshTokenHasher, fixedClock, eventPublisher, metrics);
   }
 
   @Test

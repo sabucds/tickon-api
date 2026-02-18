@@ -15,14 +15,20 @@ import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.shared.contracts.queries.GetUserAuthDataQuery;
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
+import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RefreshTokenService implements RefreshTokenUseCase {
+
+  private static final Logger log = LoggerFactory.getLogger(RefreshTokenService.class);
 
   private final SessionRepository sessionRepository;
   private final QueryBus queryBus;
@@ -30,15 +36,18 @@ public class RefreshTokenService implements RefreshTokenUseCase {
   private final RefreshTokenHasher refreshTokenHasher;
   private final Clock clock;
   private final DomainEventPublisher eventPublisher;
+  private final IdentityMetrics metrics;
 
   public RefreshTokenService(SessionRepository sessionRepository, QueryBus queryBus, TokenProvider tokenProvider,
-      RefreshTokenHasher refreshTokenHasher, Clock clock, DomainEventPublisher eventPublisher) {
+      RefreshTokenHasher refreshTokenHasher, Clock clock, DomainEventPublisher eventPublisher,
+      IdentityMetrics metrics) {
     this.sessionRepository = sessionRepository;
     this.queryBus = queryBus;
     this.tokenProvider = tokenProvider;
     this.refreshTokenHasher = refreshTokenHasher;
     this.clock = clock;
     this.eventPublisher = eventPublisher;
+    this.metrics = metrics;
   }
 
   @Override
@@ -46,24 +55,42 @@ public class RefreshTokenService implements RefreshTokenUseCase {
   public LoginResult refresh(RefreshTokenCommand command) {
     RefreshTokenHash tokenHash = refreshTokenHasher.hash(command.refreshToken());
 
-    Session session = sessionRepository.findByRefreshTokenHash(tokenHash.value())
-        .orElseThrow(InvalidRefreshTokenException::new);
+    Session session = sessionRepository.findByRefreshTokenHash(tokenHash.value()).orElseThrow(() -> {
+      log.warn("Token refresh failed: token not found");
+      metrics.tokenRefresh("failure").increment();
+      metrics.tokenRefreshFailure("invalid").increment();
+      return new InvalidRefreshTokenException();
+    });
 
     Instant now = clock.instant();
 
     if (session.isRevoked()) {
       sessionRepository.revokeAllByFamilyId(session.familyId(), now, RevokeReason.TOKEN_REUSE_DETECTED);
+      log.warn("Token refresh failed: token reuse detected for sessionId={}", session.id().value());
+      metrics.tokenRefresh("failure").increment();
+      metrics.tokenRefreshFailure("revoked").increment();
+      metrics.sessionRevoked("rotation_failure").increment();
       throw new InvalidRefreshTokenException();
     }
 
     if (session.isExpired(now)) {
+      log.warn("Token refresh failed: session expired for sessionId={}", session.id().value());
+      metrics.tokenRefresh("failure").increment();
+      metrics.tokenRefreshFailure("expired").increment();
       throw new InvalidRefreshTokenException();
     }
 
-    UserAuthDataDTO userDTO = queryBus.execute(new GetUserAuthDataQuery(session.userId().value())).orElseThrow()
-        .orElseThrow(() -> new InvalidRefreshTokenException()); // Unwrap Optional
+    Optional<UserAuthDataDTO> userOpt = queryBus.execute(new GetUserAuthDataQuery(session.userId().value()))
+        .orElseThrow();
 
-    AuthUser user = AuthUser.fromDTO(userDTO);
+    if (userOpt.isEmpty()) {
+      log.warn("Token refresh failed: user not found for sessionId={}", session.id().value());
+      metrics.tokenRefresh("failure").increment();
+      metrics.tokenRefreshFailure("invalid").increment();
+      throw new InvalidRefreshTokenException();
+    }
+
+    AuthUser user = AuthUser.fromDTO(userOpt.get());
 
     String newAccessToken = tokenProvider.generateAccessToken(user);
     String newRefreshToken = tokenProvider.generateRefreshToken(user);
@@ -78,6 +105,11 @@ public class RefreshTokenService implements RefreshTokenUseCase {
     eventPublisher.publishAll(newSession.domainEvents());
     session.clearEvents();
     newSession.clearEvents();
+
+    log.debug("Token refresh successful: userId={}, newSessionId={}", user.id().value(), newSession.id().value());
+    metrics.tokenRefresh("success").increment();
+    metrics.sessionCreated().increment();
+    metrics.sessionRevoked("rotation").increment();
 
     return new LoginResult(newAccessToken, newRefreshToken);
   }

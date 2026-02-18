@@ -24,7 +24,9 @@ import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.shared.AuthTestFixtures;
 import com.tickon.identity.shared.contracts.queries.GetUserByUsernameOrEmailQuery;
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
+import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -53,6 +55,7 @@ class LoginServiceTest {
   private RefreshTokenHasher refreshTokenHasher;
   @Mock
   private DomainEventPublisher eventPublisher;
+  private final IdentityMetrics metrics = new IdentityMetrics(new SimpleMeterRegistry());
 
   private LoginService loginService;
 
@@ -66,7 +69,7 @@ class LoginServiceTest {
   @BeforeEach
   void setUp() {
     loginService = new LoginService(queryBus, sessionRepository, passwordHasher, tokenProvider, sessionExpirationMS,
-        fixedClock, refreshTokenHasher, eventPublisher);
+        fixedClock, refreshTokenHasher, eventPublisher, metrics);
   }
 
   @Test

@@ -29,7 +29,9 @@ import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.auth.shared.AuthTestFixtures;
 import com.tickon.identity.shared.contracts.queries.GetUserAuthDataQuery;
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
+import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -56,6 +58,7 @@ class RefreshTokenServiceTest {
   private RefreshTokenHasher refreshTokenHasher;
   @Mock
   private DomainEventPublisher eventPublisher;
+  private final IdentityMetrics metrics = new IdentityMetrics(new SimpleMeterRegistry());
 
   private RefreshTokenService refreshTokenService;
 
@@ -73,7 +76,7 @@ class RefreshTokenServiceTest {
   @BeforeEach
   void setUp() {
     refreshTokenService = new RefreshTokenService(sessionRepository, queryBus, tokenProvider, refreshTokenHasher,
-        fixedClock, eventPublisher);
+        fixedClock, eventPublisher, metrics);
   }
 
   @Test

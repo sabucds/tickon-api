@@ -17,7 +17,9 @@ import com.tickon.identity.auth.domain.PasswordResetToken;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.shared.contracts.queries.GetUserByEmailQuery;
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
+import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -44,6 +46,7 @@ class RequestPasswordResetServiceTest {
   private ResetTokenGenerator resetTokenGenerator;
   @Mock
   private DomainEventPublisher eventPublisher;
+  private final IdentityMetrics metrics = new IdentityMetrics(new SimpleMeterRegistry());
 
   private RequestPasswordResetService service;
 
@@ -54,7 +57,7 @@ class RequestPasswordResetServiceTest {
   @BeforeEach
   void setUp() {
     service = new RequestPasswordResetService(queryBus, resetTokenRepository, resetTokenHasher, resetTokenGenerator,
-        tokenDuration.toMillis(), fixedClock, eventPublisher);
+        tokenDuration.toMillis(), fixedClock, eventPublisher, metrics);
   }
 
   @Test

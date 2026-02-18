@@ -8,10 +8,14 @@ import com.tickon.identity.auth.application.ports.out.ResetTokenRepository;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import java.time.Clock;
 import java.time.Instant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class VerifyResetTokenService implements VerifyResetTokenUseCase {
+
+  private static final Logger log = LoggerFactory.getLogger(VerifyResetTokenService.class);
 
   private final ResetTokenRepository resetTokenRepository;
   private final ResetTokenHasher resetTokenHasher;
@@ -26,15 +30,16 @@ public class VerifyResetTokenService implements VerifyResetTokenUseCase {
 
   @Override
   public VerifyResetTokenResult verifyResetToken(VerifyResetTokenCommand command) {
-    // Hash token
     ResetTokenHash tokenHash = resetTokenHasher.hash(command.resetToken());
 
-    // Find token
     return resetTokenRepository.findByTokenHash(tokenHash.value()).map(token -> {
       Instant now = clock.instant();
-      // Check if valid: not expired and not used
       boolean valid = !token.isExpired(now) && !token.isUsed();
+      log.debug("Reset token verification: valid={}", valid);
       return new VerifyResetTokenResult(valid);
-    }).orElse(new VerifyResetTokenResult(false)); // Token not found = invalid
+    }).orElseGet(() -> {
+      log.debug("Reset token verification: token not found");
+      return new VerifyResetTokenResult(false);
+    });
   }
 }

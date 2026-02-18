@@ -137,6 +137,7 @@ services:
       SECURITY_JWT_PRIVATE_KEY: ${SECURITY_JWT_PRIVATE_KEY:-}
       SECURITY_JWT_PUBLIC_KEY: ${SECURITY_JWT_PUBLIC_KEY:-}
       REFRESH_TOKEN_PEPPER: ${REFRESH_TOKEN_PEPPER:-}
+      TRACING_SAMPLING_PROBABILITY: ${TRACING_SAMPLING_PROBABILITY:-1.0}
     volumes:
       - .:/workspace
       - ./services/identity-service:/app
@@ -153,6 +154,7 @@ services:
     container_name: tickon-prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./infra/prometheus/rules:/etc/prometheus/rules
       - prometheus-data:/prometheus
     ports:
       - "9090:9090"
@@ -171,8 +173,52 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
+      - loki
+      - tempo
+    networks:
+      - tickon-network
+
+  # Grafana Tempo — Distributed Trace Backend
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tickon-tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./infra/tempo/tempo.yaml:/etc/tempo.yaml
+      - tempo-data:/var/tempo
+    ports:
+      - "3200:3200"
+      - "4318:4318"
+    networks:
+      - tickon-network
+
+  # Grafana Loki — Log Aggregation Backend
+  loki:
+    image: grafana/loki:latest
+    container_name: tickon-loki
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    volumes:
+      - ./infra/loki/loki.yaml:/etc/loki/loki.yaml
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - tickon-network
+
+  # Promtail — Log Shipper (Docker socket discovery)
+  promtail:
+    image: grafana/promtail:latest
+    container_name: tickon-promtail
+    command: ["-config.file=/etc/promtail/promtail.yaml"]
+    volumes:
+      - ./infra/promtail/promtail.yaml:/etc/promtail/promtail.yaml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    depends_on:
+      - loki
     networks:
       - tickon-network
 
@@ -181,6 +227,8 @@ volumes:
   postgres-identity-data:
   prometheus-data:
   grafana-data:
+  tempo-data:
+  loki-data:
   maven-cache:
 
 networks:

@@ -1,0 +1,69 @@
+{
+  "title": "Identity Service — Errors & Security",
+  "uid": "identity-errors",
+  "schemaVersion": 38,
+  "tags": ["identity-service"],
+  "panels": [
+    {
+      "id": 1,
+      "title": "5xx Error Rate",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{job=\"identity-service\", status=~\"5..\"}[5m])",
+          "legendFormat": "{{status}} {{uri}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Login Failure Rate",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(identity_auth_login_failure_total[5m])",
+          "legendFormat": "{{reason}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Error Log Stream",
+      "type": "logs",
+      "gridPos": { "x": 0, "y": 8, "w": 24, "h": 10 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "expr": "{service=\"identity-service\", level=\"ERROR\"}",
+          "legendFormat": ""
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Password Reset Token Failures",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(identity_auth_password_reset_failed_total[5m])",
+          "legendFormat": "{{reason}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Session Revocations",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 18, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(identity_auth_session_revoked_total[5m])",
+          "legendFormat": "{{reason}}"
+        }
+      ]
+    }
+  ]
+}

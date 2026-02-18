@@ -1,0 +1,92 @@
+{
+  "title": "Identity Service — Health",
+  "uid": "identity-health",
+  "schemaVersion": 38,
+  "tags": ["identity-service"],
+  "panels": [
+    {
+      "id": 1,
+      "title": "HTTP Request Rate",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{job=\"identity-service\"}[1m])",
+          "legendFormat": "{{uri}} {{method}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "HTTP Error Rate (4xx/5xx)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(http_server_requests_seconds_count{job=\"identity-service\", status=~\"4..|5..\"}[1m])",
+          "legendFormat": "{{status}} {{uri}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "p95 Response Latency",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{job=\"identity-service\"}[5m]))",
+          "legendFormat": "p95 {{uri}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "JVM Heap Usage",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{job=\"identity-service\", area=\"heap\"}",
+          "legendFormat": "Used"
+        },
+        {
+          "expr": "jvm_memory_committed_bytes{job=\"identity-service\", area=\"heap\"}",
+          "legendFormat": "Committed"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "DB Connection Pool",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "hikaricp_connections_active{job=\"identity-service\"}",
+          "legendFormat": "Active"
+        },
+        {
+          "expr": "hikaricp_connections_idle{job=\"identity-service\"}",
+          "legendFormat": "Idle"
+        },
+        {
+          "expr": "hikaricp_connections_pending{job=\"identity-service\"}",
+          "legendFormat": "Pending"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "GC Pause Duration",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(jvm_gc_pause_seconds_sum{job=\"identity-service\"}[1m])",
+          "legendFormat": "{{cause}}"
+        }
+      ]
+    }
+  ]
+}

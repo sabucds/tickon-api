@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import com.tickon.common.domain.DomainEvent;
 import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.PasswordHash;
+import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;
 import com.tickon.identity.user.application.dto.RegisterUserCommand;
 import com.tickon.identity.user.application.dto.UserResult;
@@ -22,6 +23,7 @@ import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
 import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
 import com.tickon.identity.user.domain.valueobjects.Username;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +43,7 @@ class RegisterUserServiceTest {
 
   @Mock
   private DomainEventPublisher eventPublisher;
+  private final IdentityMetrics metrics = new IdentityMetrics(new SimpleMeterRegistry());
 
   private PasswordStrengthPolicy passwordPolicy;
 
@@ -49,7 +52,7 @@ class RegisterUserServiceTest {
   @BeforeEach
   void setUp() {
     passwordPolicy = new PasswordStrengthPolicy();
-    registerUser = new RegisterUserService(userRepository, passwordHasher, passwordPolicy, eventPublisher);
+    registerUser = new RegisterUserService(userRepository, passwordHasher, passwordPolicy, eventPublisher, metrics);
   }
 
   @Test

@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.identity.domain.valueobjects.UserId;
+import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.shared.UserTestFixtures;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +23,11 @@ class DeleteUserServiceTest {
 
   @Mock
   private UserRepository userRepository;
+  private final IdentityMetrics metrics = new IdentityMetrics(new SimpleMeterRegistry());
 
   @BeforeEach
   void setUp() {
-    deleteUserService = new DeleteUserService(userRepository);
+    deleteUserService = new DeleteUserService(userRepository, metrics);
   }
 
   @Test

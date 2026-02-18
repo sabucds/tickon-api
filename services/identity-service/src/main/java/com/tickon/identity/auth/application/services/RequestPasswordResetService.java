@@ -13,17 +13,22 @@ import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenId;
 import com.tickon.identity.shared.contracts.queries.GetUserByEmailQuery;
 import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
+import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
 import com.tickon.identity.shared.ports.out.DomainEventPublisher;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RequestPasswordResetService implements RequestPasswordResetUseCase {
+
+  private static final Logger log = LoggerFactory.getLogger(RequestPasswordResetService.class);
 
   private final QueryBus queryBus;
   private final ResetTokenRepository resetTokenRepository;
@@ -32,11 +37,12 @@ public class RequestPasswordResetService implements RequestPasswordResetUseCase 
   private final Duration tokenDuration;
   private final Clock clock;
   private final DomainEventPublisher eventPublisher;
+  private final IdentityMetrics metrics;
 
   public RequestPasswordResetService(QueryBus queryBus, ResetTokenRepository resetTokenRepository,
       ResetTokenHasher resetTokenHasher, ResetTokenGenerator resetTokenGenerator,
       @Value("${security.password-reset.token-expiration-ms:3600000}") long tokenExpirationMs, Clock clock,
-      DomainEventPublisher eventPublisher) {
+      DomainEventPublisher eventPublisher, IdentityMetrics metrics) {
     this.queryBus = queryBus;
     this.resetTokenRepository = resetTokenRepository;
     this.resetTokenHasher = resetTokenHasher;
@@ -44,11 +50,14 @@ public class RequestPasswordResetService implements RequestPasswordResetUseCase 
     this.tokenDuration = Duration.ofMillis(tokenExpirationMs);
     this.clock = clock;
     this.eventPublisher = eventPublisher;
+    this.metrics = metrics;
   }
 
   @Override
   @Transactional
   public RequestPasswordResetResult requestPasswordReset(RequestPasswordResetCommand command) {
+    log.info("Password reset requested");
+    metrics.passwordResetRequested().increment();
 
     Optional<UserAuthDataDTO> userOpt = queryBus.execute(new GetUserByEmailQuery(command.email().value()))
         .orElseThrow();

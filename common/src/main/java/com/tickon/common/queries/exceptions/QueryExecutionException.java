@@ -1,9 +1,5 @@
 package com.tickon.common.queries.exceptions;
 
-/**
- * Exception thrown when a query handler fails during execution. This wraps any
- * unexpected exceptions that occur while processing a query.
- */
 public class QueryExecutionException extends QueryBusException {
   private final Class<?> queryClass;
 
@@ -16,11 +12,6 @@ public class QueryExecutionException extends QueryBusException {
     this(queryClass, cause.getMessage(), cause);
   }
 
-  /**
-   * Gets the query class that failed to execute.
-   *
-   * @return the query class
-   */
   public Class<?> getQueryClass() {
     return queryClass;
   }

@@ -43,9 +43,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Test for RefreshTokenService using QueryBus for cross-module communication.
- */
 @ExtendWith(MockitoExtension.class)
 class RefreshTokenServiceTest {
 
@@ -138,7 +135,7 @@ class RefreshTokenServiceTest {
     Session session = createValidSession(user);
     stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
     stubSessionFound(REFRESH_TOKEN_HASH, session);
-    when(queryBus.execute(any(GetUserAuthDataQuery.class))).thenReturn(new QueryResult.NotFound<>());
+    when(queryBus.execute(any(GetUserAuthDataQuery.class))).thenReturn(new QueryResult.Success<>(Optional.empty()));
 
     assertThatThrownBy(() -> refreshTokenService.refresh(new RefreshTokenCommand(REFRESH_TOKEN)))
         .isInstanceOf(InvalidRefreshTokenException.class).hasMessageContaining("Invalid refresh token");
@@ -230,7 +227,7 @@ class RefreshTokenServiceTest {
 
   private void stubUserFound(AuthUser user) {
     UserAuthDataDTO dto = new UserAuthDataDTO(user.id().value(), user.passwordHash().value(), user.status().name());
-    when(queryBus.execute(any(GetUserAuthDataQuery.class))).thenReturn(new QueryResult.Success<>(dto));
+    when(queryBus.execute(any(GetUserAuthDataQuery.class))).thenReturn(new QueryResult.Success<>(Optional.of(dto)));
   }
 
   private void stubNewTokens(AuthUser user) {

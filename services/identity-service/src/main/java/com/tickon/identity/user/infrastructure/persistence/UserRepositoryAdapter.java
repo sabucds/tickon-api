@@ -1,12 +1,11 @@
 package com.tickon.identity.user.infrastructure.persistence;
 
+import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.UserId;
-import com.tickon.identity.shared.infrastructure.persistence.entities.UserEntity;
-import com.tickon.identity.shared.infrastructure.persistence.repositories.JpaUserRepository;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
-import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.Username;
+import com.tickon.identity.user.infrastructure.persistence.entities.UserEntity;
 import com.tickon.identity.user.infrastructure.persistence.mappers.UserPersistenceMapper;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
@@ -46,6 +45,11 @@ public class UserRepositoryAdapter implements UserRepository {
   @Override
   public Optional<User> findByUsernameOrEmail(String usernameOrEmail) {
     return jpaRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).map(mapper::toDomain);
+  }
+
+  @Override
+  public Optional<User> findByEmail(Email email) {
+    return jpaRepository.findByEmail(email.value()).map(mapper::toDomain);
   }
 
   @Override

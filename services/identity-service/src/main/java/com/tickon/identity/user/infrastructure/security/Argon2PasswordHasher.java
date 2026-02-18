@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Primary
-public class Argon2PasswordHasher implements PasswordHasher {
+public class Argon2PasswordHasher
+    implements PasswordHasher, com.tickon.identity.auth.application.ports.out.PasswordHasher {
 
   private final Argon2PasswordEncoder encoder;
 

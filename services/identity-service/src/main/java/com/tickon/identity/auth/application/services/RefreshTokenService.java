@@ -21,10 +21,6 @@ import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * RefreshToken service using QueryBus for cross-module communication. Auth
- * module queries user data without directly importing user module.
- */
 @Service
 public class RefreshTokenService implements RefreshTokenUseCase {
 
@@ -64,11 +60,9 @@ public class RefreshTokenService implements RefreshTokenUseCase {
       throw new InvalidRefreshTokenException();
     }
 
-    // Query user data from user module via QueryBus
-    UserAuthDataDTO userDTO = queryBus.execute(new GetUserAuthDataQuery(session.userId().value()))
-        .orElseThrow(result -> new InvalidRefreshTokenException());
+    UserAuthDataDTO userDTO = queryBus.execute(new GetUserAuthDataQuery(session.userId().value())).orElseThrow()
+        .orElseThrow(() -> new InvalidRefreshTokenException()); // Unwrap Optional
 
-    // Convert DTO to auth's domain model
     AuthUser user = AuthUser.fromDTO(userDTO);
 
     String newAccessToken = tokenProvider.generateAccessToken(user);

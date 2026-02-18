@@ -39,7 +39,6 @@ public class LogoutService implements LogoutUseCase {
 
   private void revokeSession(Session session) {
     if (session.isRevoked()) {
-      // Already revoked - idempotent behavior, no action needed
       return;
     }
 

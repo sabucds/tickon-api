@@ -7,6 +7,7 @@ import com.tickon.identity.user.application.ports.in.RegisterUserUseCase;
 import com.tickon.identity.user.infrastructure.web.dto.RegisterUserRequest;
 import com.tickon.identity.user.infrastructure.web.dto.UserResponse;
 import com.tickon.identity.user.infrastructure.web.mappers.UserMapper;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,7 @@ public class UserController {
   }
 
   @GetMapping("me")
-  public ResponseEntity<UserResponse> getCurrentUser(@RequestHeader("X-User-Id") String userId) {
+  public ResponseEntity<UserResponse> getCurrentUser(@Parameter(hidden = true) @RequestHeader("X-User-Id") String userId) {
     return getUserById.handle(UserId.from(userId)).map(UserMapper::toDto).map(ResponseEntity::ok)
         .orElseGet(() -> ResponseEntity.notFound().build());
   }

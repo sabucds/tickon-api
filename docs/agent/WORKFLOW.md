@@ -1,29 +1,23 @@
-# Development Workflow (Canonical)
+# Development Workflow (Short Canon)
 
-This is the canonical workflow for implementing features and fixing bugs in Tickon API.
-Keep changes small, verifiable, and within the architecture boundaries.
+Use for any non-trivial task. Keep changes small, testable, and within boundaries.
 
-## Default loop (non-trivial work)
-For anything beyond a tiny change, use this loop:
-
+## Required loop (don’t skip)
 1) Research
 2) Plan
 3) Implement (TDD)
 4) Verify
 
-Do not skip steps.
+## Context rules
+- Open/read the minimum files needed for the current step.
+- Work in small chunks (2–4 steps), then update the plan and clear context.
+- Keep responses concise.
 
-## Context & cost control (required)
-- Keep only the minimum files in context to perform the next step.
-- After each chunk of work, write a short progress note into the active plan doc, then `/clear`.
-- Default responses must be concise. No long explanations unless asked.
+## Plan files (required)
+- Create/update: `docs/plans/<YYYY-MM-DD>-<topic>.md`
+- Plans are the project memory.
 
-## Plans (required for non-trivial work)
-- Every non-trivial task must have a plan file:
-  - `docs/plans/<YYYY-MM-DD>-<topic>.md`
-- A plan is the project memory. Prefer updating the plan over keeping long chat context.
-
-### Plan template (copy into each plan)
+Plan template (copy into plan file):
 ```text
 # <ticket> <feature>
 Status: planned | in-progress | done
@@ -33,87 +27,42 @@ Service/module: <...>
 ## Scope / Non-goals
 ## Touchpoints (files/packages)
 ## Tests to write first
-## Steps (execute 2–4 at a time)
+## Steps (2–4 at a time)
 ## Verification (exact commands)
 ## Progress log (brief)
 ```
 
-## Phase 1 — Research
+## ADR rule
+If you change boundaries, module relationships, shared contracts, infra dependencies, or cross-module patterns: add an ADR in `docs/adr/<NNNN>-<short>-<title>.md`.
 
-**Objective:** understand the existing code and constraints.
+## Research
+- Read relevant files only; reuse existing patterns.
+- Identify: owning service/bounded context, layer (domain/application/infrastructure), cross-module needs.
+- Output: update the plan.
 
-- Read only the relevant files (use `@` mentions selectively).
-- Search the codebase for similar patterns before inventing new ones.
-- Identify:
-  - which service and bounded context (module) owns the change
-  - which layer(s) it belongs in (`domain` / `application` / `infrastructure`)
-  - whether cross-module communication is needed (QueryBus / CommandBus / Domain Events)
+## Plan
+Plan must include:
+- Numbered steps + files/packages per step
+- First failing tests
+- Exact verification commands
+- Rollback note if risky
+- 1–3 edge cases as tests
+If the plan changes architecture/boundaries/dependencies: stop and request approval before coding.
 
-**Output:** a short plan draft (or plan updates) in the plan file.
+## Implement (TDD)
+- New behavior: failing test → minimal code → refactor with tests green.
+- Execute only 2–4 plan steps, then stop and update the plan.
+- No drive-by refactors; log follow-ups in the plan.
 
-## Phase 2 — Plan
-
-**Objective:** write a step-by-step plan that is easy to execute and verify.
-
-**Plan requirements:**
-- steps are numbered and small
-- each step names files/packages to touch
-- includes the first failing test(s) to write
-- includes exact verification commands
-- includes rollback notes if risk exists
-- includes only 1–3 high-impact edge cases as tests (don’t enumerate everything)
-
-Stop after writing the plan and wait for approval if the task changes architecture, boundaries, or introduces new dependencies.
-
-## Phase 3 — Implement (TDD)
-
-**Objective:** implement in small batches.
-
-**Rules:**
-- TDD is mandatory for new behavior:
-  1) write a failing test  
-  2) implement minimal code to pass  
-  3) refactor with tests green
-- Execute 2–4 plan steps, then stop.
-- Do not do drive-by refactors. Record them as follow-ups in the plan.
-
-## Phase 4 — Verify
-
-**Objective:** ensure correctness and cleanliness.
-
-**Required:**
+## Verify (commands)
 - `./mvnw clean verify`
+- If formatting fails: `./mvnw spotless:apply` then `./mvnw clean verify`
+- Single service tests: `./mvnw test -pl services/<service>`
 
-If formatting fails:
-- `./mvnw spotless:apply`
-- then `./mvnw clean verify` again
+## Git (trunk-based)
+- Short-lived branches: `feat/<short>`, `fix/<short>`, `docs/<short>`
+- Small commits; Conventional commits: `feat`, `fix`, `test`, `refactor`, `chore` (optional scope)
 
-## Git workflow (trunk-based)
-
-Use short-lived branches:
-- `feat/<short>`
-- `fix/<short>`
-- `docs/<short>`
-
-Commit frequently (small commits).
-
-Conventional Commits for messages:
-- `feat(scope): ...`
-- `fix(scope): ...`
-- `test(scope): ...`
-- `refactor(scope): ...`
-- `chore(scope): ...`
-
-## Debugging rules (systematic)
-
-- Read the error message.
-- Reproduce consistently.
-- Find similar working code.
-- Form one hypothesis at a time; test minimally.
-- Avoid multi-fix “shotgun” commits.
-
-## Quick commands
-
-- Verify all: `./mvnw clean verify`
-- Format: `./mvnw spotless:apply`
-- One service tests: `./mvnw test -pl services/<service>`
+## Debugging
+- Read the error, reproduce, compare with working code.
+- Change one thing at a time; avoid shotgun commits.

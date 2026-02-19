@@ -137,7 +137,10 @@ services:
       SECURITY_JWT_PRIVATE_KEY: ${SECURITY_JWT_PRIVATE_KEY:-}
       SECURITY_JWT_PUBLIC_KEY: ${SECURITY_JWT_PUBLIC_KEY:-}
       REFRESH_TOKEN_PEPPER: ${REFRESH_TOKEN_PEPPER:-}
+      PASSWORD_RESET_TOKEN_PEPPER: ${PASSWORD_RESET_TOKEN_PEPPER:-}
       TRACING_SAMPLING_PROBABILITY: ${TRACING_SAMPLING_PROBABILITY:-1.0}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL:-}
     volumes:
       - .:/workspace
       - ./services/identity-service:/app
@@ -201,8 +204,9 @@ services:
     container_name: tickon-loki
     command: ["-config.file=/etc/loki/loki.yaml"]
     volumes:
-      - ./infra/loki/loki.yaml:/etc/loki/loki.yaml
-      - loki-data:/loki
+      - ./infra/loki/loki.yaml:/etc/loki/loki.yaml:ro
+      - loki-data:/var/loki
+      - loki-wal:/wal
     ports:
       - "3100:3100"
     networks:
@@ -230,6 +234,7 @@ volumes:
   tempo-data:
   loki-data:
   maven-cache:
+  loki-wal:
 
 networks:
   tickon-network:

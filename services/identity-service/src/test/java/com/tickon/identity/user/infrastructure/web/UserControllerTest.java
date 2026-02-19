@@ -2,6 +2,7 @@ package com.tickon.identity.user.infrastructure.web;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -13,6 +14,7 @@ import com.tickon.identity.user.application.ports.in.DeleteUserUseCase;
 import com.tickon.identity.user.application.ports.in.GetUserByIdUseCase;
 import com.tickon.identity.user.application.ports.in.RegisterUserUseCase;
 import com.tickon.identity.user.infrastructure.web.dto.RegisterUserRequest;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -99,6 +101,26 @@ class UserControllerTest {
         .andExpect(jsonPath("$.errors.firstName").exists()).andExpect(jsonPath("$.errors.lastName").exists())
         .andExpect(jsonPath("$.errors.username").exists()).andExpect(jsonPath("$.errors.email").exists())
         .andExpect(jsonPath("$.errors.password").exists());
+  }
+
+  @Test
+  void shouldReturnCurrentUser_WhenHeaderPresent() throws Exception {
+    String userId = "550e8400-e29b-41d4-a716-446655440000";
+    UserResult userResult = new UserResult(userId, "johndoe", "john@example.com", "John", "Doe");
+    when(getUserByIdService.handle(any())).thenReturn(Optional.of(userResult));
+
+    mockMvc.perform(get("/v1/users/me").header("X-User-Id", userId)).andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(userId)).andExpect(jsonPath("$.username").value("johndoe"))
+        .andExpect(jsonPath("$.email").value("john@example.com")).andExpect(jsonPath("$.firstName").value("John"))
+        .andExpect(jsonPath("$.lastName").value("Doe"));
+  }
+
+  @Test
+  void shouldReturn404_WhenCurrentUserNotFound() throws Exception {
+    when(getUserByIdService.handle(any())).thenReturn(Optional.empty());
+
+    mockMvc.perform(get("/v1/users/me").header("X-User-Id", "550e8400-e29b-41d4-a716-446655440000"))
+        .andExpect(status().isNotFound());
   }
 
 }

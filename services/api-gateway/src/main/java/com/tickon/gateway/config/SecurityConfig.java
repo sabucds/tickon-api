@@ -16,7 +16,9 @@ public class SecurityConfig {
   SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
     return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
         .authorizeExchange(exchanges -> exchanges.pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            .pathMatchers(HttpMethod.POST, "/api/identity/v1/auth/login", "/api/identity/v1/users").permitAll()
+            .pathMatchers(HttpMethod.POST, "/api/identity/v1/auth/login", "/api/identity/v1/users",
+                "/api/identity/v1/auth/password-reset/request")
+            .permitAll()
             .pathMatchers("/api/identity/swagger-ui/**", "/api/identity/docs/**", "/api/identity/v3/api-docs/**",
                 "/api/identity/v3/api-docs")
             .permitAll()

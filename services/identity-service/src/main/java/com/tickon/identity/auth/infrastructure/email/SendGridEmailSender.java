@@ -7,6 +7,7 @@ import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
+import com.sendgrid.helpers.mail.objects.Personalization;
 import com.tickon.identity.auth.application.ports.out.EmailSender;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -41,10 +42,17 @@ public class SendGridEmailSender implements EmailSender {
     String htmlContent = buildHtmlContent(resetUrl, recipientName);
     String textContent = buildTextContent(resetUrl, recipientName);
 
-    Content content = new Content("text/html", htmlContent);
-    Mail mail = new Mail(from, subject, toEmail, content);
+    Mail mail = new Mail();
+    mail.setFrom(from);
+    mail.setSubject(subject);
 
+    Personalization personalization = new Personalization();
+    personalization.addTo(toEmail);
+    mail.addPersonalization(personalization);
+
+    // Order matters for SendGrid:
     mail.addContent(new Content("text/plain", textContent));
+    mail.addContent(new Content("text/html", htmlContent));
 
     try {
       Request request = new Request();

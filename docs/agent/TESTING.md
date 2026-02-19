@@ -60,58 +60,6 @@ Controllers:
 2) implement minimal code to pass
 3) refactor with tests green
 
-## Example (short)
-```java
-@ExtendWith(MockitoExtension.class)
-class RegisterUserServiceTest {
-
-  @Mock UserRepository userRepository;
-  @Mock PasswordHasher passwordHasher;
-  @Mock DomainEventPublisher eventPublisher;
-
-  RegisterUserService service;
-
-  @BeforeEach
-  void setUp() {
-    service = new RegisterUserService(
-        userRepository,
-        passwordHasher,
-        new PasswordStrengthPolicy(),
-        eventPublisher
-    );
-  }
-
-  @Test
-  void shouldRegisterUser_WhenValidInput() {
-    when(userRepository.existsByEmail(any())).thenReturn(false);
-    when(passwordHasher.hash(any())).thenReturn(new PasswordHash("hashed"));
-
-    var result = service.register(aCommand("john@example.com", "SecurePass123!"));
-
-    var captor = ArgumentCaptor.forClass(User.class);
-    verify(userRepository).save(captor.capture());
-    verify(eventPublisher).publishAll(anyList());
-
-    assertThat(result.email()).isEqualTo("john@example.com");
-    assertThat(captor.getValue().email().value()).isEqualTo("john@example.com");
-  }
-
-  @Test
-  void shouldThrowDuplicateEmail_WhenEmailExists() {
-    when(userRepository.existsByEmail(any())).thenReturn(true);
-
-    assertThatThrownBy(() -> service.register(aCommand("john@example.com", "x")))
-        .isInstanceOf(DuplicateEmailException.class);
-
-    verifyNoInteractions(passwordHasher, eventPublisher);
-  }
-
-  private RegisterUserCommand aCommand(String email, String pwd) {
-    return new RegisterUserCommand(Email.from(email), pwd);
-  }
-}
-```
-
 ## Agent cost controls
 Do not paste long templates into chat output.
 - Write only tests relevant to the change.

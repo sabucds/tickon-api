@@ -7,10 +7,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.identity.domain.valueobjects.Email;
-import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
-import com.tickon.identity.shared.ports.out.DomainEventPublisher;
+import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
+import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
+import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import com.tickon.identity.user.application.dto.RegisterUserCommand;
-import com.tickon.identity.user.application.ports.out.PasswordHasher;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
 import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;

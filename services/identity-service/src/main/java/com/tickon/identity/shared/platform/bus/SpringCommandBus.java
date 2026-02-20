@@ -1,4 +1,4 @@
-package com.tickon.identity.shared.infrastructure;
+package com.tickon.identity.shared.platform.bus;
 
 import com.tickon.common.commands.Command;
 import com.tickon.common.commands.CommandBus;

@@ -1,4 +1,4 @@
-package com.tickon.identity.shared.exceptions;
+package com.tickon.identity.shared.kernel.exceptions;
 
 public abstract class IdentityDomainException extends RuntimeException {
   private final IdentityExceptionCodes code;

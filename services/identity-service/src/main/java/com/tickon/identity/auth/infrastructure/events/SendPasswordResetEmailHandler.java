@@ -2,7 +2,7 @@ package com.tickon.identity.auth.infrastructure.events;
 
 import com.tickon.identity.auth.application.ports.out.EmailSender;
 import com.tickon.identity.auth.domain.events.PasswordResetRequestedEvent;
-import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
+import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;

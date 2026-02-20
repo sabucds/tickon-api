@@ -8,6 +8,7 @@ import com.tickon.common.commands.CommandHandler;
 import com.tickon.common.commands.CommandResult;
 import com.tickon.common.commands.exceptions.CommandExecutionException;
 import com.tickon.common.commands.exceptions.CommandHandlerNotFoundException;
+import com.tickon.identity.shared.platform.bus.SpringCommandBus;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 

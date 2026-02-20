@@ -1,4 +1,4 @@
-package com.tickon.identity.shared.infrastructure.web;
+package com.tickon.identity.shared.platform.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;

@@ -1,15 +1,12 @@
 package com.tickon.identity.user.infrastructure.security;
 
 import com.tickon.common.identity.domain.valueobjects.PasswordHash;
-import com.tickon.identity.user.application.ports.out.PasswordHasher;
-import org.springframework.context.annotation.Primary;
+import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-@Primary
-public class Argon2PasswordHasher
-    implements PasswordHasher, com.tickon.identity.auth.application.ports.out.PasswordHasher {
+public class Argon2PasswordHasher implements PasswordHasher {
 
   private final Argon2PasswordEncoder encoder;
 

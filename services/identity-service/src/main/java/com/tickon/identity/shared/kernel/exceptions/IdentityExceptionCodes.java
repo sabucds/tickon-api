@@ -1,4 +1,4 @@
-package com.tickon.identity.shared.exceptions;
+package com.tickon.identity.shared.kernel.exceptions;
 
 import org.springframework.http.HttpStatus;
 

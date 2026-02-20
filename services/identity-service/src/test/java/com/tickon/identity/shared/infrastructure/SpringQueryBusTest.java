@@ -8,6 +8,7 @@ import com.tickon.common.queries.QueryHandler;
 import com.tickon.common.queries.QueryResult;
 import com.tickon.common.queries.exceptions.QueryExecutionException;
 import com.tickon.common.queries.exceptions.QueryHandlerNotFoundException;
+import com.tickon.identity.shared.platform.bus.SpringQueryBus;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;

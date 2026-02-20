@@ -1,4 +1,4 @@
-package com.tickon.identity.shared.infrastructure.web;
+package com.tickon.identity.shared.platform.web;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

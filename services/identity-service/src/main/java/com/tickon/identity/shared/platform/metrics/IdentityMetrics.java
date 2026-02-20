@@ -1,4 +1,4 @@
-package com.tickon.identity.shared.infrastructure.metrics;
+package com.tickon.identity.shared.platform.metrics;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

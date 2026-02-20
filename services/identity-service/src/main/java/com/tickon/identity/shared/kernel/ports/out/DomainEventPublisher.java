@@ -1,4 +1,4 @@
-package com.tickon.identity.shared.ports.out;
+package com.tickon.identity.shared.kernel.ports.out;
 
 import com.tickon.common.domain.DomainEvent;
 import java.util.List;

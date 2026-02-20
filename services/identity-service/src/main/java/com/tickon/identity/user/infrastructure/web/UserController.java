@@ -44,7 +44,8 @@ public class UserController {
   }
 
   @GetMapping("me")
-  public ResponseEntity<UserResponse> getCurrentUser(@Parameter(hidden = true) @RequestHeader("X-User-Id") String userId) {
+  public ResponseEntity<UserResponse> getCurrentUser(
+      @Parameter(hidden = true) @RequestHeader("X-User-Id") String userId) {
     return getUserById.handle(UserId.from(userId)).map(UserMapper::toDto).map(ResponseEntity::ok)
         .orElseGet(() -> ResponseEntity.notFound().build());
   }

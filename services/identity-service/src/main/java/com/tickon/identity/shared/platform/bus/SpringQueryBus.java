@@ -1,4 +1,4 @@
-package com.tickon.identity.shared.infrastructure;
+package com.tickon.identity.shared.platform.bus;
 
 import com.tickon.common.queries.Query;
 import com.tickon.common.queries.QueryBus;

@@ -1,7 +1,7 @@
-package com.tickon.identity.shared.infrastructure;
+package com.tickon.identity.shared.platform.bus;
 
 import com.tickon.common.domain.DomainEvent;
-import com.tickon.identity.shared.ports.out.DomainEventPublisher;
+import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
 import java.util.List;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;

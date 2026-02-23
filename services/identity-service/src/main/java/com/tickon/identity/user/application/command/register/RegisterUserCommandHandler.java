@@ -1,13 +1,13 @@
-package com.tickon.identity.user.application.services;
+package com.tickon.identity.user.application.command.register;
 
+import com.tickon.common.commands.CommandHandler;
+import com.tickon.common.commands.CommandResult;
 import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
 import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
-import com.tickon.identity.user.application.dto.RegisterUserCommand;
-import com.tickon.identity.user.application.dto.UserResult;
-import com.tickon.identity.user.application.ports.in.RegisterUserUseCase;
+import com.tickon.identity.user.application.UserResult;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
@@ -15,12 +15,11 @@ import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class RegisterUserService implements RegisterUserUseCase {
-
-  private static final Logger log = LoggerFactory.getLogger(RegisterUserService.class);
+@Component
+public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCommand, UserResult> {
+  private static final Logger log = LoggerFactory.getLogger(RegisterUserCommandHandler.class);
 
   private final UserRepository userRepository;
   private final PasswordHasher passwordHasher;
@@ -28,7 +27,7 @@ public class RegisterUserService implements RegisterUserUseCase {
   private final DomainEventPublisher eventPublisher;
   private final IdentityMetrics metrics;
 
-  public RegisterUserService(UserRepository userRepository, PasswordHasher passwordHasher,
+  public RegisterUserCommandHandler(UserRepository userRepository, PasswordHasher passwordHasher,
       PasswordStrengthPolicy passwordPolicy, DomainEventPublisher eventPublisher, IdentityMetrics metrics) {
     this.userRepository = userRepository;
     this.passwordHasher = passwordHasher;
@@ -38,7 +37,7 @@ public class RegisterUserService implements RegisterUserUseCase {
   }
 
   @Override
-  public UserResult register(RegisterUserCommand cmd) {
+  public CommandResult<UserResult> handle(RegisterUserCommand cmd) {
     if (userRepository.existsByEmail(cmd.email())) {
       log.warn("Registration failed: duplicate email for username='{}'", cmd.username().value());
       metrics.registrationFailed("duplicate_email").increment();
@@ -61,7 +60,11 @@ public class RegisterUserService implements RegisterUserUseCase {
     log.info("User registered: userId={}, username='{}'", user.id().value(), cmd.username().value());
     metrics.userRegistered().increment();
 
-    return UserResult.from(user);
+    return new CommandResult.Success<>(UserResult.from(user));
   }
 
+  @Override
+  public Class<RegisterUserCommand> getCommandClass() {
+    return RegisterUserCommand.class;
+  }
 }

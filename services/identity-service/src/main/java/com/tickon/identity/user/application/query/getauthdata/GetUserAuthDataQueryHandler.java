@@ -1,4 +1,4 @@
-package com.tickon.identity.user.application.queryhandlers;
+package com.tickon.identity.user.application.query.getauthdata;
 
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.common.queries.QueryHandler;

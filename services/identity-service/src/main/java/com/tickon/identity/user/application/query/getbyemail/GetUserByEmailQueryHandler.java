@@ -1,4 +1,4 @@
-package com.tickon.identity.user.application.queryhandlers;
+package com.tickon.identity.user.application.query.getbyemail;
 
 import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.queries.QueryHandler;

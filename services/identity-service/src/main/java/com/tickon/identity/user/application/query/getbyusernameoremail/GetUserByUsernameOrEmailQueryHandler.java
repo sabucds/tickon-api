@@ -1,4 +1,4 @@
-package com.tickon.identity.user.application.queryhandlers;
+package com.tickon.identity.user.application.query.getbyusernameoremail;
 
 import com.tickon.common.queries.QueryHandler;
 import com.tickon.common.queries.QueryResult;

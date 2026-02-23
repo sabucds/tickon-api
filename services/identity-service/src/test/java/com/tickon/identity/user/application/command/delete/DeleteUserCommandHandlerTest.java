@@ -1,4 +1,4 @@
-package com.tickon.identity.user.application.services;
+package com.tickon.identity.user.application.command.delete;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -17,9 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class DeleteUserServiceTest {
+class DeleteUserCommandHandlerTest {
 
-  private DeleteUserService deleteUserService;
+  private DeleteUserCommandHandler handler;
 
   @Mock
   private UserRepository userRepository;
@@ -27,7 +27,7 @@ class DeleteUserServiceTest {
 
   @BeforeEach
   void setUp() {
-    deleteUserService = new DeleteUserService(userRepository, metrics);
+    handler = new DeleteUserCommandHandler(userRepository, metrics);
   }
 
   @Test
@@ -35,7 +35,7 @@ class DeleteUserServiceTest {
     String userId = "123e4567-e89b-12d3-a456-426614174000";
     User user = UserTestFixtures.aUserWithId(userId);
     when(userRepository.findById(UserId.from(userId))).thenReturn(Optional.of(user));
-    deleteUserService.handle(UserId.from(userId));
+    handler.handle(new DeleteUserCommand(UserId.from(userId)));
   }
 
   @Test
@@ -43,10 +43,9 @@ class DeleteUserServiceTest {
     String userId = "123e4567-e89b-12d3-a456-426614174999";
     when(userRepository.findById(UserId.from(userId))).thenReturn(Optional.empty());
     try {
-      deleteUserService.handle(UserId.from(userId));
+      handler.handle(new DeleteUserCommand(UserId.from(userId)));
     } catch (IllegalArgumentException e) {
       assertThat(e.getMessage()).isEqualTo("User not found with id: " + UserId.from(userId));
     }
   }
-
 }

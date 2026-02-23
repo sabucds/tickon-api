@@ -1,9 +1,11 @@
 package com.tickon.identity.user.infrastructure.web;
 
+import com.tickon.common.commands.CommandBus;
 import com.tickon.common.identity.domain.valueobjects.UserId;
-import com.tickon.identity.user.application.ports.in.DeleteUserUseCase;
-import com.tickon.identity.user.application.ports.in.GetUserByIdUseCase;
-import com.tickon.identity.user.application.ports.in.RegisterUserUseCase;
+import com.tickon.common.queries.QueryBus;
+import com.tickon.identity.user.application.UserResult;
+import com.tickon.identity.user.application.command.delete.DeleteUserCommand;
+import com.tickon.identity.user.application.query.getuserbyid.GetUserByIdQuery;
 import com.tickon.identity.user.infrastructure.web.dto.RegisterUserRequest;
 import com.tickon.identity.user.infrastructure.web.dto.UserResponse;
 import com.tickon.identity.user.infrastructure.web.mappers.UserMapper;
@@ -26,39 +28,37 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/users")
 public class UserController {
 
-  private final RegisterUserUseCase registerUser;
-  private final GetUserByIdUseCase getUserById;
-  private final DeleteUserUseCase deleteUser;
+  private final CommandBus commandBus;
+  private final QueryBus queryBus;
 
-  UserController(RegisterUserUseCase registerUser, GetUserByIdUseCase getUserById, DeleteUserUseCase deleteUser) {
-    this.registerUser = registerUser;
-    this.getUserById = getUserById;
-    this.deleteUser = deleteUser;
+  UserController(CommandBus commandBus, QueryBus queryBus) {
+    this.commandBus = commandBus;
+    this.queryBus = queryBus;
   }
 
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping
   public UserResponse register(@Valid @RequestBody RegisterUserRequest request) {
-    var appResponse = registerUser.register(UserMapper.toRegisterCommand(request));
-    return UserMapper.toDto(appResponse);
+    UserResult result = commandBus.execute(UserMapper.toRegisterCommand(request)).orElseThrow();
+    return UserMapper.toDto(result);
   }
 
   @GetMapping("me")
   public ResponseEntity<UserResponse> getCurrentUser(
       @Parameter(hidden = true) @RequestHeader("X-User-Id") String userId) {
-    return getUserById.handle(UserId.from(userId)).map(UserMapper::toDto).map(ResponseEntity::ok)
-        .orElseGet(() -> ResponseEntity.notFound().build());
+    return queryBus.<Optional<UserResult>>execute(new GetUserByIdQuery(UserId.from(userId))).orElseThrow()
+        .map(UserMapper::toDto).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   @GetMapping("/{id}")
   public Optional<UserResponse> getUser(@PathVariable String id) {
-    return getUserById.handle(UserId.from(id)).map(UserMapper::toDto);
-
+    return queryBus.<Optional<UserResult>>execute(new GetUserByIdQuery(UserId.from(id))).orElseThrow()
+        .map(UserMapper::toDto);
   }
 
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{id}")
   public void deleteUser(@PathVariable String id) {
-    deleteUser.handle(UserId.from(id));
+    commandBus.execute(new DeleteUserCommand(UserId.from(id)));
   }
 }

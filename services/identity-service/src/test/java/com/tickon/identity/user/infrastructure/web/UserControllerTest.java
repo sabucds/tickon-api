@@ -8,11 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tickon.identity.user.application.dto.RegisterUserCommand;
-import com.tickon.identity.user.application.dto.UserResult;
-import com.tickon.identity.user.application.ports.in.DeleteUserUseCase;
-import com.tickon.identity.user.application.ports.in.GetUserByIdUseCase;
-import com.tickon.identity.user.application.ports.in.RegisterUserUseCase;
+import com.tickon.common.commands.CommandBus;
+import com.tickon.common.commands.CommandResult;
+import com.tickon.common.queries.QueryBus;
+import com.tickon.common.queries.QueryResult;
+import com.tickon.identity.user.application.UserResult;
 import com.tickon.identity.user.infrastructure.web.dto.RegisterUserRequest;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -34,13 +34,10 @@ class UserControllerTest {
   private ObjectMapper objectMapper;
 
   @MockBean
-  private RegisterUserUseCase registerUserService;
+  private CommandBus commandBus;
 
   @MockBean
-  private GetUserByIdUseCase getUserByIdService;
-
-  @MockBean
-  private DeleteUserUseCase deleteUserUseCase;
+  private QueryBus queryBus;
 
   @Test
   void shouldRegisterNewUser_WhenValidInput() throws Exception {
@@ -48,7 +45,7 @@ class UserControllerTest {
         "SecurePass123!");
     UserResult expectedResponse = new UserResult("123", "johndoe", "john@example.com", "John", "Doe");
 
-    when(registerUserService.register(any(RegisterUserCommand.class))).thenReturn(expectedResponse);
+    when(commandBus.execute(any())).thenReturn(new CommandResult.Success<>(expectedResponse));
 
     mockMvc
         .perform(
@@ -107,7 +104,7 @@ class UserControllerTest {
   void shouldReturnCurrentUser_WhenHeaderPresent() throws Exception {
     String userId = "550e8400-e29b-41d4-a716-446655440000";
     UserResult userResult = new UserResult(userId, "johndoe", "john@example.com", "John", "Doe");
-    when(getUserByIdService.handle(any())).thenReturn(Optional.of(userResult));
+    when(queryBus.execute(any())).thenReturn(new QueryResult.Success<>(Optional.of(userResult)));
 
     mockMvc.perform(get("/v1/users/me").header("X-User-Id", userId)).andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(userId)).andExpect(jsonPath("$.username").value("johndoe"))
@@ -117,10 +114,9 @@ class UserControllerTest {
 
   @Test
   void shouldReturn404_WhenCurrentUserNotFound() throws Exception {
-    when(getUserByIdService.handle(any())).thenReturn(Optional.empty());
+    when(queryBus.execute(any())).thenReturn(new QueryResult.Success<>(Optional.empty()));
 
     mockMvc.perform(get("/v1/users/me").header("X-User-Id", "550e8400-e29b-41d4-a716-446655440000"))
         .andExpect(status().isNotFound());
   }
-
 }

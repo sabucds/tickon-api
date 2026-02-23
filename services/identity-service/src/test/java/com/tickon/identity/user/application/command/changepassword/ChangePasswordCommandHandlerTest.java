@@ -1,4 +1,4 @@
-package com.tickon.identity.user.application.commandhandlers;
+package com.tickon.identity.user.application.command.changepassword;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

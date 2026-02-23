@@ -1,4 +1,4 @@
-package com.tickon.identity.user.application.commandhandlers;
+package com.tickon.identity.user.application.command.changepassword;
 
 import com.tickon.common.commands.CommandHandler;
 import com.tickon.common.commands.CommandResult;

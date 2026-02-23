@@ -1,4 +1,4 @@
-package com.tickon.identity.user.application.dto;
+package com.tickon.identity.user.application;
 
 import com.tickon.identity.user.domain.User;
 

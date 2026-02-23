@@ -1,4 +1,4 @@
-package com.tickon.identity.user.application.services;
+package com.tickon.identity.user.application.command.register;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -13,8 +13,7 @@ import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
 import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
-import com.tickon.identity.user.application.dto.RegisterUserCommand;
-import com.tickon.identity.user.application.dto.UserResult;
+import com.tickon.identity.user.application.UserResult;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.events.UserCreatedEvent;
@@ -33,7 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class RegisterUserServiceTest {
+class RegisterUserCommandHandlerTest {
 
   @Mock
   private UserRepository userRepository;
@@ -47,12 +46,12 @@ class RegisterUserServiceTest {
 
   private PasswordStrengthPolicy passwordPolicy;
 
-  private RegisterUserService registerUser;
+  private RegisterUserCommandHandler handler;
 
   @BeforeEach
   void setUp() {
     passwordPolicy = new PasswordStrengthPolicy();
-    registerUser = new RegisterUserService(userRepository, passwordHasher, passwordPolicy, eventPublisher, metrics);
+    handler = new RegisterUserCommandHandler(userRepository, passwordHasher, passwordPolicy, eventPublisher, metrics);
   }
 
   @Test
@@ -65,7 +64,7 @@ class RegisterUserServiceTest {
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
     when(passwordHasher.hash("SecurePass123!")).thenReturn(hashedPassword);
 
-    UserResult result = registerUser.register(command);
+    UserResult result = handler.handle(command).orElseThrow();
 
     assertThat(result.username()).isEqualTo("john_doe");
     assertThat(result.email()).isEqualTo("john@example.com");
@@ -100,7 +99,7 @@ class RegisterUserServiceTest {
 
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(true);
 
-    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(DuplicateEmailException.class)
+    assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(DuplicateEmailException.class)
         .hasMessage("Email already in use: john@example.com");
     verify(userRepository).existsByEmail(any(Email.class));
     verifyNoMoreInteractions(userRepository, passwordHasher, eventPublisher);
@@ -113,7 +112,7 @@ class RegisterUserServiceTest {
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(true);
 
-    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(DuplicateUsernameException.class)
+    assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(DuplicateUsernameException.class)
         .hasMessage("Username already in use: john_doe");
     verify(userRepository).existsByEmail(any(Email.class));
     verify(userRepository).existsByUsername(any(Username.class));
@@ -127,7 +126,7 @@ class RegisterUserServiceTest {
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
 
-    assertThatThrownBy(() -> registerUser.register(command)).isInstanceOf(InvalidPasswordException.class)
+    assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(InvalidPasswordException.class)
         .hasMessageContaining("Password must be at least");
   }
 
@@ -141,8 +140,8 @@ class RegisterUserServiceTest {
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
     when(passwordHasher.hash(any())).thenReturn(new PasswordHash("hashed"));
 
-    UserResult result1 = registerUser.register(command1);
-    UserResult result2 = registerUser.register(command2);
+    UserResult result1 = handler.handle(command1).orElseThrow();
+    UserResult result2 = handler.handle(command2).orElseThrow();
 
     assertThat(result1.id()).isNotEqualTo(result2.id());
   }
@@ -155,7 +154,7 @@ class RegisterUserServiceTest {
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
     when(passwordHasher.hash(any())).thenReturn(new PasswordHash("hashed"));
 
-    registerUser.register(command);
+    handler.handle(command);
 
     verify(passwordHasher).hash("SecurePass123!");
   }

@@ -1,4 +1,4 @@
-package com.tickon.identity.config;
+package com.tickon.identity.bootstrap.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -13,7 +13,7 @@ import com.tickon.identity.auth.application.ports.out.SessionRepository;
 import com.tickon.identity.auth.application.ports.out.TokenProvider;
 import com.tickon.identity.auth.domain.exceptions.InvalidCredentialsException;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
-import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
+import com.tickon.identity.contracts.user.queries.UserAuthDataDTO;
 import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
 import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;

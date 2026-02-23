@@ -3,7 +3,7 @@ package com.tickon.identity.auth.domain;
 import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.common.identity.domain.valueobjects.UserStatus;
-import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
+import com.tickon.identity.contracts.user.queries.UserAuthDataDTO;
 import java.util.Objects;
 
 public class AuthUser {

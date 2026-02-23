@@ -1,4 +1,4 @@
-package com.tickon.identity.config;
+package com.tickon.identity.bootstrap.config;
 
 import java.time.Clock;
 import org.springframework.context.annotation.Bean;

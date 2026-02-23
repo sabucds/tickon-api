@@ -1,4 +1,4 @@
-package com.tickon.identity.shared.contracts.queries;
+package com.tickon.identity.contracts.user.queries;
 
 import com.tickon.common.queries.Query;
 import java.util.Optional;

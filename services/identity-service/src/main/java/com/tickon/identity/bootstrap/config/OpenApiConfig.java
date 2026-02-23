@@ -1,4 +1,4 @@
-package com.tickon.identity.config;
+package com.tickon.identity.bootstrap.config;
 
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.models.Components;

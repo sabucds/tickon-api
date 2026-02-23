@@ -2,8 +2,8 @@ package com.tickon.identity.user.application.queryhandlers;
 
 import com.tickon.common.queries.QueryHandler;
 import com.tickon.common.queries.QueryResult;
-import com.tickon.identity.shared.contracts.queries.GetUserByUsernameOrEmailQuery;
-import com.tickon.identity.shared.contracts.queries.UserAuthDataDTO;
+import com.tickon.identity.contracts.user.queries.GetUserByUsernameOrEmailQuery;
+import com.tickon.identity.contracts.user.queries.UserAuthDataDTO;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
 import java.util.Optional;

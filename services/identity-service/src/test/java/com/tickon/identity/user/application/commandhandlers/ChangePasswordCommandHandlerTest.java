@@ -14,7 +14,7 @@ import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.common.identity.domain.valueobjects.UserStatus;
-import com.tickon.identity.shared.contracts.commands.ChangePasswordCommand;
+import com.tickon.identity.contracts.user.commands.ChangePasswordCommand;
 import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;

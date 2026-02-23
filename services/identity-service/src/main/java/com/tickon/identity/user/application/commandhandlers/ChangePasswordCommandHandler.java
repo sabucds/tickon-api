@@ -3,7 +3,7 @@ package com.tickon.identity.user.application.commandhandlers;
 import com.tickon.common.commands.CommandHandler;
 import com.tickon.common.commands.CommandResult;
 import com.tickon.common.identity.domain.valueobjects.PasswordHash;
-import com.tickon.identity.shared.contracts.commands.ChangePasswordCommand;
+import com.tickon.identity.contracts.user.commands.ChangePasswordCommand;
 import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;

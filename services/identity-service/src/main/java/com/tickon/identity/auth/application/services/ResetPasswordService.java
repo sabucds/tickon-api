@@ -10,7 +10,7 @@ import com.tickon.identity.auth.application.ports.out.ResetTokenRepository;
 import com.tickon.identity.auth.domain.PasswordResetToken;
 import com.tickon.identity.auth.domain.exceptions.InvalidResetTokenException;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
-import com.tickon.identity.shared.contracts.commands.ChangePasswordCommand;
+import com.tickon.identity.contracts.user.commands.ChangePasswordCommand;
 import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import java.time.Clock;

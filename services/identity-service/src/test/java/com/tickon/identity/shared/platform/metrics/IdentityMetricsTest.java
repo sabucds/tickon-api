@@ -1,8 +1,7 @@
-package com.tickon.identity.shared.infrastructure.metrics;
+package com.tickon.identity.shared.platform.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;

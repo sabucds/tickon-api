@@ -62,13 +62,14 @@ public class SendGridEmailSender implements EmailSender {
       Response response = sendGrid.api(request);
 
       if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
-        log.info("Password reset email sent successfully to {}", to);
+        log.info("Password reset email sent successfully to {}", maskEmail(to));
       } else {
-        log.error("Failed to send password reset email to {}. Status: {}, Body: {}", to, response.getStatusCode(),
-            response.getBody());
+        String errorMessage = String.format("SendGrid email failed with status=%s, body=%s",
+            response.getStatusCode(), response.getBody());
+        throw new EmailSendException(errorMessage);
       }
     } catch (IOException e) {
-      log.error("Error sending password reset email to {}", to, e);
+      throw new EmailSendException("Failed to send password reset email", e);
     }
   }
 
@@ -120,5 +121,20 @@ public class SendGridEmailSender implements EmailSender {
         Thanks,
         The Tickon Team
         """, recipientName, resetUrl);
+  }
+
+  private String maskEmail(String email) {
+    if (email == null || email.isBlank()) {
+      return "unknown";
+    }
+    String[] parts = email.split("@", 2);
+    if (parts.length != 2) {
+      return "invalid";
+    }
+    String local = parts[0];
+    String domain = parts[1];
+    String localMasked = local.isEmpty() ? "*" : local.substring(0, 1) + "***";
+    String domainMasked = domain.isEmpty() ? "*" : domain.substring(0, 1) + "***";
+    return localMasked + "@" + domainMasked;
   }
 }

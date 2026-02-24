@@ -106,6 +106,15 @@ class SpringCommandBusTest {
   }
 
   @Test
+  void shouldThrowWhenNullCommandDispatched() {
+    SpringCommandBus commandBus = new SpringCommandBus(List.of());
+
+    assertThatThrownBy(() -> commandBus.execute(null))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Command must not be null");
+  }
+
+  @Test
   void shouldExecuteMultipleCommands() {
     TestCommandHandler handler1 = new TestCommandHandler();
     AnotherCommandHandler handler2 = new AnotherCommandHandler();

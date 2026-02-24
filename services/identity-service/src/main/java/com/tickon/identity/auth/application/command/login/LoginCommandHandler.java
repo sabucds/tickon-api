@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginResult> {
@@ -58,6 +59,7 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginRe
   }
 
   @Override
+  @Transactional
   public CommandResult<LoginResult> handle(LoginCommand cmd) {
     log.info("Login attempt for user '{}'", cmd.usernameOrEmail());
 

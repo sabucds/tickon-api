@@ -16,6 +16,7 @@ import com.tickon.identity.user.domain.valueobjects.UserId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCommand, UserResult> {
@@ -37,6 +38,7 @@ public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCo
   }
 
   @Override
+  @Transactional
   public CommandResult<UserResult> handle(RegisterUserCommand cmd) {
     if (userRepository.existsByEmail(cmd.email())) {
       log.warn("Registration failed: duplicate email for username='{}'", cmd.username().value());

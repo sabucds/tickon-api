@@ -49,6 +49,9 @@ public class SpringCommandBus implements CommandBus {
   @Override
   @SuppressWarnings("unchecked")
   public <R> CommandResult<R> execute(Command<R> command) {
+    if (command == null) {
+      throw new IllegalArgumentException("Command must not be null");
+    }
     String commandName = command.getCommandName();
     log.debug("Executing command: {}", commandName);
     long startTime = System.currentTimeMillis();

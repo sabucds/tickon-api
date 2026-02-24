@@ -54,6 +54,44 @@ class IdentityMdcFilterTest {
   }
 
   @Test
+  void shouldSkipUserIdWhenHeaderIsEmptyString() throws Exception {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    FilterChain chain = mock(FilterChain.class);
+    when(request.getHeader("X-User-Id")).thenReturn("");
+
+    doAnswer(invocation -> {
+      assertThat(MDC.get("userId")).isNull();
+      return null;
+    }).when(chain).doFilter(request, response);
+
+    filter.doFilterInternal(request, response, chain);
+
+    verify(chain).doFilter(request, response);
+  }
+
+  @Test
+  void shouldPreserveExistingMdcKeysAndRemoveOnlyUserId() throws Exception {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    FilterChain chain = mock(FilterChain.class);
+    when(request.getHeader("X-User-Id")).thenReturn("user-123");
+
+    MDC.put("traceId", "t-1");
+
+    doAnswer(invocation -> {
+      assertThat(MDC.get("userId")).isEqualTo("user-123");
+      assertThat(MDC.get("traceId")).isEqualTo("t-1");
+      return null;
+    }).when(chain).doFilter(request, response);
+
+    filter.doFilterInternal(request, response, chain);
+
+    assertThat(MDC.get("userId")).isNull();
+    assertThat(MDC.get("traceId")).isEqualTo("t-1");
+  }
+
+  @Test
   void shouldClearMdcAfterRequestCompletes() throws Exception {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);

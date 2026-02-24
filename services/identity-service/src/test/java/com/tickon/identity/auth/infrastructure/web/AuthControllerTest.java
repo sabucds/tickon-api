@@ -14,6 +14,7 @@ import com.tickon.common.commands.CommandResult;
 import com.tickon.identity.auth.application.LoginResult;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.LogoutRequest;
+import com.tickon.identity.auth.infrastructure.web.dto.RefreshTokenRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -67,6 +68,20 @@ class AuthControllerTest {
         .content(objectMapper.writeValueAsString(request))).andExpect(status().isNoContent());
 
     verify(commandBus).execute(any());
+  }
+
+  @Test
+  void shouldRefreshAndReturnTokens_WhenValidRequest() throws Exception {
+    RefreshTokenRequest request = new RefreshTokenRequest("refresh-token");
+    LoginResult response = new LoginResult("new-access-token", "new-refresh-token");
+
+    when(commandBus.execute(any())).thenReturn(new CommandResult.Success<>(response));
+
+    mockMvc
+        .perform(post("/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.accessToken").value("new-access-token"))
+        .andExpect(jsonPath("$.refreshToken").value("new-refresh-token"));
   }
 
   @Test

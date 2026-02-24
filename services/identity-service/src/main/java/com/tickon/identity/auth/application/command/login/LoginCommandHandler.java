@@ -7,7 +7,6 @@ import com.tickon.identity.auth.application.LoginResult;
 import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
 import com.tickon.identity.auth.application.ports.out.SessionRepository;
 import com.tickon.identity.auth.application.ports.out.TokenProvider;
-import com.tickon.identity.auth.domain.AuthUser;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.exceptions.InvalidCredentialsException;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
@@ -22,6 +21,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,28 +71,30 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginRe
       throw new InvalidCredentialsException();
     }
 
-    AuthUser user = AuthUser.fromDTO(userOpt.get());
+    UserAuthDataDTO user = userOpt.get();
+    UUID userId = user.id();
+    String passwordHash = user.passwordHash();
 
-    if (!passwordHasher.verify(cmd.password(), user.passwordHash())) {
+    if (!passwordHasher.verify(cmd.password(), passwordHash)) {
       log.warn("Login failed: invalid credentials for '{}'", cmd.usernameOrEmail());
       metrics.loginAttempt("failure").increment();
       metrics.loginFailure("invalid_credentials").increment();
       throw new InvalidCredentialsException();
     }
 
-    String accessToken = tokenProvider.generateAccessToken(user);
-    String refreshToken = tokenProvider.generateRefreshToken(user);
+    String accessToken = tokenProvider.generateAccessToken(userId);
+    String refreshToken = tokenProvider.generateRefreshToken();
     RefreshTokenHash refreshTokenHash = refreshTokenHasher.hash(refreshToken);
 
     Instant now = clock.instant();
-    Session session = Session.create(SessionId.generate(), refreshTokenHash, user.id(), cmd.deviceId(),
+    Session session = Session.create(SessionId.generate(), refreshTokenHash, userId, cmd.deviceId(),
         FamilyId.generate(), null, sessionDuration, now);
 
     sessionRepository.save(session);
     eventPublisher.publishAll(session.domainEvents());
     session.clearEvents();
 
-    log.info("Login successful: userId={}, sessionId={}", user.id().value(), session.id().value());
+    log.info("Login successful: userId={}, sessionId={}", userId, session.id().value());
     metrics.loginAttempt("success").increment();
     metrics.sessionCreated().increment();
 

@@ -8,8 +8,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.domain.DomainEvent;
-import com.tickon.common.identity.domain.valueobjects.Email;
-import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
 import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
@@ -21,6 +19,8 @@ import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
 import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
 import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
+import com.tickon.identity.user.domain.valueobjects.Email;
+import com.tickon.identity.user.domain.valueobjects.PasswordHash;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.List;
@@ -62,7 +62,7 @@ class RegisterUserCommandHandlerTest {
 
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
-    when(passwordHasher.hash("SecurePass123!")).thenReturn(hashedPassword);
+    when(passwordHasher.hash("SecurePass123!")).thenReturn(hashedPassword.value());
 
     UserResult result = handler.handle(command).orElseThrow();
 
@@ -138,7 +138,7 @@ class RegisterUserCommandHandlerTest {
 
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
-    when(passwordHasher.hash(any())).thenReturn(new PasswordHash("hashed"));
+    when(passwordHasher.hash(any())).thenReturn("hashed");
 
     UserResult result1 = handler.handle(command1).orElseThrow();
     UserResult result2 = handler.handle(command2).orElseThrow();
@@ -152,7 +152,7 @@ class RegisterUserCommandHandlerTest {
 
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
-    when(passwordHasher.hash(any())).thenReturn(new PasswordHash("hashed"));
+    when(passwordHasher.hash(any())).thenReturn("hashed");
 
     handler.handle(command);
 

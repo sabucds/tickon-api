@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,18 +21,18 @@ class Argon2PasswordHasherIntegrationTest {
   void shouldCreateAHashedPassword() {
     String rawPassword = "mySecretPassword";
 
-    PasswordHash passwordHash = hasher.hash(rawPassword);
+    String passwordHash = hasher.hash(rawPassword);
 
     assertNotNull(passwordHash);
-    assertNotEquals(passwordHash.value(), rawPassword);
-    assertTrue(passwordHash.value().startsWith("$argon2id$"));
+    assertNotEquals(passwordHash, rawPassword);
+    assertTrue(passwordHash.startsWith("$argon2id$"));
   }
 
   @Test
   void shouldVerifyAHashedPassword() {
     String rawPassword = "mySecretPassword";
 
-    PasswordHash passwordHash = hasher.hash(rawPassword);
+    String passwordHash = hasher.hash(rawPassword);
 
     assertTrue(hasher.verify(rawPassword, passwordHash));
   }
@@ -43,7 +42,7 @@ class Argon2PasswordHasherIntegrationTest {
     String rawPassword = "mySecretPassword";
     String wrongPassword = "wrongPassword";
 
-    PasswordHash passwordHash = hasher.hash(rawPassword);
+    String passwordHash = hasher.hash(rawPassword);
 
     assertFalse(hasher.verify(wrongPassword, passwordHash));
   }
@@ -52,10 +51,10 @@ class Argon2PasswordHasherIntegrationTest {
   void shouldGenerateDifferentHashes_ForSamePassword() {
     String rawPassword = "mySecretPassword";
 
-    PasswordHash passwordHash1 = hasher.hash(rawPassword);
-    PasswordHash passwordHash2 = hasher.hash(rawPassword);
+    String passwordHash1 = hasher.hash(rawPassword);
+    String passwordHash2 = hasher.hash(rawPassword);
 
-    assertNotEquals(passwordHash1.value(), passwordHash2.value());
+    assertNotEquals(passwordHash1, passwordHash2);
     assertTrue(hasher.verify(rawPassword, passwordHash1));
     assertTrue(hasher.verify(rawPassword, passwordHash2));
   }

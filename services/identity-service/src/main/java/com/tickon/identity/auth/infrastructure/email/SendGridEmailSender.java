@@ -31,12 +31,11 @@ public class SendGridEmailSender implements EmailSender {
   }
 
   @Override
-  public void sendPasswordResetEmail(com.tickon.common.identity.domain.valueobjects.Email to, String resetToken,
-      String recipientName) {
+  public void sendPasswordResetEmail(String to, String resetToken, String recipientName) {
     String resetUrl = emailProperties.getResetUrlBase() + "?token=" + resetToken;
 
     Email from = new Email(emailProperties.getFromEmail(), emailProperties.getFromName());
-    Email toEmail = new Email(to.value(), recipientName);
+    Email toEmail = new Email(to, recipientName);
     String subject = "Reset Your Password";
 
     String htmlContent = buildHtmlContent(resetUrl, recipientName);
@@ -63,13 +62,13 @@ public class SendGridEmailSender implements EmailSender {
       Response response = sendGrid.api(request);
 
       if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
-        log.info("Password reset email sent successfully to {}", to.value());
+        log.info("Password reset email sent successfully to {}", to);
       } else {
-        log.error("Failed to send password reset email to {}. Status: {}, Body: {}", to.value(),
-            response.getStatusCode(), response.getBody());
+        log.error("Failed to send password reset email to {}. Status: {}, Body: {}", to, response.getStatusCode(),
+            response.getBody());
       }
     } catch (IOException e) {
-      log.error("Error sending password reset email to {}", to.value(), e);
+      log.error("Error sending password reset email to {}", to, e);
     }
   }
 

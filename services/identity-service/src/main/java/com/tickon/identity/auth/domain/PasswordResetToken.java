@@ -1,8 +1,6 @@
 package com.tickon.identity.auth.domain;
 
 import com.tickon.common.domain.AggregateRoot;
-import com.tickon.common.identity.domain.valueobjects.Email;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.events.PasswordResetCompletedEvent;
 import com.tickon.identity.auth.domain.events.PasswordResetRequestedEvent;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
@@ -10,18 +8,19 @@ import com.tickon.identity.auth.domain.valueobjects.ResetTokenId;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 
 public class PasswordResetToken extends AggregateRoot {
 
   private final ResetTokenId id;
   private final ResetTokenHash tokenHash;
-  private final UserId userId;
-  private final Email email;
+  private final UUID userId;
+  private final String email;
   private final Instant absoluteExpiresAt;
 
   private Instant usedAt;
 
-  private PasswordResetToken(ResetTokenId id, ResetTokenHash tokenHash, UserId userId, Email email,
+  private PasswordResetToken(ResetTokenId id, ResetTokenHash tokenHash, UUID userId, String email,
       Instant absoluteExpiresAt, Instant usedAt) {
     this.id = Objects.requireNonNull(id, "id");
     this.tokenHash = Objects.requireNonNull(tokenHash, "tokenHash");
@@ -31,7 +30,7 @@ public class PasswordResetToken extends AggregateRoot {
     this.usedAt = usedAt;
   }
 
-  public static PasswordResetToken create(ResetTokenId id, ResetTokenHash tokenHash, UserId userId, Email email,
+  public static PasswordResetToken create(ResetTokenId id, ResetTokenHash tokenHash, UUID userId, String email,
       Duration duration, Instant now, String plainToken) {
     Objects.requireNonNull(duration, "duration");
     Objects.requireNonNull(now, "now");
@@ -46,7 +45,7 @@ public class PasswordResetToken extends AggregateRoot {
     return token;
   }
 
-  public static PasswordResetToken restore(ResetTokenId id, ResetTokenHash tokenHash, UserId userId, Email email,
+  public static PasswordResetToken restore(ResetTokenId id, ResetTokenHash tokenHash, UUID userId, String email,
       Instant absoluteExpiresAt, Instant usedAt) {
     return new PasswordResetToken(id, tokenHash, userId, email, absoluteExpiresAt, usedAt);
   }
@@ -83,11 +82,11 @@ public class PasswordResetToken extends AggregateRoot {
     return tokenHash;
   }
 
-  public UserId userId() {
+  public UUID userId() {
     return userId;
   }
 
-  public Email email() {
+  public String email() {
     return email;
   }
 

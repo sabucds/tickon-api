@@ -1,8 +1,8 @@
 package com.tickon.identity.user.infrastructure.web.mappers;
 
-import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.identity.user.application.UserResult;
 import com.tickon.identity.user.application.command.register.RegisterUserCommand;
+import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import com.tickon.identity.user.infrastructure.web.dto.RegisterUserRequest;
 import com.tickon.identity.user.infrastructure.web.dto.UserResponse;

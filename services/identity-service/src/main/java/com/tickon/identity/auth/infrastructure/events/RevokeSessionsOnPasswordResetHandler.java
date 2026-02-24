@@ -29,12 +29,12 @@ public class RevokeSessionsOnPasswordResetHandler {
   @Async
   @EventListener
   public void handle(PasswordResetCompletedEvent event) {
-    log.info("Revoking all sessions for user {} due to password reset", event.userId().value());
+    log.info("Revoking all sessions for user {} due to password reset", event.userId());
     try {
       sessionRepository.revokeAllByUserId(event.userId(), clock.instant(), RevokeReason.PASSWORD_RESET);
       metrics.sessionRevoked("password_reset").increment();
     } catch (Exception e) {
-      log.error("Failed to revoke sessions for user {} after password reset", event.userId().value(), e);
+      log.error("Failed to revoke sessions for user {} after password reset", event.userId(), e);
     }
   }
 }

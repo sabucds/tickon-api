@@ -1,11 +1,11 @@
 package com.tickon.identity.user.domain;
 
 import com.tickon.common.domain.AggregateRoot;
-import com.tickon.common.identity.domain.valueobjects.Email;
-import com.tickon.common.identity.domain.valueobjects.PasswordHash;
-import com.tickon.common.identity.domain.valueobjects.UserId;
-import com.tickon.common.identity.domain.valueobjects.UserStatus;
 import com.tickon.identity.user.domain.events.UserCreatedEvent;
+import com.tickon.identity.user.domain.valueobjects.Email;
+import com.tickon.identity.user.domain.valueobjects.PasswordHash;
+import com.tickon.identity.user.domain.valueobjects.UserId;
+import com.tickon.identity.user.domain.valueobjects.UserStatus;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import java.util.Objects;
 

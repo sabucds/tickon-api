@@ -7,7 +7,6 @@ import com.tickon.identity.auth.application.LoginResult;
 import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
 import com.tickon.identity.auth.application.ports.out.SessionRepository;
 import com.tickon.identity.auth.application.ports.out.TokenProvider;
-import com.tickon.identity.auth.domain.AuthUser;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.exceptions.InvalidRefreshTokenException;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
@@ -20,6 +19,7 @@ import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -80,8 +80,7 @@ public class RefreshTokenCommandHandler implements CommandHandler<RefreshTokenCo
       throw new InvalidRefreshTokenException();
     }
 
-    Optional<UserAuthDataDTO> userOpt = queryBus.execute(new GetUserAuthDataQuery(session.userId().value()))
-        .orElseThrow();
+    Optional<UserAuthDataDTO> userOpt = queryBus.execute(new GetUserAuthDataQuery(session.userId())).orElseThrow();
 
     if (userOpt.isEmpty()) {
       log.warn("Token refresh failed: user not found for sessionId={}", session.id().value());
@@ -89,11 +88,11 @@ public class RefreshTokenCommandHandler implements CommandHandler<RefreshTokenCo
       metrics.tokenRefreshFailure("invalid").increment();
       throw new InvalidRefreshTokenException();
     }
+    UserAuthDataDTO user = userOpt.get();
+    UUID userId = user.id();
 
-    AuthUser user = AuthUser.fromDTO(userOpt.get());
-
-    String newAccessToken = tokenProvider.generateAccessToken(user);
-    String newRefreshToken = tokenProvider.generateRefreshToken(user);
+    String newAccessToken = tokenProvider.generateAccessToken(userId);
+    String newRefreshToken = tokenProvider.generateRefreshToken();
     RefreshTokenHash newTokenHash = refreshTokenHasher.hash(newRefreshToken);
 
     Session newSession = session.rotateTo(now, newTokenHash, SessionId.generate());
@@ -106,7 +105,7 @@ public class RefreshTokenCommandHandler implements CommandHandler<RefreshTokenCo
     session.clearEvents();
     newSession.clearEvents();
 
-    log.debug("Token refresh successful: userId={}, newSessionId={}", user.id().value(), newSession.id().value());
+    log.debug("Token refresh successful: userId={}, newSessionId={}", userId, newSession.id().value());
     metrics.tokenRefresh("success").increment();
     metrics.sessionCreated().increment();
     metrics.sessionRevoked("rotation").increment();

@@ -7,8 +7,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.tickon.common.identity.domain.valueobjects.Email;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.common.queries.QueryBus;
 import com.tickon.common.queries.QueryResult;
 import com.tickon.identity.auth.application.ports.out.ResetTokenGenerator;
@@ -63,9 +61,9 @@ class RequestPasswordResetCommandHandlerTest {
 
   @Test
   void shouldCreateTokenAndPublishEvent_WhenUserExists() {
-    Email email = Email.from("user@example.com");
-    UserId userId = new UserId(UUID.randomUUID());
-    UserAuthDataDTO userDTO = new UserAuthDataDTO(userId.value(), "password-hash", "ACTIVE");
+    String email = "user@example.com";
+    UUID userId = UUID.randomUUID();
+    UserAuthDataDTO userDTO = new UserAuthDataDTO(userId, "password-hash", "ACTIVE");
 
     when(queryBus.execute(any(GetUserByEmailQuery.class))).thenReturn(new QueryResult.Success<>(Optional.of(userDTO)));
     when(resetTokenGenerator.generateSecureToken()).thenReturn("plain-token-abc123");
@@ -88,7 +86,7 @@ class RequestPasswordResetCommandHandlerTest {
 
   @Test
   void shouldReturnSuccess_WhenUserDoesNotExist() {
-    Email email = Email.from("nonexistent@example.com");
+    String email = "nonexistent@example.com";
     when(queryBus.execute(any(GetUserByEmailQuery.class))).thenReturn(new QueryResult.Success<>(Optional.empty()));
 
     RequestPasswordResetResult result = handler.handle(new RequestPasswordResetCommand(email)).orElseThrow();
@@ -100,9 +98,9 @@ class RequestPasswordResetCommandHandlerTest {
 
   @Test
   void shouldInvalidateOldTokens_BeforeCreatingNew() {
-    Email email = Email.from("user@example.com");
-    UserId userId = new UserId(UUID.randomUUID());
-    UserAuthDataDTO userDTO = new UserAuthDataDTO(userId.value(), "hash", "ACTIVE");
+    String email = "user@example.com";
+    UUID userId = UUID.randomUUID();
+    UserAuthDataDTO userDTO = new UserAuthDataDTO(userId, "hash", "ACTIVE");
 
     when(queryBus.execute(any(GetUserByEmailQuery.class))).thenReturn(new QueryResult.Success<>(Optional.of(userDTO)));
     when(resetTokenGenerator.generateSecureToken()).thenReturn("token");

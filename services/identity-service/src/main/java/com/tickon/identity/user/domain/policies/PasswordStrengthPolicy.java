@@ -1,9 +1,7 @@
 package com.tickon.identity.user.domain.policies;
 
 import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
-import org.springframework.stereotype.Component;
 
-@Component
 public class PasswordStrengthPolicy {
 
   private static final int MIN_LENGTH = 8;

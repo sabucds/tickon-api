@@ -3,7 +3,6 @@ package com.tickon.identity.auth.application.command.resetpassword;
 import com.tickon.common.commands.CommandBus;
 import com.tickon.common.commands.CommandHandler;
 import com.tickon.common.commands.CommandResult;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.application.ports.out.ResetTokenHasher;
 import com.tickon.identity.auth.application.ports.out.ResetTokenRepository;
 import com.tickon.identity.auth.domain.PasswordResetToken;
@@ -14,6 +13,7 @@ import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -54,18 +54,18 @@ public class ResetPasswordCommandHandler implements CommandHandler<ResetPassword
     Instant now = clock.instant();
 
     if (token.isExpired(now)) {
-      log.warn("Password reset failed: token expired for userId={}", token.userId().value());
+      log.warn("Password reset failed: token expired for userId={}", token.userId());
       metrics.passwordResetFailed("expired_token").increment();
       throw new InvalidResetTokenException();
     }
 
     if (token.isUsed()) {
-      log.warn("Password reset failed: token already used for userId={}", token.userId().value());
+      log.warn("Password reset failed: token already used for userId={}", token.userId());
       metrics.passwordResetFailed("invalid_token").increment();
       throw new InvalidResetTokenException();
     }
 
-    UserId userId = token.userId();
+    UUID userId = token.userId();
     commandBus.execute(new ChangePasswordCommand(userId, command.newPassword())).orElseThrow();
 
     token.markAsUsed(now);
@@ -74,7 +74,7 @@ public class ResetPasswordCommandHandler implements CommandHandler<ResetPassword
     eventPublisher.publishAll(token.domainEvents());
     token.clearEvents();
 
-    log.info("Password reset completed: userId={}", userId.value());
+    log.info("Password reset completed: userId={}", userId);
     metrics.passwordResetCompleted().increment();
 
     return new CommandResult.Success<>(null);

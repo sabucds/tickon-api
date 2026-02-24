@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.tickon.common.domain.DomainEvent;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.events.SessionCreatedEvent;
 import com.tickon.identity.auth.domain.events.SessionRevokedEvent;
 import com.tickon.identity.auth.domain.exceptions.SessionExpiredException;
@@ -17,13 +16,14 @@ import com.tickon.identity.auth.shared.AuthTestFixtures;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class SessionTest {
 
   private static final Instant FIXED_INSTANT = Instant.parse("2025-01-15T10:00:00Z");
   private static final Duration DURATION_30_DAYS = java.time.Duration.ofDays(30);
-  private static final UserId USER_ID = UserId.generate();
+  private static final UUID USER_ID = UUID.randomUUID();
 
   @Test
   void shouldCreateSessionWithValidParameters() {

@@ -1,12 +1,12 @@
 package com.tickon.identity.auth.application.ports.out;
 
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface SessionRepository {
 
@@ -18,5 +18,5 @@ public interface SessionRepository {
 
   void revokeAllByFamilyId(FamilyId familyId, Instant revokedAt, RevokeReason reason);
 
-  void revokeAllByUserId(UserId userId, Instant now, RevokeReason reason);
+  void revokeAllByUserId(UUID userId, Instant now, RevokeReason reason);
 }

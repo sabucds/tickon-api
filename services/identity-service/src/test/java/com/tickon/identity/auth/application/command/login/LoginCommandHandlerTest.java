@@ -14,7 +14,6 @@ import com.tickon.identity.auth.application.LoginResult;
 import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
 import com.tickon.identity.auth.application.ports.out.SessionRepository;
 import com.tickon.identity.auth.application.ports.out.TokenProvider;
-import com.tickon.identity.auth.domain.AuthUser;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.events.SessionCreatedEvent;
 import com.tickon.identity.auth.domain.exceptions.InvalidCredentialsException;
@@ -32,6 +31,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,10 +73,11 @@ class LoginCommandHandlerTest {
 
   @Test
   void shouldLoginAndPersistSession_WhenCredentialsAreValid() {
-    AuthUser user = AuthTestFixtures.anAuthUser();
+    UserAuthDataDTO user = AuthTestFixtures.aUserAuthData();
+    UUID userId = user.id();
     stubUserFound(user);
     stubValidPassword("plain-password", user);
-    stubTokens(user, "access-token", "refresh-token", "hashed-refresh-token");
+    stubTokens("access-token", "refresh-token", "hashed-refresh-token");
 
     LoginResult result = handler.handle(new LoginCommand(IDENTIFIER, "plain-password", DEVICE_ID)).orElseThrow();
 
@@ -87,7 +88,7 @@ class LoginCommandHandlerTest {
     verify(sessionRepository).save(sessionCaptor.capture());
 
     Session savedSession = sessionCaptor.getValue();
-    assertThat(savedSession.userId()).isEqualTo(user.id());
+    assertThat(savedSession.userId()).isEqualTo(userId);
     assertThat(savedSession.deviceId()).isEqualTo(DEVICE_ID);
     assertThat(savedSession.refreshTokenHash()).isEqualTo(RefreshTokenHash.from("hashed-refresh-token"));
     assertThat(savedSession.isRevoked()).isFalse();
@@ -115,7 +116,7 @@ class LoginCommandHandlerTest {
 
   @Test
   void shouldThrow_WhenPasswordIsInvalid() {
-    AuthUser user = AuthTestFixtures.anAuthUser();
+    UserAuthDataDTO user = AuthTestFixtures.aUserAuthData();
     stubUserFound(user);
     stubInvalidPassword("wrong-password", user);
 
@@ -125,23 +126,22 @@ class LoginCommandHandlerTest {
     verify(sessionRepository, never()).save(any());
   }
 
-  private void stubUserFound(AuthUser user) {
-    UserAuthDataDTO dto = new UserAuthDataDTO(user.id().value(), user.passwordHash().value(), user.status().name());
+  private void stubUserFound(UserAuthDataDTO user) {
     when(queryBus.execute(any(GetUserByUsernameOrEmailQuery.class)))
-        .thenReturn(new QueryResult.Success<>(Optional.of(dto)));
+        .thenReturn(new QueryResult.Success<>(Optional.of(user)));
   }
 
-  private void stubValidPassword(String raw, AuthUser user) {
+  private void stubValidPassword(String raw, UserAuthDataDTO user) {
     when(passwordHasher.verify(raw, user.passwordHash())).thenReturn(true);
   }
 
-  private void stubInvalidPassword(String raw, AuthUser user) {
+  private void stubInvalidPassword(String raw, UserAuthDataDTO user) {
     when(passwordHasher.verify(raw, user.passwordHash())).thenReturn(false);
   }
 
-  private void stubTokens(AuthUser user, String access, String refresh, String refreshHash) {
-    when(tokenProvider.generateAccessToken(any(AuthUser.class))).thenReturn(access);
-    when(tokenProvider.generateRefreshToken(any(AuthUser.class))).thenReturn(refresh);
+  private void stubTokens(String access, String refresh, String refreshHash) {
+    when(tokenProvider.generateAccessToken(any(UUID.class))).thenReturn(access);
+    when(tokenProvider.generateRefreshToken()).thenReturn(refresh);
     when(refreshTokenHasher.hash(refresh)).thenReturn(RefreshTokenHash.from(refreshHash));
   }
 }

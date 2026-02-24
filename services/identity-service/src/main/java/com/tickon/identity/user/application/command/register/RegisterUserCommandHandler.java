@@ -2,8 +2,6 @@ package com.tickon.identity.user.application.command.register;
 
 import com.tickon.common.commands.CommandHandler;
 import com.tickon.common.commands.CommandResult;
-import com.tickon.common.identity.domain.valueobjects.PasswordHash;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
 import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
@@ -13,6 +11,8 @@ import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
 import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
+import com.tickon.identity.user.domain.valueobjects.PasswordHash;
+import com.tickon.identity.user.domain.valueobjects.UserId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -50,7 +50,7 @@ public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCo
     }
 
     passwordPolicy.validate(cmd.rawPassword());
-    PasswordHash hash = passwordHasher.hash(cmd.rawPassword());
+    PasswordHash hash = PasswordHash.from(passwordHasher.hash(cmd.rawPassword()));
 
     User user = User.create(UserId.generate(), cmd.email(), cmd.username(), cmd.firstName(), cmd.lastName(), hash);
     userRepository.save(user);

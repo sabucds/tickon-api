@@ -1,11 +1,11 @@
 package com.tickon.identity.contracts.user.commands;
 
 import com.tickon.common.commands.Command;
-import com.tickon.common.identity.domain.valueobjects.UserId;
+import java.util.UUID;
 
 // Cross-module contract: dispatched by auth/ to user/ via CommandBus.
 // Intra-module commands stay inside their own application/command/ package.
-public record ChangePasswordCommand(UserId userId, String newPlainPassword) implements Command<Void> {
+public record ChangePasswordCommand(UUID userId, String newPlainPassword) implements Command<Void> {
 
   public ChangePasswordCommand {
     if (userId == null) {

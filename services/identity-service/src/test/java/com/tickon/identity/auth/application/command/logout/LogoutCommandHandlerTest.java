@@ -7,17 +7,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.domain.DomainEvent;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
 import com.tickon.identity.auth.application.ports.out.SessionRepository;
-import com.tickon.identity.auth.domain.AuthUser;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.events.SessionRevokedEvent;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
-import com.tickon.identity.auth.shared.AuthTestFixtures;
 import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -27,6 +24,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +49,7 @@ class LogoutCommandHandlerTest {
   private final Clock fixedClock = Clock.fixed(fixedInstant, ZoneOffset.UTC);
   private final Duration sessionDuration = Duration.ofDays(14);
 
-  private static final UserId USER_ID = UserId.generate();
+  private static final UUID USER_ID = UUID.randomUUID();
   private static final String REFRESH_TOKEN = "refresh-token";
   private static final String REFRESH_TOKEN_HASH = "hashed-refresh-token";
 
@@ -62,8 +60,7 @@ class LogoutCommandHandlerTest {
 
   @Test
   void shouldRevokeSession_WhenValidRefreshToken() {
-    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
-    Session session = createValidSession(user);
+    Session session = createValidSession(USER_ID);
     stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
     stubSessionFound(REFRESH_TOKEN_HASH, session);
 
@@ -91,8 +88,7 @@ class LogoutCommandHandlerTest {
 
   @Test
   void shouldNotThrowException_WhenSessionAlreadyRevoked() {
-    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
-    Session session = createRevokedSession(user);
+    Session session = createRevokedSession(USER_ID);
     stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
     stubSessionFound(REFRESH_TOKEN_HASH, session);
 
@@ -115,8 +111,7 @@ class LogoutCommandHandlerTest {
 
   @Test
   void shouldPublishSessionRevokedEvent_WhenSessionRevoked() {
-    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
-    Session session = createValidSession(user);
+    Session session = createValidSession(USER_ID);
     stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
     stubSessionFound(REFRESH_TOKEN_HASH, session);
 
@@ -134,15 +129,15 @@ class LogoutCommandHandlerTest {
     assertThat(event.reason()).isEqualTo(RevokeReason.USER_LOGOUT);
   }
 
-  private Session createValidSession(AuthUser user) {
-    Session session = Session.create(SessionId.generate(), RefreshTokenHash.from(REFRESH_TOKEN_HASH), user.id(),
+  private Session createValidSession(UUID userId) {
+    Session session = Session.create(SessionId.generate(), RefreshTokenHash.from(REFRESH_TOKEN_HASH), userId,
         "device-123", FamilyId.generate(), null, sessionDuration, fixedInstant);
     session.clearEvents();
     return session;
   }
 
-  private Session createRevokedSession(AuthUser user) {
-    Session session = createValidSession(user);
+  private Session createRevokedSession(UUID userId) {
+    Session session = createValidSession(userId);
     session.revoke(fixedInstant, RevokeReason.USER_LOGOUT);
     session.clearEvents();
     return session;

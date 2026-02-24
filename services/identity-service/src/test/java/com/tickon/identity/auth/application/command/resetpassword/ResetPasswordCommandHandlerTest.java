@@ -11,8 +11,6 @@ import static org.mockito.Mockito.when;
 import com.tickon.common.commands.CommandBus;
 import com.tickon.common.commands.CommandResult;
 import com.tickon.common.commands.exceptions.CommandExecutionException;
-import com.tickon.common.identity.domain.valueobjects.Email;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.application.ports.out.ResetTokenHasher;
 import com.tickon.identity.auth.application.ports.out.ResetTokenRepository;
 import com.tickon.identity.auth.domain.PasswordResetToken;
@@ -28,6 +26,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,10 +62,10 @@ class ResetPasswordCommandHandlerTest {
     String plainToken = "valid-token";
     String newPassword = "NewSecure123!";
     ResetTokenHash tokenHash = ResetTokenHash.from("hashed-token");
-    UserId userId = UserId.generate();
+    UUID userId = UUID.randomUUID();
 
-    PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId,
-        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minusSeconds(30), "test-plain-token");
+    PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId, "user@example.com",
+        Duration.ofHours(1), fixedInstant.minusSeconds(30), "test-plain-token");
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(token));
@@ -85,10 +84,10 @@ class ResetPasswordCommandHandlerTest {
     String plainToken = "valid-token";
     String newPassword = "NewSecure123!";
     ResetTokenHash tokenHash = ResetTokenHash.from("hashed-token");
-    UserId userId = UserId.generate();
+    UUID userId = UUID.randomUUID();
 
-    PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId,
-        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minusSeconds(30), "test-plain-token");
+    PasswordResetToken token = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId, "user@example.com",
+        Duration.ofHours(1), fixedInstant.minusSeconds(30), "test-plain-token");
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(token));
@@ -122,11 +121,10 @@ class ResetPasswordCommandHandlerTest {
   void shouldThrow_WhenTokenIsExpired() {
     String plainToken = "expired-token";
     ResetTokenHash tokenHash = ResetTokenHash.from("hashed");
-    UserId userId = UserId.generate();
+    UUID userId = UUID.randomUUID();
 
     PasswordResetToken expiredToken = PasswordResetToken.create(ResetTokenId.generate(), tokenHash, userId,
-        Email.from("user@example.com"), Duration.ofHours(1), fixedInstant.minus(Duration.ofHours(2)),
-        "test-plain-token");
+        "user@example.com", Duration.ofHours(1), fixedInstant.minus(Duration.ofHours(2)), "test-plain-token");
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(expiredToken));
@@ -139,10 +137,10 @@ class ResetPasswordCommandHandlerTest {
   void shouldThrow_WhenTokenAlreadyUsed() {
     String plainToken = "used-token";
     ResetTokenHash tokenHash = ResetTokenHash.from("hashed");
-    UserId userId = UserId.generate();
+    UUID userId = UUID.randomUUID();
 
     PasswordResetToken usedToken = PasswordResetToken.restore(ResetTokenId.generate(), tokenHash, userId,
-        Email.from("user@example.com"), fixedInstant.plus(Duration.ofHours(1)), fixedInstant.minusSeconds(30));
+        "user@example.com", fixedInstant.plus(Duration.ofHours(1)), fixedInstant.minusSeconds(30));
 
     when(resetTokenHasher.hash(plainToken)).thenReturn(tokenHash);
     when(resetTokenRepository.findByTokenHash(tokenHash.value())).thenReturn(Optional.of(usedToken));

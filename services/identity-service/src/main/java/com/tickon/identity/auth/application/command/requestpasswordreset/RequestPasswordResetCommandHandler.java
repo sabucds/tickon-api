@@ -2,7 +2,6 @@ package com.tickon.identity.auth.application.command.requestpasswordreset;
 
 import com.tickon.common.commands.CommandHandler;
 import com.tickon.common.commands.CommandResult;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.common.queries.QueryBus;
 import com.tickon.identity.auth.application.ports.out.ResetTokenGenerator;
 import com.tickon.identity.auth.application.ports.out.ResetTokenHasher;
@@ -18,6 +17,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,15 +59,14 @@ public class RequestPasswordResetCommandHandler
     log.info("Password reset requested");
     metrics.passwordResetRequested().increment();
 
-    Optional<UserAuthDataDTO> userOpt = queryBus.execute(new GetUserByEmailQuery(command.email().value()))
-        .orElseThrow();
+    Optional<UserAuthDataDTO> userOpt = queryBus.execute(new GetUserByEmailQuery(command.email())).orElseThrow();
 
     if (userOpt.isEmpty()) {
       return new CommandResult.Success<>(RequestPasswordResetResult.success());
     }
 
     UserAuthDataDTO userDTO = userOpt.get();
-    UserId userId = new UserId(userDTO.id());
+    UUID userId = userDTO.id();
 
     String plainToken = resetTokenGenerator.generateSecureToken();
     ResetTokenHash tokenHash = resetTokenHasher.hash(plainToken);

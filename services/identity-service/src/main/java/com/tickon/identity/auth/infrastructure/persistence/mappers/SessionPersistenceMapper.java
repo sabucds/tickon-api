@@ -1,6 +1,5 @@
 package com.tickon.identity.auth.infrastructure.persistence.mappers;
 
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
@@ -13,7 +12,7 @@ public class SessionPersistenceMapper {
     var entity = new SessionEntity();
     entity.id = session.id().value();
     entity.refreshTokenHash = session.refreshTokenHash().value();
-    entity.userId = session.userId().value();
+    entity.userId = session.userId();
     entity.familyId = session.familyId().value();
     entity.deviceId = session.deviceId();
     entity.rotatedFromSessionId = session.rotatedFromSessionId() != null ? session.rotatedFromSessionId().value()
@@ -25,8 +24,8 @@ public class SessionPersistenceMapper {
   }
 
   public Session toDomain(SessionEntity entity) {
-    return Session.restore(new SessionId(entity.id), RefreshTokenHash.from(entity.refreshTokenHash),
-        new UserId(entity.userId), entity.deviceId, new FamilyId(entity.familyId),
+    return Session.restore(new SessionId(entity.id), RefreshTokenHash.from(entity.refreshTokenHash), entity.userId,
+        entity.deviceId, new FamilyId(entity.familyId),
         entity.rotatedFromSessionId != null ? new SessionId(entity.rotatedFromSessionId) : null,
         entity.absoluteExpiresAt, entity.revokedAt,
         entity.revokeReason != null ? RevokeReason.valueOf(entity.revokeReason) : null);

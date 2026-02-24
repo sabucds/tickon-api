@@ -1,11 +1,11 @@
 package com.tickon.identity.user.infrastructure.web;
 
 import com.tickon.common.commands.CommandBus;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.common.queries.QueryBus;
 import com.tickon.identity.user.application.UserResult;
 import com.tickon.identity.user.application.command.delete.DeleteUserCommand;
 import com.tickon.identity.user.application.query.getuserbyid.GetUserByIdQuery;
+import com.tickon.identity.user.domain.valueobjects.UserId;
 import com.tickon.identity.user.infrastructure.web.dto.RegisterUserRequest;
 import com.tickon.identity.user.infrastructure.web.dto.UserResponse;
 import com.tickon.identity.user.infrastructure.web.mappers.UserMapper;

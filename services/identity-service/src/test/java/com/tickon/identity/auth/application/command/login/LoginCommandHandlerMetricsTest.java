@@ -58,8 +58,8 @@ class LoginCommandHandlerMetricsTest {
     UserAuthDataDTO userDTO = new UserAuthDataDTO(UUID.randomUUID(), "hashed", "ACTIVE");
     when(queryBus.execute(any())).thenReturn(new QueryResult.Success<>(Optional.of(userDTO)));
     when(passwordHasher.verify(any(), any())).thenReturn(true);
-    when(tokenProvider.generateAccessToken(any())).thenReturn("access-token");
-    when(tokenProvider.generateRefreshToken(any())).thenReturn("refresh-token");
+    when(tokenProvider.generateAccessToken(any(java.util.UUID.class))).thenReturn("access-token");
+    when(tokenProvider.generateRefreshToken()).thenReturn("refresh-token");
     when(refreshTokenHasher.hash(any())).thenReturn(new RefreshTokenHash("hashed-refresh"));
 
     handler.handle(new LoginCommand("user@example.com", "password", "device-1"));

@@ -1,12 +1,12 @@
 package com.tickon.identity.user.application.query.getauthdata;
 
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.common.queries.QueryHandler;
 import com.tickon.common.queries.QueryResult;
 import com.tickon.identity.contracts.user.queries.GetUserAuthDataQuery;
 import com.tickon.identity.contracts.user.queries.UserAuthDataDTO;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
+import com.tickon.identity.user.domain.valueobjects.UserId;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

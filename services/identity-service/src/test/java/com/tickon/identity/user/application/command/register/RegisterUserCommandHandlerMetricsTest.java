@@ -6,8 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.tickon.common.identity.domain.valueobjects.Email;
-import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
 import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
@@ -15,6 +13,7 @@ import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
 import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
+import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +45,7 @@ class RegisterUserCommandHandlerMetricsTest {
   void successfulRegistrationIncrementsUserRegisteredCounter() {
     when(userRepository.existsByEmail(any())).thenReturn(false);
     when(userRepository.existsByUsername(any())).thenReturn(false);
-    when(passwordHasher.hash(any())).thenReturn(new PasswordHash("hashed"));
+    when(passwordHasher.hash(any())).thenReturn("hashed");
 
     handler.handle(new RegisterUserCommand("FirstName", "LastName", new Username("username"),
         new Email("user@example.com"), "Password1!"));

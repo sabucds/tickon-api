@@ -20,8 +20,8 @@ public class UserIdRelayFilter implements GlobalFilter, Ordered {
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     return exchange.getPrincipal().filter(p -> p instanceof JwtAuthenticationToken).cast(JwtAuthenticationToken.class)
-        .map(jwt -> jwt.getToken().getSubject()).flatMap(userId -> chain.filter(withUserIdHeader(exchange, userId)))
-        .switchIfEmpty(chain.filter(stripUserIdHeader(exchange)));
+        .map(jwt -> withUserIdHeader(exchange, jwt.getToken().getSubject()))
+        .switchIfEmpty(Mono.just(stripUserIdHeader(exchange))).flatMap(chain::filter);
   }
 
   private ServerWebExchange stripUserIdHeader(ServerWebExchange exchange) {

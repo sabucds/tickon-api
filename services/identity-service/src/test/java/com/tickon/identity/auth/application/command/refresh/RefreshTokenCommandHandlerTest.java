@@ -9,14 +9,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.domain.DomainEvent;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.common.queries.QueryBus;
 import com.tickon.common.queries.QueryResult;
 import com.tickon.identity.auth.application.LoginResult;
 import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
 import com.tickon.identity.auth.application.ports.out.SessionRepository;
 import com.tickon.identity.auth.application.ports.out.TokenProvider;
-import com.tickon.identity.auth.domain.AuthUser;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.events.SessionCreatedEvent;
 import com.tickon.identity.auth.domain.events.SessionRevokedEvent;
@@ -37,6 +35,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +64,7 @@ class RefreshTokenCommandHandlerTest {
   private final Clock fixedClock = Clock.fixed(fixedInstant, ZoneOffset.UTC);
   private final Duration sessionDuration = Duration.ofDays(14);
 
-  private static final UserId USER_ID = UserId.generate();
+  private static final UUID USER_ID = UUID.randomUUID();
   private static final String REFRESH_TOKEN = "refresh-token";
   private static final String REFRESH_TOKEN_HASH = "hashed-refresh-token";
   private static final String NEW_ACCESS_TOKEN = "new-access-token";
@@ -80,12 +79,12 @@ class RefreshTokenCommandHandlerTest {
 
   @Test
   void shouldRotateToken_WhenValidRefreshToken() {
-    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
-    Session session = createValidSession(user);
+    UserAuthDataDTO user = AuthTestFixtures.aUserAuthData(USER_ID);
+    Session session = createValidSession(USER_ID);
     stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
     stubSessionFound(REFRESH_TOKEN_HASH, session);
     stubUserFound(user);
-    stubNewTokens(user);
+    stubNewTokens();
 
     LoginResult result = handler.handle(new RefreshTokenCommand(REFRESH_TOKEN)).orElseThrow();
 
@@ -106,8 +105,7 @@ class RefreshTokenCommandHandlerTest {
 
   @Test
   void shouldRevokeEntireFamily_WhenRevokedTokenIsReused() {
-    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
-    Session session = createRevokedSession(user);
+    Session session = createRevokedSession(USER_ID);
     stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
     stubSessionFound(REFRESH_TOKEN_HASH, session);
 
@@ -120,8 +118,7 @@ class RefreshTokenCommandHandlerTest {
 
   @Test
   void shouldThrowException_WhenSessionIsExpired() {
-    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
-    Session session = createExpiredSession(user);
+    Session session = createExpiredSession(USER_ID);
     stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
     stubSessionFound(REFRESH_TOKEN_HASH, session);
 
@@ -133,8 +130,7 @@ class RefreshTokenCommandHandlerTest {
 
   @Test
   void shouldThrowException_WhenUserNotFound() {
-    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
-    Session session = createValidSession(user);
+    Session session = createValidSession(USER_ID);
     stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
     stubSessionFound(REFRESH_TOKEN_HASH, session);
     when(queryBus.execute(any(GetUserAuthDataQuery.class))).thenReturn(new QueryResult.Success<>(Optional.empty()));
@@ -147,12 +143,12 @@ class RefreshTokenCommandHandlerTest {
 
   @Test
   void shouldSaveBothSessions_WhenRotating() {
-    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
-    Session session = createValidSession(user);
+    UserAuthDataDTO user = AuthTestFixtures.aUserAuthData(USER_ID);
+    Session session = createValidSession(USER_ID);
     stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
     stubSessionFound(REFRESH_TOKEN_HASH, session);
     stubUserFound(user);
-    stubNewTokens(user);
+    stubNewTokens();
 
     handler.handle(new RefreshTokenCommand(REFRESH_TOKEN));
 
@@ -180,12 +176,12 @@ class RefreshTokenCommandHandlerTest {
 
   @Test
   void shouldPreserveFamilyId_WhenRotating() {
-    AuthUser user = AuthTestFixtures.anAuthUser(USER_ID);
-    Session session = createValidSession(user);
+    UserAuthDataDTO user = AuthTestFixtures.aUserAuthData(USER_ID);
+    Session session = createValidSession(USER_ID);
     stubRefreshTokenHash(REFRESH_TOKEN, REFRESH_TOKEN_HASH);
     stubSessionFound(REFRESH_TOKEN_HASH, session);
     stubUserFound(user);
-    stubNewTokens(user);
+    stubNewTokens();
 
     handler.handle(new RefreshTokenCommand(REFRESH_TOKEN));
 
@@ -199,22 +195,22 @@ class RefreshTokenCommandHandlerTest {
     assertThat(savedNewSession.rotatedFromSessionId()).isEqualTo(savedOldSession.id());
   }
 
-  private Session createValidSession(AuthUser user) {
-    Session session = Session.create(SessionId.generate(), RefreshTokenHash.from(REFRESH_TOKEN_HASH), user.id(),
+  private Session createValidSession(UUID userId) {
+    Session session = Session.create(SessionId.generate(), RefreshTokenHash.from(REFRESH_TOKEN_HASH), userId,
         "device-123", FamilyId.generate(), null, sessionDuration, fixedInstant);
     session.clearEvents();
     return session;
   }
 
-  private Session createRevokedSession(AuthUser user) {
-    Session session = createValidSession(user);
+  private Session createRevokedSession(UUID userId) {
+    Session session = createValidSession(userId);
     session.revoke(fixedInstant, RevokeReason.USER_LOGOUT);
     return session;
   }
 
-  private Session createExpiredSession(AuthUser user) {
+  private Session createExpiredSession(UUID userId) {
     Instant pastInstant = fixedInstant.minus(Duration.ofDays(15));
-    return Session.create(SessionId.generate(), RefreshTokenHash.from(REFRESH_TOKEN_HASH), user.id(), "device-123",
+    return Session.create(SessionId.generate(), RefreshTokenHash.from(REFRESH_TOKEN_HASH), userId, "device-123",
         FamilyId.generate(), null, sessionDuration, pastInstant);
   }
 
@@ -226,14 +222,13 @@ class RefreshTokenCommandHandlerTest {
     when(sessionRepository.findByRefreshTokenHash(hash)).thenReturn(Optional.of(session));
   }
 
-  private void stubUserFound(AuthUser user) {
-    UserAuthDataDTO dto = new UserAuthDataDTO(user.id().value(), user.passwordHash().value(), user.status().name());
-    when(queryBus.execute(any(GetUserAuthDataQuery.class))).thenReturn(new QueryResult.Success<>(Optional.of(dto)));
+  private void stubUserFound(UserAuthDataDTO user) {
+    when(queryBus.execute(any(GetUserAuthDataQuery.class))).thenReturn(new QueryResult.Success<>(Optional.of(user)));
   }
 
-  private void stubNewTokens(AuthUser user) {
-    when(tokenProvider.generateAccessToken(any(AuthUser.class))).thenReturn(NEW_ACCESS_TOKEN);
-    when(tokenProvider.generateRefreshToken(any(AuthUser.class))).thenReturn(NEW_REFRESH_TOKEN);
+  private void stubNewTokens() {
+    when(tokenProvider.generateAccessToken(any(UUID.class))).thenReturn(NEW_ACCESS_TOKEN);
+    when(tokenProvider.generateRefreshToken()).thenReturn(NEW_REFRESH_TOKEN);
     when(refreshTokenHasher.hash(NEW_REFRESH_TOKEN)).thenReturn(RefreshTokenHash.from(NEW_REFRESH_TOKEN_HASH));
   }
 }

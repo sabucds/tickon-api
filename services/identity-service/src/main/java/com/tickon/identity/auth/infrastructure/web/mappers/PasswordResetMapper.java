@@ -1,6 +1,5 @@
 package com.tickon.identity.auth.infrastructure.web.mappers;
 
-import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.identity.auth.application.command.requestpasswordreset.RequestPasswordResetCommand;
 import com.tickon.identity.auth.application.command.resetpassword.ResetPasswordCommand;
 import com.tickon.identity.auth.application.query.verifyresettoken.VerifyResetTokenQuery;
@@ -12,7 +11,7 @@ public class PasswordResetMapper {
   private PasswordResetMapper() {}
 
   public static RequestPasswordResetCommand toRequestPasswordResetCommand(ForgotPasswordRequest request) {
-    return new RequestPasswordResetCommand(Email.from(request.email()));
+    return new RequestPasswordResetCommand(request.email());
   }
 
   public static VerifyResetTokenQuery toVerifyResetTokenQuery(String token) {

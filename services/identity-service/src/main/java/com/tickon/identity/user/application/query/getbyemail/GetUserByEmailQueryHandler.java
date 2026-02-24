@@ -1,12 +1,12 @@
 package com.tickon.identity.user.application.query.getbyemail;
 
-import com.tickon.common.identity.domain.valueobjects.Email;
 import com.tickon.common.queries.QueryHandler;
 import com.tickon.common.queries.QueryResult;
 import com.tickon.identity.contracts.user.queries.GetUserByEmailQuery;
 import com.tickon.identity.contracts.user.queries.UserAuthDataDTO;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
+import com.tickon.identity.user.domain.valueobjects.Email;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 

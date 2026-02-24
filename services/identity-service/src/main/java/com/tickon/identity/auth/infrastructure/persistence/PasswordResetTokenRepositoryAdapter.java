@@ -1,11 +1,11 @@
 package com.tickon.identity.auth.infrastructure.persistence;
 
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.application.ports.out.ResetTokenRepository;
 import com.tickon.identity.auth.domain.PasswordResetToken;
 import com.tickon.identity.auth.infrastructure.persistence.mappers.PasswordResetTokenPersistenceMapper;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +34,7 @@ public class PasswordResetTokenRepositoryAdapter implements ResetTokenRepository
 
   @Override
   @Transactional
-  public void invalidateAllForUser(UserId userId, Instant now) {
-    jpaRepository.invalidateAllForUser(userId.value(), now);
+  public void invalidateAllForUser(UUID userId, Instant now) {
+    jpaRepository.invalidateAllForUser(userId, now);
   }
 }

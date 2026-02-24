@@ -2,12 +2,13 @@ package com.tickon.identity.user.application.command.changepassword;
 
 import com.tickon.common.commands.CommandHandler;
 import com.tickon.common.commands.CommandResult;
-import com.tickon.common.identity.domain.valueobjects.PasswordHash;
 import com.tickon.identity.contracts.user.commands.ChangePasswordCommand;
 import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
 import com.tickon.identity.user.application.ports.out.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
+import com.tickon.identity.user.domain.valueobjects.PasswordHash;
+import com.tickon.identity.user.domain.valueobjects.UserId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,18 +32,19 @@ public class ChangePasswordCommandHandler implements CommandHandler<ChangePasswo
   @Override
   @Transactional
   public CommandResult<Void> handle(ChangePasswordCommand command) {
-    log.debug("Changing password for user: {}", command.userId().value());
+    log.debug("Changing password for user: {}", command.userId());
 
     passwordPolicy.validate(command.newPlainPassword());
-    PasswordHash hashedPassword = passwordHasher.hash(command.newPlainPassword());
+    PasswordHash hashedPassword = PasswordHash.from(passwordHasher.hash(command.newPlainPassword()));
 
-    User user = userRepository.findById(command.userId())
-        .orElseThrow(() -> new IllegalStateException("User not found: " + command.userId().value()));
+    UserId userId = new UserId(command.userId());
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalStateException("User not found: " + command.userId()));
 
     user.changePasswordHash(hashedPassword);
     userRepository.save(user);
 
-    log.info("Password changed successfully for user: {}", command.userId().value());
+    log.info("Password changed successfully for user: {}", command.userId());
     return new CommandResult.Success<>(null);
   }
 

@@ -51,8 +51,7 @@ class DeleteUserCommandHandlerTest {
     UserId id = UserId.from(userId);
     when(userRepository.findById(id)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> handler.handle(new DeleteUserCommand(id)))
-        .isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> handler.handle(new DeleteUserCommand(id))).isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("User not found with id: " + id);
   }
 }

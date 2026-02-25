@@ -1,6 +1,6 @@
 package com.tickon.identity.user.infrastructure.security;
 
-import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
+import com.tickon.identity.shared.kernel.ports.PasswordHasher;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Component;
 

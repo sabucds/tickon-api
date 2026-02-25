@@ -1,6 +1,6 @@
 package com.tickon.identity.auth.infrastructure.persistence;
 
-import com.tickon.identity.auth.application.ports.out.SessionRepository;
+import com.tickon.identity.auth.application.ports.SessionRepository;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;

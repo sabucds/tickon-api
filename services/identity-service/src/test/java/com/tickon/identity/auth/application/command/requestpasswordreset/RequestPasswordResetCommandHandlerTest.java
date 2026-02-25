@@ -9,14 +9,14 @@ import static org.mockito.Mockito.when;
 
 import com.tickon.common.queries.QueryBus;
 import com.tickon.common.queries.QueryResult;
-import com.tickon.identity.auth.application.ports.out.ResetTokenGenerator;
-import com.tickon.identity.auth.application.ports.out.ResetTokenHasher;
-import com.tickon.identity.auth.application.ports.out.ResetTokenRepository;
+import com.tickon.identity.auth.application.ports.ResetTokenGenerator;
+import com.tickon.identity.auth.application.ports.ResetTokenHasher;
+import com.tickon.identity.auth.application.ports.ResetTokenRepository;
 import com.tickon.identity.auth.domain.PasswordResetToken;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.contracts.user.queries.GetUserByEmailQuery;
 import com.tickon.identity.contracts.user.queries.UserAuthDataDTO;
-import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
+import com.tickon.identity.shared.kernel.ports.DomainEventPublisher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;

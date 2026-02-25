@@ -2,8 +2,8 @@ package com.tickon.identity.auth.application.query.verifyresettoken;
 
 import com.tickon.common.queries.QueryHandler;
 import com.tickon.common.queries.QueryResult;
-import com.tickon.identity.auth.application.ports.out.ResetTokenHasher;
-import com.tickon.identity.auth.application.ports.out.ResetTokenRepository;
+import com.tickon.identity.auth.application.ports.ResetTokenHasher;
+import com.tickon.identity.auth.application.ports.ResetTokenRepository;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import java.time.Clock;
 import java.time.Instant;

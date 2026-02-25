@@ -1,6 +1,6 @@
 package com.tickon.identity.auth.infrastructure.events;
 
-import com.tickon.identity.auth.application.ports.out.SessionRepository;
+import com.tickon.identity.auth.application.ports.SessionRepository;
 import com.tickon.identity.auth.domain.events.PasswordResetCompletedEvent;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;

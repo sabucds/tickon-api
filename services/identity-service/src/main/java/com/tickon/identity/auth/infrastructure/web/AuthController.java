@@ -5,6 +5,7 @@ import com.tickon.identity.auth.infrastructure.web.dto.LoginRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginResponse;
 import com.tickon.identity.auth.infrastructure.web.dto.LogoutRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.RefreshTokenRequest;
+import com.tickon.identity.auth.infrastructure.web.dto.RefreshTokenResponse;
 import com.tickon.identity.auth.infrastructure.web.mappers.LoginMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -32,8 +33,9 @@ public class AuthController {
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/refresh")
-  public LoginResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
-    return LoginMapper.toLoginResponse(commandBus.execute(LoginMapper.toRefreshTokenCommand(request)).orElseThrow());
+  public RefreshTokenResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
+    return LoginMapper
+        .toRefreshTokenResponse(commandBus.execute(LoginMapper.toRefreshTokenCommand(request)).orElseThrow());
   }
 
   @ResponseStatus(HttpStatus.NO_CONTENT)

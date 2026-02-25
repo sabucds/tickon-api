@@ -1,4 +1,4 @@
-package com.tickon.identity.user.application.ports.out;
+package com.tickon.identity.user.application.ports;
 
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.valueobjects.Email;

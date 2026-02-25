@@ -11,10 +11,9 @@ import static org.mockito.Mockito.when;
 import com.tickon.common.domain.DomainEvent;
 import com.tickon.common.queries.QueryBus;
 import com.tickon.common.queries.QueryResult;
-import com.tickon.identity.auth.application.LoginResult;
-import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
-import com.tickon.identity.auth.application.ports.out.SessionRepository;
-import com.tickon.identity.auth.application.ports.out.TokenProvider;
+import com.tickon.identity.auth.application.ports.RefreshTokenHasher;
+import com.tickon.identity.auth.application.ports.SessionRepository;
+import com.tickon.identity.auth.application.ports.TokenProvider;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.events.SessionCreatedEvent;
 import com.tickon.identity.auth.domain.events.SessionRevokedEvent;
@@ -26,7 +25,7 @@ import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.auth.shared.AuthTestFixtures;
 import com.tickon.identity.contracts.user.queries.GetUserAuthDataQuery;
 import com.tickon.identity.contracts.user.queries.UserAuthDataDTO;
-import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
+import com.tickon.identity.shared.kernel.ports.DomainEventPublisher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
@@ -86,7 +85,7 @@ class RefreshTokenCommandHandlerTest {
     stubUserFound(user);
     stubNewTokens();
 
-    LoginResult result = handler.handle(new RefreshTokenCommand(REFRESH_TOKEN)).orElseThrow();
+    RefreshTokenResult result = handler.handle(new RefreshTokenCommand(REFRESH_TOKEN)).orElseThrow();
 
     assertThat(result.accessToken()).isEqualTo(NEW_ACCESS_TOKEN);
     assertThat(result.refreshToken()).isEqualTo(NEW_REFRESH_TOKEN);

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
-import com.tickon.identity.user.application.ports.out.UserRepository;
+import com.tickon.identity.user.application.ports.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.valueobjects.UserId;
 import com.tickon.identity.user.shared.UserTestFixtures;

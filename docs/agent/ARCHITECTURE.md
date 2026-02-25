@@ -1,6 +1,6 @@
 # Architecture Guidelines (Canonical)
 
-We use Hexagonal Architecture + DDD with vertical slices (bounded contexts).
+We use Hexagonal Architecture + DDD with vertical slices (bounded contexts) and CQRS via an in-process bus.
 Keep boundaries strict. If boundaries blur, the system rots.
 
 ## Core rule: dependencies point inward
@@ -15,32 +15,53 @@ Infrastructure → Application → Domain
 - Modules are isolated:
   - ❌ no compile-time imports between modules' `domain/`, `application/`, or `infrastructure/`
   - ❌ no direct imports from other modules' domain (e.g., `com.tickon.<service>.<module>.domain.*`)
-  - ✅ shared contracts live under `shared/contracts/`
-  - ✅ shared infrastructure primitives live under `shared/infrastructure/`
-  - ✅ shared abstractions (not owned models) may live under `shared/domain/`
+  - ✅ shared contracts live under `contracts/<source-module>/commands/` and `contracts/<source-module>/queries/`
+  - ✅ shared infrastructure primitives live under `shared/platform/`
+  - ✅ shared pure-Java abstractions live under `shared/kernel/`
   - ✅ truly shared value objects (Email, UserId, etc.) belong in the common module: `com.tickon.common.identity.domain.valueobjects.*`
 
-## Package structure (example)
-`com.tickon.<service>/`
-- `<module>/domain/`
-- `<module>/application/`
-  - `ports/in/`
-  - `ports/out/`
-  - `services/`
-  - `dto/`
-  - `queryhandlers/` (if used)
-  - `commandhandlers/` (if used)
-- `<module>/infrastructure/`
-  - `web/`
-  - `persistence/`
-  - `security/`
-  - `events/`
-- `shared/`
-  - `contracts/queries/`
-  - `contracts/commands/`
-  - `infrastructure/`
-  - `domain/`
-- `config/`
+## Package structure (identity-service example)
+```
+com.tickon.<service>/
+  <module>/
+    domain/
+      events/
+      exceptions/
+      policies/
+      valueobjects/
+    application/
+      ports/              ← output port interfaces (repo, publisher, etc.)
+      command/
+        <operation>/          ← one sub-package per command (vertical slice)
+          <Operation>Command.java
+          <Operation>CommandHandler.java
+      query/
+        <operation>/          ← one sub-package per query (vertical slice)
+          <Operation>Query.java
+          <Operation>QueryHandler.java
+      <SharedResult>.java     ← shared result types used across slices in this module
+    infrastructure/
+      web/
+        dto/
+        mappers/
+      persistence/
+      security/
+      events/
+  shared/
+    kernel/                   ← pure Java, zero Spring
+      ports/              ← shared output port interfaces (e.g., PasswordHasher)
+      exceptions/
+    platform/                 ← Spring-aware shared glue
+      bus/                    ← CommandBus / QueryBus implementations
+      metrics/
+      web/
+  contracts/
+    <source-module>/
+      commands/               ← Command types dispatched cross-module via CommandBus
+      queries/                ← Query types dispatched cross-module via QueryBus
+  bootstrap/
+    config/                   ← Spring wiring only (beans, security config, etc.)
+```
 
 ## Domain rules (DDD discipline)
 ### Aggregates
@@ -64,22 +85,24 @@ Infrastructure → Application → Domain
 - Domain exceptions extend `<Service>DomainException`.
 - Include a stable `ErrorCode`.
 
-## Application rules (use cases are the API)
-- One use case interface per operation: `RegisterUserUseCase`.
-- Use case implementation coordinates:
-  1) validation + policy checks
-  2) domain operation
-  3) persistence via output ports
-  4) publish domain events (via output port)
-- Application has no direct Spring/JPA/web dependencies.
+## Application rules (CQRS via handlers)
+- No UseCase interfaces. Operations are expressed as Commands and Queries.
+- Each command/query lives in its own vertical slice: `application/command/<operation>/` or `application/query/<operation>/`.
+- A `CommandHandler` or `QueryHandler` per slice coordinates:
+  1. validation + policy checks
+  2. domain operation
+  3. persistence via output ports
+  4. publish domain events (via output port)
+- Application has no direct Spring/JPA/web dependencies (handlers may use `@Component` / `@Transactional` as infrastructure concerns via Spring's annotation model, but no framework logic).
 
 ## Infrastructure rules
-- Controllers: validate → call use case → map response. No business logic.
+- Controllers: validate → dispatch command/query via bus → map response. No business logic.
+- Controllers inject `CommandBus` and/or `QueryBus` directly. No UseCase interfaces.
 - Adapters implement output ports (e.g., repository adapter, token provider).
 - Mappers are explicit:
   - `toDomain()` / `toEntity()` / `toDto()`
 - Prefer constructor injection.
-- Framework configuration stays in infrastructure/config.
+- Framework configuration stays in `bootstrap/config/`.
 
 ## Cross-module communication (inside a service)
 Modules communicate using only one of these patterns:
@@ -90,8 +113,8 @@ Use for read-only queries across modules.
 - Returns `QueryResult<T>`.
 
 Contracts:
-- Query contract: `shared/contracts/queries/`
-- Query handler: `<target-module>/application/queryhandlers/`
+- Query contract: `contracts/<source-module>/queries/`
+- Query handler: `<target-module>/application/query/<operation>/`
 
 ### 2) CommandBus (sync writes)
 Use for critical state changes that must be atomic with the caller.
@@ -100,8 +123,8 @@ Use for critical state changes that must be atomic with the caller.
 - Use sparingly (couples modules).
 
 Contracts:
-- Command contract: `shared/contracts/commands/`
-- Command handler: `<target-module>/application/commandhandlers/`
+- Command contract: `contracts/<source-module>/commands/`
+- Command handler: `<target-module>/application/command/<operation>/`
 
 ### 3) Domain Events (async notifications)
 Use for non-critical side effects and decoupled reactions.

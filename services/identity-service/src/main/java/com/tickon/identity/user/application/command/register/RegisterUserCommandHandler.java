@@ -2,11 +2,11 @@ package com.tickon.identity.user.application.command.register;
 
 import com.tickon.common.commands.CommandHandler;
 import com.tickon.common.commands.CommandResult;
-import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
-import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
+import com.tickon.identity.shared.kernel.ports.DomainEventPublisher;
+import com.tickon.identity.shared.kernel.ports.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import com.tickon.identity.user.application.UserResult;
-import com.tickon.identity.user.application.ports.out.UserRepository;
+import com.tickon.identity.user.application.ports.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
 import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;

@@ -1,6 +1,6 @@
 package com.tickon.identity.auth.infrastructure.jwt;
 
-import com.tickon.identity.auth.application.ports.out.TokenProvider;
+import com.tickon.identity.auth.application.ports.TokenProvider;
 import io.jsonwebtoken.Jwts;
 import java.security.KeyFactory;
 import java.security.KeyPair;

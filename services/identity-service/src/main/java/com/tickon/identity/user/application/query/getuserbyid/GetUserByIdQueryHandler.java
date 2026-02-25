@@ -3,7 +3,7 @@ package com.tickon.identity.user.application.query.getuserbyid;
 import com.tickon.common.queries.QueryHandler;
 import com.tickon.common.queries.QueryResult;
 import com.tickon.identity.user.application.UserResult;
-import com.tickon.identity.user.application.ports.out.UserRepository;
+import com.tickon.identity.user.application.ports.UserRepository;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

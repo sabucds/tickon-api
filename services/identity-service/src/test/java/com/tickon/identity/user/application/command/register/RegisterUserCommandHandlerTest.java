@@ -8,11 +8,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.domain.DomainEvent;
-import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
-import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
+import com.tickon.identity.shared.kernel.ports.DomainEventPublisher;
+import com.tickon.identity.shared.kernel.ports.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import com.tickon.identity.user.application.UserResult;
-import com.tickon.identity.user.application.ports.out.UserRepository;
+import com.tickon.identity.user.application.ports.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.events.UserCreatedEvent;
 import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
@@ -100,7 +100,7 @@ class RegisterUserCommandHandlerTest {
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(true);
 
     assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(DuplicateEmailException.class)
-        .hasMessage("Email already in use: john@example.com");
+        .hasMessage("Email already in use");
     verify(userRepository).existsByEmail(any(Email.class));
     verifyNoMoreInteractions(userRepository, passwordHasher, eventPublisher);
   }
@@ -113,7 +113,7 @@ class RegisterUserCommandHandlerTest {
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(true);
 
     assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(DuplicateUsernameException.class)
-        .hasMessage("Username already in use: john_doe");
+        .hasMessage("Username already in use");
     verify(userRepository).existsByEmail(any(Email.class));
     verify(userRepository).existsByUsername(any(Username.class));
     verifyNoMoreInteractions(userRepository, passwordHasher, eventPublisher);

@@ -3,10 +3,9 @@ package com.tickon.identity.auth.application.command.refresh;
 import com.tickon.common.commands.CommandHandler;
 import com.tickon.common.commands.CommandResult;
 import com.tickon.common.queries.QueryBus;
-import com.tickon.identity.auth.application.LoginResult;
-import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
-import com.tickon.identity.auth.application.ports.out.SessionRepository;
-import com.tickon.identity.auth.application.ports.out.TokenProvider;
+import com.tickon.identity.auth.application.ports.RefreshTokenHasher;
+import com.tickon.identity.auth.application.ports.SessionRepository;
+import com.tickon.identity.auth.application.ports.TokenProvider;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.exceptions.InvalidRefreshTokenException;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
@@ -14,7 +13,7 @@ import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.contracts.user.queries.GetUserAuthDataQuery;
 import com.tickon.identity.contracts.user.queries.UserAuthDataDTO;
-import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
+import com.tickon.identity.shared.kernel.ports.DomainEventPublisher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import java.time.Clock;
 import java.time.Instant;
@@ -26,7 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class RefreshTokenCommandHandler implements CommandHandler<RefreshTokenCommand, LoginResult> {
+public class RefreshTokenCommandHandler implements CommandHandler<RefreshTokenCommand, RefreshTokenResult> {
 
   private static final Logger log = LoggerFactory.getLogger(RefreshTokenCommandHandler.class);
 
@@ -52,7 +51,7 @@ public class RefreshTokenCommandHandler implements CommandHandler<RefreshTokenCo
 
   @Override
   @Transactional
-  public CommandResult<LoginResult> handle(RefreshTokenCommand command) {
+  public CommandResult<RefreshTokenResult> handle(RefreshTokenCommand command) {
     RefreshTokenHash tokenHash = refreshTokenHasher.hash(command.refreshToken());
 
     Session session = sessionRepository.findByRefreshTokenHash(tokenHash.value()).orElseThrow(() -> {
@@ -110,7 +109,7 @@ public class RefreshTokenCommandHandler implements CommandHandler<RefreshTokenCo
     metrics.sessionCreated().increment();
     metrics.sessionRevoked("rotation").increment();
 
-    return new CommandResult.Success<>(new LoginResult(newAccessToken, newRefreshToken));
+    return new CommandResult.Success<>(new RefreshTokenResult(newAccessToken, newRefreshToken));
   }
 
   @Override

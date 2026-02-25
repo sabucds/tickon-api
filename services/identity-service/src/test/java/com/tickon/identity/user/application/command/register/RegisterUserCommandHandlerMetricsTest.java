@@ -6,10 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.tickon.identity.shared.kernel.ports.out.DomainEventPublisher;
-import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
+import com.tickon.identity.shared.kernel.ports.DomainEventPublisher;
+import com.tickon.identity.shared.kernel.ports.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
-import com.tickon.identity.user.application.ports.out.UserRepository;
+import com.tickon.identity.user.application.ports.UserRepository;
 import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
 import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;

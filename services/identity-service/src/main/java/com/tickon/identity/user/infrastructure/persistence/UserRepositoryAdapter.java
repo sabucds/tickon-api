@@ -1,6 +1,6 @@
 package com.tickon.identity.user.infrastructure.persistence;
 
-import com.tickon.identity.user.application.ports.out.UserRepository;
+import com.tickon.identity.user.application.ports.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.UserId;

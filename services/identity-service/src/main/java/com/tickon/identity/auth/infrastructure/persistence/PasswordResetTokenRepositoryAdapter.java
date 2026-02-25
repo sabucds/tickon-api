@@ -1,6 +1,6 @@
 package com.tickon.identity.auth.infrastructure.persistence;
 
-import com.tickon.identity.auth.application.ports.out.ResetTokenRepository;
+import com.tickon.identity.auth.application.ports.ResetTokenRepository;
 import com.tickon.identity.auth.domain.PasswordResetToken;
 import com.tickon.identity.auth.infrastructure.persistence.mappers.PasswordResetTokenPersistenceMapper;
 import java.time.Instant;

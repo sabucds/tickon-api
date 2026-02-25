@@ -1,4 +1,4 @@
-package com.tickon.identity.auth.application.ports.out;
+package com.tickon.identity.auth.application.ports;
 
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 

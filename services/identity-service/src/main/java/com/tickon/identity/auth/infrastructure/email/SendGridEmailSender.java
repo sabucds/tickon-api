@@ -8,7 +8,7 @@ import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
-import com.tickon.identity.auth.application.ports.out.EmailSender;
+import com.tickon.identity.auth.application.ports.EmailSender;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +64,8 @@ public class SendGridEmailSender implements EmailSender {
       if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
         log.info("Password reset email sent successfully to {}", maskEmail(to));
       } else {
-        String errorMessage = String.format("SendGrid email failed with status=%s, body=%s",
-            response.getStatusCode(), response.getBody());
+        String errorMessage = String.format("SendGrid email failed with status=%s, body=%s", response.getStatusCode(),
+            response.getBody());
         throw new EmailSendException(errorMessage);
       }
     } catch (IOException e) {

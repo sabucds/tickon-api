@@ -1,6 +1,6 @@
 package com.tickon.identity.auth.infrastructure.security;
 
-import com.tickon.identity.auth.application.ports.out.ResetTokenGenerator;
+import com.tickon.identity.auth.application.ports.ResetTokenGenerator;
 import java.security.SecureRandom;
 import java.util.Base64;
 import org.springframework.stereotype.Component;

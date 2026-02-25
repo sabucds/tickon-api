@@ -11,7 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tickon.common.commands.CommandBus;
 import com.tickon.common.commands.CommandResult;
-import com.tickon.identity.auth.application.LoginResult;
+import com.tickon.identity.auth.application.command.login.LoginResult;
+import com.tickon.identity.auth.application.command.refresh.RefreshTokenResult;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.LogoutRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.RefreshTokenRequest;
@@ -73,7 +74,7 @@ class AuthControllerTest {
   @Test
   void shouldRefreshAndReturnTokens_WhenValidRequest() throws Exception {
     RefreshTokenRequest request = new RefreshTokenRequest("refresh-token");
-    LoginResult response = new LoginResult("new-access-token", "new-refresh-token");
+    RefreshTokenResult response = new RefreshTokenResult("new-access-token", "new-refresh-token");
 
     when(commandBus.execute(any())).thenReturn(new CommandResult.Success<>(response));
 

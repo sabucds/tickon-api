@@ -11,8 +11,8 @@ import static org.mockito.Mockito.when;
 
 import com.tickon.common.commands.CommandResult;
 import com.tickon.identity.contracts.user.commands.ChangePasswordCommand;
-import com.tickon.identity.shared.kernel.ports.out.PasswordHasher;
-import com.tickon.identity.user.application.ports.out.UserRepository;
+import com.tickon.identity.shared.kernel.ports.PasswordHasher;
+import com.tickon.identity.user.application.ports.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;

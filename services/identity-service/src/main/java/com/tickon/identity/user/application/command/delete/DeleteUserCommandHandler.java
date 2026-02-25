@@ -3,7 +3,7 @@ package com.tickon.identity.user.application.command.delete;
 import com.tickon.common.commands.CommandHandler;
 import com.tickon.common.commands.CommandResult;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
-import com.tickon.identity.user.application.ports.out.UserRepository;
+import com.tickon.identity.user.application.ports.UserRepository;
 import com.tickon.identity.user.domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

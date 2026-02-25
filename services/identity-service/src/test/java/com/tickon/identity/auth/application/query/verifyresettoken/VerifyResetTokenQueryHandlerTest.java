@@ -3,8 +3,8 @@ package com.tickon.identity.auth.application.query.verifyresettoken;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import com.tickon.identity.auth.application.ports.out.ResetTokenHasher;
-import com.tickon.identity.auth.application.ports.out.ResetTokenRepository;
+import com.tickon.identity.auth.application.ports.ResetTokenHasher;
+import com.tickon.identity.auth.application.ports.ResetTokenRepository;
 import com.tickon.identity.auth.domain.PasswordResetToken;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenId;

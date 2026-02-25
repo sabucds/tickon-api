@@ -18,7 +18,6 @@ Infrastructure → Application → Domain
   - ✅ shared contracts live under `contracts/<source-module>/commands/` and `contracts/<source-module>/queries/`
   - ✅ shared infrastructure primitives live under `shared/platform/`
   - ✅ shared pure-Java abstractions live under `shared/kernel/`
-  - ✅ truly shared value objects (Email, UserId, etc.) belong in the common module: `com.tickon.common.identity.domain.valueobjects.*`
 
 ## Package structure (identity-service example)
 ```

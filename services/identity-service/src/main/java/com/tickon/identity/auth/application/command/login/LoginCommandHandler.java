@@ -71,7 +71,6 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginRe
       metrics.loginFailure("user_not_found").increment();
       throw new InvalidCredentialsException();
     }
-
     UserAuthDataDTO user = userOpt.get();
     UUID userId = user.id();
     String passwordHash = user.passwordHash();

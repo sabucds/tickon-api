@@ -205,8 +205,8 @@ services:
     command: ["-config.file=/etc/loki/loki.yaml"]
     volumes:
       - ./infra/loki/loki.yaml:/etc/loki/loki.yaml:ro
-      - loki-data:/var/loki
-      - loki-wal:/wal
+      - loki-data:/loki
+      - loki-wal:/loki/wal
     ports:
       - "3100:3100"
     networks:

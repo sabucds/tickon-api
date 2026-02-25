@@ -66,7 +66,7 @@ email:
     api-key: "${SENDGRID_API_KEY:}"
     from-email: "${SENDGRID_FROM_EMAIL:noreply@tickon.com}"
     from-name: "${SENDGRID_FROM_NAME:Tickon}"
-    reset-url-base: "${RESET_URL_BASE:http://localhost:8080/api/identity/v1/reset-password}"
+    reset-url-base: "${RESET_URL_BASE:http://localhost:3000/reset-password}"
 
 springdoc:
   swagger-ui:

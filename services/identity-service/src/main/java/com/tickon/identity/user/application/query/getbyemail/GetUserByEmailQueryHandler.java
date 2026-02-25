@@ -21,7 +21,8 @@ public class GetUserByEmailQueryHandler implements QueryHandler<GetUserByEmailQu
 
   @Override
   public QueryResult<Optional<UserAuthDataDTO>> handle(GetUserByEmailQuery query) {
-    return new QueryResult.Success<>(userRepository.findByEmail(Email.from(query.email())).map(this::toDTO));
+    Optional<UserAuthDataDTO> user = userRepository.findByEmail(Email.from(query.email())).map(this::toDTO);
+    return new QueryResult.Success<>(user);
   }
 
   @Override

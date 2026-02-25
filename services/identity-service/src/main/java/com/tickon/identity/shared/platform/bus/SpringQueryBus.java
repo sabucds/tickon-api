@@ -68,7 +68,6 @@ public class SpringQueryBus implements QueryBus {
 
       return result;
     } catch (QueryHandlerNotFoundException e) {
-
       throw e;
     } catch (Exception e) {
       long duration = System.currentTimeMillis() - startTime;

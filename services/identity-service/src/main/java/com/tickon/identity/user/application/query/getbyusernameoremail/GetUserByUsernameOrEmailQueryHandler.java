@@ -24,11 +24,11 @@ public class GetUserByUsernameOrEmailQueryHandler
 
   @Override
   public QueryResult<Optional<UserAuthDataDTO>> handle(GetUserByUsernameOrEmailQuery query) {
-    Optional<UserAuthDataDTO> userOpt = userRepository.findByUsernameOrEmail(query.usernameOrEmail()).map(this::toDTO);
-    if (userOpt.isEmpty()) {
+    Optional<UserAuthDataDTO> user = userRepository.findByUsernameOrEmail(query.usernameOrEmail()).map(this::toDTO);
+    if (user.isEmpty()) {
       log.debug("User not found for username/email: {}", query.usernameOrEmail());
     }
-    return new QueryResult.Success<>(userOpt);
+    return new QueryResult.Success<>(user);
   }
 
   @Override

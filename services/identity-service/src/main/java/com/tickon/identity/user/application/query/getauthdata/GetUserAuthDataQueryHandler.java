@@ -24,11 +24,11 @@ public class GetUserAuthDataQueryHandler implements QueryHandler<GetUserAuthData
 
   @Override
   public QueryResult<Optional<UserAuthDataDTO>> handle(GetUserAuthDataQuery query) {
-    Optional<UserAuthDataDTO> userOpt = userRepository.findById(new UserId(query.userId())).map(this::toDTO);
-    if (userOpt.isEmpty()) {
+    Optional<UserAuthDataDTO> user = userRepository.findById(new UserId(query.userId())).map(this::toDTO);
+    if (user.isEmpty()) {
       log.debug("User not found for id: {}", query.userId());
     }
-    return new QueryResult.Success<>(userOpt);
+    return new QueryResult.Success<>(user);
   }
 
   @Override

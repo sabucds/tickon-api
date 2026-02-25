@@ -25,7 +25,7 @@ public class GetUserByIdQueryHandler implements QueryHandler<GetUserByIdQuery, O
     if (result.isPresent()) {
       log.debug("User found: userId={}", query.userId().value());
     } else {
-      log.warn("User not found: userId={}", query.userId().value());
+      log.debug("User not found: userId={}", query.userId().value());
     }
     return new QueryResult.Success<>(result);
   }

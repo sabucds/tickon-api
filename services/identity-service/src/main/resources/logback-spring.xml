@@ -3,10 +3,6 @@
     <!-- JSON output for deployed/docker environments -->
     <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
       <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-        <includeMdcKeyName>traceId</includeMdcKeyName>
-        <includeMdcKeyName>spanId</includeMdcKeyName>
-        <includeMdcKeyName>userId</includeMdcKeyName>
-        <includeMdcKeyName>operation</includeMdcKeyName>
         <customFields>{"service":"identity-service"}</customFields>
       </encoder>
     </appender>

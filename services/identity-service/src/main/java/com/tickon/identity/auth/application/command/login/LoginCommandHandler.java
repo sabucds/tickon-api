@@ -60,13 +60,10 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginRe
   @Override
   @Transactional
   public CommandResult<LoginResult> handle(LoginCommand cmd) {
-    log.info("Login attempt for user '{}'", cmd.usernameOrEmail());
-
     Optional<UserAuthDataDTO> userOpt = queryBus.execute(new GetUserByUsernameOrEmailQuery(cmd.usernameOrEmail()))
         .orElseThrow();
 
     if (userOpt.isEmpty()) {
-      log.warn("Login failed: user not found for '{}'", cmd.usernameOrEmail());
       metrics.loginAttempt("failure").increment();
       metrics.loginFailure("user_not_found").increment();
       throw new InvalidCredentialsException();
@@ -76,7 +73,6 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginRe
     String passwordHash = user.passwordHash();
 
     if (!passwordHasher.verify(cmd.password(), passwordHash)) {
-      log.warn("Login failed: invalid credentials for '{}'", cmd.usernameOrEmail());
       metrics.loginAttempt("failure").increment();
       metrics.loginFailure("invalid_credentials").increment();
       throw new InvalidCredentialsException();

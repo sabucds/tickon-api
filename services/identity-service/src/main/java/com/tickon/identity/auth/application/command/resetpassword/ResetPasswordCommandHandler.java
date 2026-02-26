@@ -46,7 +46,6 @@ public class ResetPasswordCommandHandler implements CommandHandler<ResetPassword
   public CommandResult<Void> handle(ResetPasswordCommand command) {
     ResetTokenHash tokenHash = resetTokenHasher.hash(command.resetToken());
     PasswordResetToken token = resetTokenRepository.findByTokenHash(tokenHash.value()).orElseThrow(() -> {
-      log.warn("Password reset failed: token not found");
       metrics.passwordResetFailed("invalid_token").increment();
       return new InvalidResetTokenException();
     });

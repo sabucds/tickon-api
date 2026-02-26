@@ -18,8 +18,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class RequestPasswordResetCommandHandler
     implements CommandHandler<RequestPasswordResetCommand, RequestPasswordResetResult> {
-
-  private static final Logger log = LoggerFactory.getLogger(RequestPasswordResetCommandHandler.class);
 
   private final QueryBus queryBus;
   private final ResetTokenRepository resetTokenRepository;
@@ -56,7 +52,6 @@ public class RequestPasswordResetCommandHandler
   @Override
   @Transactional
   public CommandResult<RequestPasswordResetResult> handle(RequestPasswordResetCommand command) {
-    log.info("Password reset requested");
     metrics.passwordResetRequested().increment();
 
     Optional<UserAuthDataDTO> userOpt = queryBus.execute(new GetUserByEmailQuery(command.email())).orElseThrow();

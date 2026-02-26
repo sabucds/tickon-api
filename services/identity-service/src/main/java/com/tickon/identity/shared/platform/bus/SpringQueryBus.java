@@ -49,36 +49,16 @@ public class SpringQueryBus implements QueryBus {
   @Override
   @SuppressWarnings("unchecked")
   public <R> QueryResult<R> execute(Query<R> query) {
-    String queryName = query.getQueryName();
-    log.debug("Executing query: {}", queryName);
-    long startTime = System.currentTimeMillis();
-
+    QueryHandler<Query<R>, R> handler = (QueryHandler<Query<R>, R>) handlers.get(query.getClass());
+    if (handler == null) {
+      throw new QueryHandlerNotFoundException(query.getClass());
+    }
     try {
-      QueryHandler<Query<R>, R> handler = (QueryHandler<Query<R>, R>) handlers.get(query.getClass());
-
-      if (handler == null) {
-        log.error("No handler found for query: {}", query.getClass().getName());
-        throw new QueryHandlerNotFoundException(query.getClass());
-      }
-
-      QueryResult<R> result = handler.handle(query);
-      long duration = System.currentTimeMillis() - startTime;
-
-      logQueryResult(queryName, result, duration);
-
-      return result;
+      return handler.handle(query);
     } catch (QueryHandlerNotFoundException e) {
       throw e;
     } catch (Exception e) {
-      long duration = System.currentTimeMillis() - startTime;
-      log.error("Query execution failed: {} ({}ms)", queryName, duration, e);
       throw new QueryExecutionException(query.getClass(), e);
-    }
-  }
-
-  private void logQueryResult(String queryName, QueryResult<?> result, long duration) {
-    if (result instanceof QueryResult.Success<?>) {
-      log.debug("Query executed successfully: {} ({}ms)", queryName, duration);
     }
   }
 

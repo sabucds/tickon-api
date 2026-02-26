@@ -32,8 +32,6 @@ public class ChangePasswordCommandHandler implements CommandHandler<ChangePasswo
   @Override
   @Transactional
   public CommandResult<Void> handle(ChangePasswordCommand command) {
-    log.debug("Changing password for user: {}", command.userId());
-
     passwordPolicy.validate(command.newPlainPassword());
     PasswordHash hashedPassword = PasswordHash.from(passwordHasher.hash(command.newPlainPassword()));
 

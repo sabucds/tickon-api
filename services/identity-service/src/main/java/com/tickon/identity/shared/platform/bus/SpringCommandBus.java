@@ -49,39 +49,17 @@ public class SpringCommandBus implements CommandBus {
   @Override
   @SuppressWarnings("unchecked")
   public <R> CommandResult<R> execute(Command<R> command) {
-    if (command == null) {
-      throw new IllegalArgumentException("Command must not be null");
+    if (command == null) throw new IllegalArgumentException("Command must not be null");
+    CommandHandler<Command<R>, R> handler = (CommandHandler<Command<R>, R>) handlers.get(command.getClass());
+    if (handler == null) {
+      throw new CommandHandlerNotFoundException(command.getClass());
     }
-    String commandName = command.getCommandName();
-    log.debug("Executing command: {}", commandName);
-    long startTime = System.currentTimeMillis();
-
     try {
-      CommandHandler<Command<R>, R> handler = (CommandHandler<Command<R>, R>) handlers.get(command.getClass());
-
-      if (handler == null) {
-        log.error("No handler found for command: {}", command.getClass().getName());
-        throw new CommandHandlerNotFoundException(command.getClass());
-      }
-
-      CommandResult<R> result = handler.handle(command);
-      long duration = System.currentTimeMillis() - startTime;
-
-      logCommandResult(commandName, result, duration);
-
-      return result;
+      return handler.handle(command);
     } catch (CommandHandlerNotFoundException e) {
       throw e;
     } catch (Exception e) {
-      long duration = System.currentTimeMillis() - startTime;
-      log.error("Command execution failed: {} ({}ms)", commandName, duration, e);
       throw new CommandExecutionException(command.getClass(), e);
-    }
-  }
-
-  private void logCommandResult(String commandName, CommandResult<?> result, long duration) {
-    if (result instanceof CommandResult.Success<?>) {
-      log.debug("Command executed successfully: {} ({}ms)", commandName, duration);
     }
   }
 

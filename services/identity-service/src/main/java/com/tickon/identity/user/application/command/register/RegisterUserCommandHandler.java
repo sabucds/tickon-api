@@ -41,12 +41,10 @@ public class RegisterUserCommandHandler implements CommandHandler<RegisterUserCo
   @Transactional
   public CommandResult<UserResult> handle(RegisterUserCommand cmd) {
     if (userRepository.existsByEmail(cmd.email())) {
-      log.warn("Registration failed: duplicate email for username='{}'", cmd.username().value());
       metrics.registrationFailed("duplicate_email").increment();
       throw new DuplicateEmailException(cmd.email().value());
     }
     if (userRepository.existsByUsername(cmd.username())) {
-      log.warn("Registration failed: duplicate username='{}'", cmd.username().value());
       metrics.registrationFailed("duplicate_username").increment();
       throw new DuplicateUsernameException(cmd.username().value());
     }

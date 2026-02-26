@@ -62,6 +62,6 @@ public class LogoutCommandHandler implements CommandHandler<LogoutCommand, Void>
 
     log.info("Logout: sessionId={} revoked", session.id().value());
     metrics.logout().increment();
-    metrics.sessionRevoked("logout").increment();
+    metrics.sessionRevoked("logout");
   }
 }

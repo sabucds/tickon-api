@@ -64,8 +64,7 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginRe
         .orElseThrow();
 
     if (userOpt.isEmpty()) {
-      metrics.loginAttempt("failure").increment();
-      metrics.loginFailure("user_not_found").increment();
+      metrics.loginFailure("user_not_found");
       throw new InvalidCredentialsException();
     }
     UserAuthDataDTO user = userOpt.get();
@@ -73,8 +72,7 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginRe
     String passwordHash = user.passwordHash();
 
     if (!passwordHasher.verify(cmd.password(), passwordHash)) {
-      metrics.loginAttempt("failure").increment();
-      metrics.loginFailure("invalid_credentials").increment();
+      metrics.loginFailure("invalid_credentials");
       throw new InvalidCredentialsException();
     }
 
@@ -91,7 +89,7 @@ public class LoginCommandHandler implements CommandHandler<LoginCommand, LoginRe
     session.clearEvents();
 
     log.info("Login successful: userId={}, sessionId={}", userId, session.id().value());
-    metrics.loginAttempt("success").increment();
+    metrics.loginSuccess();
     metrics.sessionCreated().increment();
 
     return new CommandResult.Success<>(new LoginResult(accessToken, refreshToken));

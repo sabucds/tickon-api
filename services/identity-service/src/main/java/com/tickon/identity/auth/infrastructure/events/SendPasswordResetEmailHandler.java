@@ -28,10 +28,10 @@ public class SendPasswordResetEmailHandler {
     try {
       String recipientName = event.email().split("@")[0];
       emailSender.sendPasswordResetEmail(event.email(), event.plainToken(), recipientName);
-      metrics.emailSent("success", "password_reset").increment();
+      metrics.emailSent("success", "password_reset");
     } catch (Exception e) {
       log.error("Failed to send password reset email", e);
-      metrics.emailSent("failure", "password_reset").increment();
+      metrics.emailSent("failure", "password_reset");
     }
   }
 }

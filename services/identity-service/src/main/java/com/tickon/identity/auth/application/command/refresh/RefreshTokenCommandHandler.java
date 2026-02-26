@@ -56,8 +56,7 @@ public class RefreshTokenCommandHandler implements CommandHandler<RefreshTokenCo
 
     Session session = sessionRepository.findByRefreshTokenHash(tokenHash.value()).orElseThrow(() -> {
       log.warn("Token refresh failed: token not found");
-      metrics.tokenRefresh("failure").increment();
-      metrics.tokenRefreshFailure("invalid").increment();
+      metrics.tokenRefreshFailure("invalid");
       return new InvalidRefreshTokenException();
     });
 
@@ -66,16 +65,14 @@ public class RefreshTokenCommandHandler implements CommandHandler<RefreshTokenCo
     if (session.isRevoked()) {
       sessionRepository.revokeAllByFamilyId(session.familyId(), now, RevokeReason.TOKEN_REUSE_DETECTED);
       log.warn("Token refresh failed: token reuse detected for sessionId={}", session.id().value());
-      metrics.tokenRefresh("failure").increment();
-      metrics.tokenRefreshFailure("revoked").increment();
-      metrics.sessionRevoked("rotation_failure").increment();
+      metrics.tokenRefreshFailure("revoked");
+      metrics.sessionRevoked("rotation_failure");
       throw new InvalidRefreshTokenException();
     }
 
     if (session.isExpired(now)) {
       log.warn("Token refresh failed: session expired for sessionId={}", session.id().value());
-      metrics.tokenRefresh("failure").increment();
-      metrics.tokenRefreshFailure("expired").increment();
+      metrics.tokenRefreshFailure("expired");
       throw new InvalidRefreshTokenException();
     }
 
@@ -83,8 +80,7 @@ public class RefreshTokenCommandHandler implements CommandHandler<RefreshTokenCo
 
     if (userOpt.isEmpty()) {
       log.warn("Token refresh failed: user not found for sessionId={}", session.id().value());
-      metrics.tokenRefresh("failure").increment();
-      metrics.tokenRefreshFailure("invalid").increment();
+      metrics.tokenRefreshFailure("invalid");
       throw new InvalidRefreshTokenException();
     }
     UserAuthDataDTO user = userOpt.get();
@@ -105,9 +101,9 @@ public class RefreshTokenCommandHandler implements CommandHandler<RefreshTokenCo
     newSession.clearEvents();
 
     log.debug("Token refresh successful: userId={}, newSessionId={}", userId, newSession.id().value());
-    metrics.tokenRefresh("success").increment();
+    metrics.tokenRefreshSuccess();
     metrics.sessionCreated().increment();
-    metrics.sessionRevoked("rotation").increment();
+    metrics.sessionRevoked("rotation");
 
     return new CommandResult.Success<>(new RefreshTokenResult(newAccessToken, newRefreshToken));
   }

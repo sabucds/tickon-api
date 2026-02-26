@@ -28,7 +28,7 @@ class IdentityMetricsTest {
 
   @Test
   void registrationFailedRecordsReason() {
-    metrics.registrationFailed("duplicate_email").increment();
+    metrics.registrationFailed("duplicate_email");
     Counter counter = registry.find("identity.user.registration.failed").tag("reason", "duplicate_email").counter();
     assertThat(counter).isNotNull();
     assertThat(counter.count()).isEqualTo(1.0);
@@ -43,17 +43,18 @@ class IdentityMetricsTest {
   }
 
   @Test
-  void loginAttemptRecordsOutcome() {
-    metrics.loginAttempt("success").increment();
-    Counter counter = registry.find("identity.auth.login.attempt").tag("outcome", "success").counter();
+  void loginSuccessRecordsOutcome() {
+    metrics.loginSuccess();
+    Counter counter = registry.find("identity.auth.login").tag("outcome", "success").counter();
     assertThat(counter).isNotNull();
     assertThat(counter.count()).isEqualTo(1.0);
   }
 
   @Test
-  void loginFailureRecordsReason() {
-    metrics.loginFailure("invalid_credentials").increment();
-    Counter counter = registry.find("identity.auth.login.failure").tag("reason", "invalid_credentials").counter();
+  void loginFailureRecordsOutcomeAndReason() {
+    metrics.loginFailure("invalid_credentials");
+    Counter counter = registry.find("identity.auth.login").tag("outcome", "failure").tag("reason", "invalid_credentials")
+        .counter();
     assertThat(counter).isNotNull();
     assertThat(counter.count()).isEqualTo(1.0);
   }
@@ -68,24 +69,25 @@ class IdentityMetricsTest {
 
   @Test
   void sessionRevokedRecordsReason() {
-    metrics.sessionRevoked("logout").increment();
+    metrics.sessionRevoked("logout");
     Counter counter = registry.find("identity.auth.session.revoked").tag("reason", "logout").counter();
     assertThat(counter).isNotNull();
     assertThat(counter.count()).isEqualTo(1.0);
   }
 
   @Test
-  void tokenRefreshRecordsOutcome() {
-    metrics.tokenRefresh("success").increment();
+  void tokenRefreshSuccessRecordsOutcome() {
+    metrics.tokenRefreshSuccess();
     Counter counter = registry.find("identity.auth.token.refresh").tag("outcome", "success").counter();
     assertThat(counter).isNotNull();
     assertThat(counter.count()).isEqualTo(1.0);
   }
 
   @Test
-  void tokenRefreshFailureRecordsReason() {
-    metrics.tokenRefreshFailure("expired").increment();
-    Counter counter = registry.find("identity.auth.token.refresh.failure").tag("reason", "expired").counter();
+  void tokenRefreshFailureRecordsOutcomeAndReason() {
+    metrics.tokenRefreshFailure("expired");
+    Counter counter = registry.find("identity.auth.token.refresh").tag("outcome", "failure").tag("reason", "expired")
+        .counter();
     assertThat(counter).isNotNull();
     assertThat(counter.count()).isEqualTo(1.0);
   }
@@ -116,7 +118,7 @@ class IdentityMetricsTest {
 
   @Test
   void passwordResetFailedRecordsReason() {
-    metrics.passwordResetFailed("expired_token").increment();
+    metrics.passwordResetFailed("expired_token");
     Counter counter = registry.find("identity.auth.password_reset.failed").tag("reason", "expired_token").counter();
     assertThat(counter).isNotNull();
     assertThat(counter.count()).isEqualTo(1.0);
@@ -124,7 +126,7 @@ class IdentityMetricsTest {
 
   @Test
   void emailSentRecordsOutcomeAndType() {
-    metrics.emailSent("success", "password_reset").increment();
+    metrics.emailSent("success", "password_reset");
     Counter counter = registry.find("identity.email.sent").tag("outcome", "success").tag("type", "password_reset")
         .counter();
     assertThat(counter).isNotNull();

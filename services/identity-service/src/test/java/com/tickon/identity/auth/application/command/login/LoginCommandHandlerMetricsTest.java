@@ -64,8 +64,8 @@ class LoginCommandHandlerMetricsTest {
 
     handler.handle(new LoginCommand("user@example.com", "password", "device-1"));
 
-    assertThat(registry.find("identity.auth.login.attempt").tag("outcome", "success").counter()).isNotNull();
-    assertThat(registry.find("identity.auth.login.attempt").tag("outcome", "success").counter().count()).isEqualTo(1.0);
+    assertThat(registry.find("identity.auth.login").tag("outcome", "success").counter()).isNotNull();
+    assertThat(registry.find("identity.auth.login").tag("outcome", "success").counter().count()).isEqualTo(1.0);
     assertThat(registry.find("identity.auth.session.created").counter()).isNotNull();
     assertThat(registry.find("identity.auth.session.created").counter().count()).isEqualTo(1.0);
   }
@@ -74,14 +74,14 @@ class LoginCommandHandlerMetricsTest {
   void userNotFoundIncrementsFailureWithUserNotFoundReason() {
     when(queryBus.execute(any())).thenReturn(new QueryResult.Success<>(Optional.empty()));
 
-    assertThatThrownBy(() -> handler.handle(new LoginCommand("unknown@example.com", "password", "device-1")))
+    var cmd = new LoginCommand("unknown@example.com", "password", "device-1");
+    assertThatThrownBy(() -> handler.handle(cmd))
         .isInstanceOf(InvalidCredentialsException.class);
 
-    assertThat(registry.find("identity.auth.login.attempt").tag("outcome", "failure").counter()).isNotNull();
-    assertThat(registry.find("identity.auth.login.attempt").tag("outcome", "failure").counter().count()).isEqualTo(1.0);
-    assertThat(registry.find("identity.auth.login.failure").tag("reason", "user_not_found").counter()).isNotNull();
-    assertThat(
-        registry.find("identity.auth.login.failure").tag("reason", "user_not_found").counter().count()).isEqualTo(1.0);
+    assertThat(registry.find("identity.auth.login").tag("outcome", "failure").tag("reason", "user_not_found").counter())
+        .isNotNull();
+    assertThat(registry.find("identity.auth.login").tag("outcome", "failure").tag("reason", "user_not_found").counter()
+        .count()).isEqualTo(1.0);
   }
 
   @Test
@@ -90,12 +90,14 @@ class LoginCommandHandlerMetricsTest {
     when(queryBus.execute(any())).thenReturn(new QueryResult.Success<>(Optional.of(userDTO)));
     when(passwordHasher.verify(any(), any())).thenReturn(false);
 
-    assertThatThrownBy(() -> handler.handle(new LoginCommand("user@example.com", "wrong", "device-1")))
+    var cmd = new LoginCommand("user@example.com", "wrong", "device-1");
+    assertThatThrownBy(() -> handler.handle(cmd))
         .isInstanceOf(InvalidCredentialsException.class);
 
-    assertThat(registry.find("identity.auth.login.attempt").tag("outcome", "failure").counter()).isNotNull();
-    assertThat(registry.find("identity.auth.login.failure").tag("reason", "invalid_credentials").counter()).isNotNull();
-    assertThat(registry.find("identity.auth.login.failure").tag("reason", "invalid_credentials").counter().count())
-        .isEqualTo(1.0);
+    assertThat(
+        registry.find("identity.auth.login").tag("outcome", "failure").tag("reason", "invalid_credentials").counter())
+        .isNotNull();
+    assertThat(registry.find("identity.auth.login").tag("outcome", "failure").tag("reason", "invalid_credentials")
+        .counter().count()).isEqualTo(1.0);
   }
 }

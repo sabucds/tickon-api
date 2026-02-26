@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class IdentityMetrics {
 
+  private static final String TAG_OUTCOME = "outcome";
+  private static final String TAG_REASON = "reason";
+  private static final String TAG_TYPE = "type";
+
   private final MeterRegistry registry;
 
   // Tag-less counters pre-registered so they appear in /actuator/prometheus
@@ -40,8 +44,8 @@ public class IdentityMetrics {
     return userRegisteredCounter;
   }
 
-  public Counter registrationFailed(String reason) {
-    return Counter.builder("identity.user.registration.failed").tag("reason", reason).register(registry);
+  public void registrationFailed(String reason) {
+    Counter.builder("identity.user.registration.failed").tag(TAG_REASON, reason).register(registry).increment();
   }
 
   public Counter userDeleted() {
@@ -50,28 +54,30 @@ public class IdentityMetrics {
 
   // --- Auth: Login / Session ---
 
-  public Counter loginAttempt(String outcome) {
-    return Counter.builder("identity.auth.login.attempt").tag("outcome", outcome).register(registry);
+  public void loginSuccess() {
+    Counter.builder("identity.auth.login").tag(TAG_OUTCOME, "success").register(registry).increment();
   }
 
-  public Counter loginFailure(String reason) {
-    return Counter.builder("identity.auth.login.failure").tag("reason", reason).register(registry);
+  public void loginFailure(String reason) {
+    Counter.builder("identity.auth.login").tag(TAG_OUTCOME, "failure").tag(TAG_REASON, reason).register(registry)
+        .increment();
   }
 
   public Counter sessionCreated() {
     return sessionCreatedCounter;
   }
 
-  public Counter sessionRevoked(String reason) {
-    return Counter.builder("identity.auth.session.revoked").tag("reason", reason).register(registry);
+  public void sessionRevoked(String reason) {
+    Counter.builder("identity.auth.session.revoked").tag(TAG_REASON, reason).register(registry).increment();
   }
 
-  public Counter tokenRefresh(String outcome) {
-    return Counter.builder("identity.auth.token.refresh").tag("outcome", outcome).register(registry);
+  public void tokenRefreshSuccess() {
+    Counter.builder("identity.auth.token.refresh").tag(TAG_OUTCOME, "success").register(registry).increment();
   }
 
-  public Counter tokenRefreshFailure(String reason) {
-    return Counter.builder("identity.auth.token.refresh.failure").tag("reason", reason).register(registry);
+  public void tokenRefreshFailure(String reason) {
+    Counter.builder("identity.auth.token.refresh").tag(TAG_OUTCOME, "failure").tag(TAG_REASON, reason).register(registry)
+        .increment();
   }
 
   public Counter logout() {
@@ -88,13 +94,13 @@ public class IdentityMetrics {
     return passwordResetCompletedCounter;
   }
 
-  public Counter passwordResetFailed(String reason) {
-    return Counter.builder("identity.auth.password_reset.failed").tag("reason", reason).register(registry);
+  public void passwordResetFailed(String reason) {
+    Counter.builder("identity.auth.password_reset.failed").tag(TAG_REASON, reason).register(registry).increment();
   }
 
   // --- Infrastructure ---
 
-  public Counter emailSent(String outcome, String type) {
-    return Counter.builder("identity.email.sent").tag("outcome", outcome).tag("type", type).register(registry);
+  public void emailSent(String outcome, String type) {
+    Counter.builder("identity.email.sent").tag(TAG_OUTCOME, outcome).tag(TAG_TYPE, type).register(registry).increment();
   }
 }

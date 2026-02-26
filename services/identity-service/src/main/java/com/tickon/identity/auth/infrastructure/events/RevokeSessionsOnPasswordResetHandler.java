@@ -32,7 +32,7 @@ public class RevokeSessionsOnPasswordResetHandler {
     log.info("Revoking all sessions for user {} due to password reset", event.userId());
     try {
       sessionRepository.revokeAllByUserId(event.userId(), clock.instant(), RevokeReason.PASSWORD_RESET);
-      metrics.sessionRevoked("password_reset").increment();
+      metrics.sessionRevoked("password_reset");
     } catch (Exception e) {
       log.error("Failed to revoke sessions for user {} after password reset", event.userId(), e);
     }

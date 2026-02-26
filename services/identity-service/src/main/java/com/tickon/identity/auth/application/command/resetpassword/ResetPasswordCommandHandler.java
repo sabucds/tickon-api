@@ -46,7 +46,7 @@ public class ResetPasswordCommandHandler implements CommandHandler<ResetPassword
   public CommandResult<Void> handle(ResetPasswordCommand command) {
     ResetTokenHash tokenHash = resetTokenHasher.hash(command.resetToken());
     PasswordResetToken token = resetTokenRepository.findByTokenHash(tokenHash.value()).orElseThrow(() -> {
-      metrics.passwordResetFailed("invalid_token").increment();
+      metrics.passwordResetFailed("invalid_token");
       return new InvalidResetTokenException();
     });
 
@@ -54,13 +54,13 @@ public class ResetPasswordCommandHandler implements CommandHandler<ResetPassword
 
     if (token.isExpired(now)) {
       log.warn("Password reset failed: token expired for userId={}", token.userId());
-      metrics.passwordResetFailed("expired_token").increment();
+      metrics.passwordResetFailed("expired_token");
       throw new InvalidResetTokenException();
     }
 
     if (token.isUsed()) {
       log.warn("Password reset failed: token already used for userId={}", token.userId());
-      metrics.passwordResetFailed("invalid_token").increment();
+      metrics.passwordResetFailed("invalid_token");
       throw new InvalidResetTokenException();
     }
 

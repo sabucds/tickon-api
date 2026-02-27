@@ -45,10 +45,6 @@ management:
     tracing:
       endpoint: http://tempo:4318/v1/traces
 
-logging:
-  pattern:
-    correlation: "[${spring.application.name:},%X{traceId},%X{spanId}] "
-
 security:
   jwt:
     private-key: "${SECURITY_JWT_PRIVATE_KEY:}"

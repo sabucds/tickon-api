@@ -1,7 +1,6 @@
 package com.tickon.identity.auth.domain;
 
 import com.tickon.common.domain.AggregateRoot;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.events.SessionCreatedEvent;
 import com.tickon.identity.auth.domain.events.SessionRevokedEvent;
 import com.tickon.identity.auth.domain.exceptions.SessionExpiredException;
@@ -13,12 +12,13 @@ import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Session extends AggregateRoot {
 
   private final SessionId id;
   private final RefreshTokenHash refreshTokenHash;
-  private final UserId userId;
+  private final UUID userId;
   private final String deviceId;
   private final FamilyId familyId;
   private final SessionId rotatedFromSessionId;
@@ -28,7 +28,7 @@ public class Session extends AggregateRoot {
   private Instant revokedAt;
   private RevokeReason revokeReason;
 
-  private Session(SessionId id, RefreshTokenHash refreshTokenHash, UserId userId, String deviceId, FamilyId familyId,
+  private Session(SessionId id, RefreshTokenHash refreshTokenHash, UUID userId, String deviceId, FamilyId familyId,
       SessionId rotatedFromSessionId, Instant absoluteExpiresAt, Instant revokedAt, RevokeReason revokeReason) {
     this.id = Objects.requireNonNull(id, "id");
     this.refreshTokenHash = Objects.requireNonNull(refreshTokenHash, "refreshTokenHash");
@@ -46,7 +46,7 @@ public class Session extends AggregateRoot {
     this.validateRevocationConsistency();
   }
 
-  public static Session create(SessionId id, RefreshTokenHash refreshTokenHash, UserId userId, String deviceId,
+  public static Session create(SessionId id, RefreshTokenHash refreshTokenHash, UUID userId, String deviceId,
       FamilyId familyId, SessionId rotatedFromSessionId, Duration sessionDuration, Instant now) {
     Objects.requireNonNull(sessionDuration, "sessionDuration");
     Objects.requireNonNull(now, "now");
@@ -60,7 +60,7 @@ public class Session extends AggregateRoot {
     return session;
   }
 
-  public static Session restore(SessionId id, RefreshTokenHash refreshTokenHash, UserId userId, String deviceId,
+  public static Session restore(SessionId id, RefreshTokenHash refreshTokenHash, UUID userId, String deviceId,
       FamilyId familyId, SessionId rotatedFromSessionId, Instant absoluteExpiresAt, Instant revokedAt,
       RevokeReason revokeReason) {
     return new Session(id, refreshTokenHash, userId, deviceId, familyId, rotatedFromSessionId, absoluteExpiresAt,
@@ -113,7 +113,7 @@ public class Session extends AggregateRoot {
     return refreshTokenHash;
   }
 
-  public UserId userId() {
+  public UUID userId() {
     return userId;
   }
 

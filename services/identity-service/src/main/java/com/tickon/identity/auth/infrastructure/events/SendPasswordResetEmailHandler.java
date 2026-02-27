@@ -1,8 +1,8 @@
 package com.tickon.identity.auth.infrastructure.events;
 
-import com.tickon.identity.auth.application.ports.out.EmailSender;
+import com.tickon.identity.auth.application.ports.EmailSender;
 import com.tickon.identity.auth.domain.events.PasswordResetRequestedEvent;
-import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
+import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -26,12 +26,12 @@ public class SendPasswordResetEmailHandler {
   public void handle(PasswordResetRequestedEvent event) {
     log.info("Sending password reset email");
     try {
-      String recipientName = event.email().value().split("@")[0];
+      String recipientName = event.email().split("@")[0];
       emailSender.sendPasswordResetEmail(event.email(), event.plainToken(), recipientName);
-      metrics.emailSent("success", "password_reset").increment();
+      metrics.emailSent("success", "password_reset");
     } catch (Exception e) {
       log.error("Failed to send password reset email", e);
-      metrics.emailSent("failure", "password_reset").increment();
+      metrics.emailSent("failure", "password_reset");
     }
   }
 }

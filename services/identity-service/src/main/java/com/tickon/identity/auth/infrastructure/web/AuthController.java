@@ -1,12 +1,11 @@
 package com.tickon.identity.auth.infrastructure.web;
 
-import com.tickon.identity.auth.application.ports.in.LoginUseCase;
-import com.tickon.identity.auth.application.ports.in.LogoutUseCase;
-import com.tickon.identity.auth.application.ports.in.RefreshTokenUseCase;
+import com.tickon.common.commands.CommandBus;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginResponse;
 import com.tickon.identity.auth.infrastructure.web.dto.LogoutRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.RefreshTokenRequest;
+import com.tickon.identity.auth.infrastructure.web.dto.RefreshTokenResponse;
 import com.tickon.identity.auth.infrastructure.web.mappers.LoginMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,34 +19,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/auth")
 public class AuthController {
 
-  private final LoginUseCase loginUser;
-  private final RefreshTokenUseCase refreshToken;
-  private final LogoutUseCase logoutUser;
+  private final CommandBus commandBus;
 
-  AuthController(LoginUseCase loginUser, RefreshTokenUseCase refreshToken, LogoutUseCase logoutUser) {
-    this.loginUser = loginUser;
-    this.refreshToken = refreshToken;
-    this.logoutUser = logoutUser;
+  AuthController(CommandBus commandBus) {
+    this.commandBus = commandBus;
   }
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/login")
   public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-    var appResponse = loginUser.login(LoginMapper.toLoginCommand(request));
-    return LoginMapper.toLoginResponse(appResponse);
+    return LoginMapper.toLoginResponse(commandBus.execute(LoginMapper.toLoginCommand(request)).orElseThrow());
   }
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/refresh")
-  public LoginResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
-    var appResponse = refreshToken.refresh(LoginMapper.toRefreshTokenCommand(request));
-    return LoginMapper.toLoginResponse(appResponse);
+  public RefreshTokenResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
+    return LoginMapper
+        .toRefreshTokenResponse(commandBus.execute(LoginMapper.toRefreshTokenCommand(request)).orElseThrow());
   }
 
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @PostMapping("/logout")
   public void logout(@Valid @RequestBody LogoutRequest request) {
-    logoutUser.logout(LoginMapper.toLogoutCommand(request));
+    commandBus.execute(LoginMapper.toLogoutCommand(request));
   }
-
 }

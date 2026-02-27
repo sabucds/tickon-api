@@ -1,7 +1,6 @@
 package com.tickon.identity.auth.infrastructure.persistence;
 
-import com.tickon.common.identity.domain.valueobjects.UserId;
-import com.tickon.identity.auth.application.ports.out.SessionRepository;
+import com.tickon.identity.auth.application.ports.SessionRepository;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
@@ -11,6 +10,7 @@ import com.tickon.identity.auth.infrastructure.persistence.mappers.SessionPersis
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,8 +49,8 @@ public class SessionRepositoryAdapter implements SessionRepository {
 
   @Override
   @Transactional
-  public void revokeAllByUserId(UserId userId, Instant now, RevokeReason reason) {
-    List<SessionEntity> sessions = jpaRepository.findByUserIdAndRevokedAtIsNull(userId.value());
+  public void revokeAllByUserId(UUID userId, Instant now, RevokeReason reason) {
+    List<SessionEntity> sessions = jpaRepository.findByUserIdAndRevokedAtIsNull(userId);
     for (SessionEntity entity : sessions) {
       Session session = mapper.toDomain(entity);
       if (!session.isRevoked()) {

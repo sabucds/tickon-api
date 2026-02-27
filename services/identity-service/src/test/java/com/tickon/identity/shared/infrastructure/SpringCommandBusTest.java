@@ -8,6 +8,7 @@ import com.tickon.common.commands.CommandHandler;
 import com.tickon.common.commands.CommandResult;
 import com.tickon.common.commands.exceptions.CommandExecutionException;
 import com.tickon.common.commands.exceptions.CommandHandlerNotFoundException;
+import com.tickon.identity.shared.platform.bus.SpringCommandBus;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -102,6 +103,14 @@ class SpringCommandBusTest {
 
     assertThat(result.isSuccess()).isTrue();
     assertThat(result.orElseThrow()).isEqualTo("handled-test");
+  }
+
+  @Test
+  void shouldThrowWhenNullCommandDispatched() {
+    SpringCommandBus commandBus = new SpringCommandBus(List.of());
+
+    assertThatThrownBy(() -> commandBus.execute(null)).isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Command must not be null");
   }
 
   @Test

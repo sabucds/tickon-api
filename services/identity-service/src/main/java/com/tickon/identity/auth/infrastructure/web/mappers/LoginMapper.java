@@ -1,13 +1,15 @@
 package com.tickon.identity.auth.infrastructure.web.mappers;
 
-import com.tickon.identity.auth.application.dto.LoginCommand;
-import com.tickon.identity.auth.application.dto.LoginResult;
-import com.tickon.identity.auth.application.dto.LogoutCommand;
-import com.tickon.identity.auth.application.dto.RefreshTokenCommand;
+import com.tickon.identity.auth.application.command.login.LoginCommand;
+import com.tickon.identity.auth.application.command.login.LoginResult;
+import com.tickon.identity.auth.application.command.logout.LogoutCommand;
+import com.tickon.identity.auth.application.command.refresh.RefreshTokenCommand;
+import com.tickon.identity.auth.application.command.refresh.RefreshTokenResult;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginResponse;
 import com.tickon.identity.auth.infrastructure.web.dto.LogoutRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.RefreshTokenRequest;
+import com.tickon.identity.auth.infrastructure.web.dto.RefreshTokenResponse;
 
 public final class LoginMapper {
   private LoginMapper() {}
@@ -28,4 +30,7 @@ public final class LoginMapper {
     return new LogoutCommand(request.refreshToken());
   }
 
+  public static RefreshTokenResponse toRefreshTokenResponse(RefreshTokenResult model) {
+    return new RefreshTokenResponse(model.accessToken(), model.refreshToken());
+  }
 }

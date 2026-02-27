@@ -3,11 +3,11 @@ package com.tickon.identity.user.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.tickon.common.domain.DomainEvent;
-import com.tickon.common.identity.domain.valueobjects.Email;
-import com.tickon.common.identity.domain.valueobjects.PasswordHash;
-import com.tickon.common.identity.domain.valueobjects.UserId;
-import com.tickon.common.identity.domain.valueobjects.UserStatus;
 import com.tickon.identity.user.domain.events.UserCreatedEvent;
+import com.tickon.identity.user.domain.valueobjects.Email;
+import com.tickon.identity.user.domain.valueobjects.PasswordHash;
+import com.tickon.identity.user.domain.valueobjects.UserId;
+import com.tickon.identity.user.domain.valueobjects.UserStatus;
 import com.tickon.identity.user.domain.valueobjects.Username;
 import java.util.List;
 import org.junit.jupiter.api.Test;

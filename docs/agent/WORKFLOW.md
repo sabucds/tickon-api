@@ -17,21 +17,6 @@ Use for any non-trivial task. Keep changes small, testable, and within boundarie
 - Create/update: `docs/plans/<YYYY-MM-DD>-<topic>.md`
 - Plans are the project memory.
 
-Plan template (copy into plan file):
-```text
-# <ticket> <feature>
-Status: planned | in-progress | done
-Service/module: <...>
-
-## Goal
-## Scope / Non-goals
-## Touchpoints (files/packages)
-## Tests to write first
-## Steps (2–4 at a time)
-## Verification (exact commands)
-## Progress log (brief)
-```
-
 ## ADR rule
 If you change boundaries, module relationships, shared contracts, infra dependencies, or cross-module patterns: add an ADR in `docs/adr/<NNNN>-<short>-<title>.md`.
 

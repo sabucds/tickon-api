@@ -1,15 +1,11 @@
 package com.tickon.identity.user.infrastructure.security;
 
-import com.tickon.common.identity.domain.valueobjects.PasswordHash;
-import com.tickon.identity.user.application.ports.out.PasswordHasher;
-import org.springframework.context.annotation.Primary;
+import com.tickon.identity.shared.kernel.ports.PasswordHasher;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-@Primary
-public class Argon2PasswordHasher
-    implements PasswordHasher, com.tickon.identity.auth.application.ports.out.PasswordHasher {
+public class Argon2PasswordHasher implements PasswordHasher {
 
   private final Argon2PasswordEncoder encoder;
 
@@ -18,12 +14,12 @@ public class Argon2PasswordHasher
   }
 
   @Override
-  public PasswordHash hash(String rawPassword) {
-    return PasswordHash.from(encoder.encode(rawPassword));
+  public String hash(String rawPassword) {
+    return encoder.encode(rawPassword);
   }
 
   @Override
-  public boolean verify(String rawPassword, PasswordHash hash) {
-    return encoder.matches(rawPassword, hash.value());
+  public boolean verify(String rawPassword, String hash) {
+    return encoder.matches(rawPassword, hash);
   }
 }

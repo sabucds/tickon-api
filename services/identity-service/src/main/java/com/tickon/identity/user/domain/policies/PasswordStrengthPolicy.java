@@ -1,9 +1,8 @@
 package com.tickon.identity.user.domain.policies;
 
 import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
-import org.springframework.stereotype.Component;
+import com.tickon.identity.user.domain.exceptions.PasswordViolation;
 
-@Component
 public class PasswordStrengthPolicy {
 
   private static final int MIN_LENGTH = 8;
@@ -14,23 +13,23 @@ public class PasswordStrengthPolicy {
 
   public void validate(String rawPassword) {
     if (rawPassword == null || rawPassword.length() < MIN_LENGTH) {
-      throw new InvalidPasswordException("Password must be at least " + MIN_LENGTH + " characters long");
+      throw new InvalidPasswordException(PasswordViolation.TOO_SHORT);
     }
 
     if (!rawPassword.matches(UPPERCASE_PATTERN)) {
-      throw new InvalidPasswordException("Password must contain at least one uppercase letter");
+      throw new InvalidPasswordException(PasswordViolation.MISSING_UPPERCASE);
     }
 
     if (!rawPassword.matches(LOWERCASE_PATTERN)) {
-      throw new InvalidPasswordException("Password must contain at least one lowercase letter");
+      throw new InvalidPasswordException(PasswordViolation.MISSING_LOWERCASE);
     }
 
     if (!rawPassword.matches(DIGIT_PATTERN)) {
-      throw new InvalidPasswordException("Password must contain at least one digit");
+      throw new InvalidPasswordException(PasswordViolation.MISSING_DIGIT);
     }
 
     if (!rawPassword.matches(SPECIAL_CHAR_PATTERN)) {
-      throw new InvalidPasswordException("Password must contain at least one special character");
+      throw new InvalidPasswordException(PasswordViolation.MISSING_SPECIAL_CHAR);
     }
   }
 }

@@ -7,7 +7,8 @@ import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
-import com.tickon.identity.auth.application.ports.out.EmailSender;
+import com.sendgrid.helpers.mail.objects.Personalization;
+import com.tickon.identity.auth.application.ports.EmailSender;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,21 +31,27 @@ public class SendGridEmailSender implements EmailSender {
   }
 
   @Override
-  public void sendPasswordResetEmail(com.tickon.common.identity.domain.valueobjects.Email to, String resetToken,
-      String recipientName) {
+  public void sendPasswordResetEmail(String to, String resetToken, String recipientName) {
     String resetUrl = emailProperties.getResetUrlBase() + "?token=" + resetToken;
 
     Email from = new Email(emailProperties.getFromEmail(), emailProperties.getFromName());
-    Email toEmail = new Email(to.value(), recipientName);
+    Email toEmail = new Email(to, recipientName);
     String subject = "Reset Your Password";
 
     String htmlContent = buildHtmlContent(resetUrl, recipientName);
     String textContent = buildTextContent(resetUrl, recipientName);
 
-    Content content = new Content("text/html", htmlContent);
-    Mail mail = new Mail(from, subject, toEmail, content);
+    Mail mail = new Mail();
+    mail.setFrom(from);
+    mail.setSubject(subject);
 
+    Personalization personalization = new Personalization();
+    personalization.addTo(toEmail);
+    mail.addPersonalization(personalization);
+
+    // Order matters for SendGrid:
     mail.addContent(new Content("text/plain", textContent));
+    mail.addContent(new Content("text/html", htmlContent));
 
     try {
       Request request = new Request();
@@ -55,13 +62,14 @@ public class SendGridEmailSender implements EmailSender {
       Response response = sendGrid.api(request);
 
       if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
-        log.info("Password reset email sent successfully to {}", to.value());
+        log.info("Password reset email sent successfully to {}", maskEmail(to));
       } else {
-        log.error("Failed to send password reset email to {}. Status: {}, Body: {}", to.value(),
-            response.getStatusCode(), response.getBody());
+        String errorMessage = String.format("SendGrid email failed with status=%s, body=%s", response.getStatusCode(),
+            response.getBody());
+        throw new EmailSendException(errorMessage);
       }
     } catch (IOException e) {
-      log.error("Error sending password reset email to {}", to.value(), e);
+      throw new EmailSendException("Failed to send password reset email", e);
     }
   }
 
@@ -113,5 +121,20 @@ public class SendGridEmailSender implements EmailSender {
         Thanks,
         The Tickon Team
         """, recipientName, resetUrl);
+  }
+
+  private String maskEmail(String email) {
+    if (email == null || email.isBlank()) {
+      return "unknown";
+    }
+    String[] parts = email.split("@", 2);
+    if (parts.length != 2) {
+      return "invalid";
+    }
+    String local = parts[0];
+    String domain = parts[1];
+    String localMasked = local.isEmpty() ? "*" : local.substring(0, 1) + "***";
+    String domainMasked = domain.isEmpty() ? "*" : domain.substring(0, 1) + "***";
+    return localMasked + "@" + domainMasked;
   }
 }

@@ -1,7 +1,6 @@
 package com.tickon.identity.auth.infrastructure.jwt;
 
-import com.tickon.identity.auth.application.ports.out.TokenProvider;
-import com.tickon.identity.auth.domain.AuthUser;
+import com.tickon.identity.auth.application.ports.TokenProvider;
 import io.jsonwebtoken.Jwts;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -12,6 +11,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -37,20 +37,21 @@ public class JwtTokenProvider implements TokenProvider {
   }
 
   @Override
-  public String generateAccessToken(AuthUser user) {
-    return generateToken(user, accessTokenValidityMs);
+  public String generateAccessToken(UUID userId) {
+    return generateToken(userId, accessTokenValidityMs);
   }
 
   @Override
-  public String generateRefreshToken(AuthUser user) {
+  public String generateRefreshToken() {
     return generateSecureRandomToken();
   }
 
-  private String generateToken(AuthUser user, long validityMs) {
+  private String generateToken(UUID userId, long validityMs) {
     Instant now = Instant.now();
-    return Jwts.builder().subject(user.id().value().toString()).issuer(issuer).issuedAt(Date.from(now))
-        .expiration(Date.from(now.plusMillis(validityMs))).claim("userId", user.id().value().toString())
-        .signWith(signingKey, Jwts.SIG.ES256).compact();
+    String id = userId.toString();
+    return Jwts.builder().subject(id).issuer(issuer).issuedAt(Date.from(now))
+        .expiration(Date.from(now.plusMillis(validityMs))).claim("userId", id).signWith(signingKey, Jwts.SIG.ES256)
+        .compact();
   }
 
   private String generateSecureRandomToken() {

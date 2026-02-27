@@ -33,6 +33,7 @@ RUN --mount=type=cache,target=/root/.m2 ./mvnw dependency:go-offline -DskipTests
 FROM deps AS package
 ARG SERVICE_PATH
 WORKDIR /build
+COPY common/src common/src/
 COPY ${SERVICE_PATH}/src ${SERVICE_PATH}/src/
 RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw package -pl ${SERVICE_PATH} -am -DskipTests && \

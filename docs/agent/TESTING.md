@@ -19,7 +19,9 @@ Test:
 Avoid:
 - mocking domain objects (use real instances)
 
-### Application (use case orchestration)
+### Application (handler orchestration)
+Test one handler class per test class, located in the same vertical slice package.
+
 Test:
 - happy path flow
 - domain/policy validation failures
@@ -28,10 +30,11 @@ Test:
 
 Mock:
 - output ports (repositories, publishers, providers)
+- `CommandBus` / `QueryBus` when a handler dispatches cross-module
 
 Avoid:
 - asserting internal call order unless required
-- over-specifying interactions that don’t matter to behavior
+- over-specifying interactions that don't matter to behavior
 
 ### Infrastructure (only when there is logic)
 Test:
@@ -42,7 +45,8 @@ Test:
   - persistence behavior (optionally Testcontainers)
 
 Controllers:
-- Prefer a small number of MockMvc integration tests for request validation and wiring.
+- Use `@WebMvcTest` + `@MockBean CommandBus` (and `QueryBus` if the controller reads).
+- Prefer a small number of MockMvc tests for request validation and bus dispatch wiring.
 - Do not unit-test controllers unless they contain logic.
 
 ## Test conventions

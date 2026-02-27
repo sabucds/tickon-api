@@ -1,6 +1,6 @@
 package com.tickon.identity.auth.infrastructure.security;
 
-import com.tickon.identity.auth.application.ports.out.RefreshTokenHasher;
+import com.tickon.identity.auth.application.ports.RefreshTokenHasher;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;

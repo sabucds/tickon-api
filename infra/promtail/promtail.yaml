@@ -27,5 +27,3 @@ scrape_configs:
             message: message
       - labels:
           level:
-          traceId:
-          spanId:

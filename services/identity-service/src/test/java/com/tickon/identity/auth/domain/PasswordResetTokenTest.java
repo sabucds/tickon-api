@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.tickon.common.domain.DomainEvent;
-import com.tickon.common.identity.domain.valueobjects.Email;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.events.PasswordResetCompletedEvent;
 import com.tickon.identity.auth.domain.events.PasswordResetRequestedEvent;
 import com.tickon.identity.auth.domain.valueobjects.ResetTokenHash;
@@ -13,14 +11,15 @@ import com.tickon.identity.auth.domain.valueobjects.ResetTokenId;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class PasswordResetTokenTest {
 
   private static final Instant FIXED_INSTANT = Instant.parse("2025-01-15T10:00:00Z");
   private static final Duration ONE_HOUR = Duration.ofHours(1);
-  private static final UserId USER_ID = UserId.generate();
-  private static final Email EMAIL = Email.from("user@example.com");
+  private static final UUID USER_ID = UUID.randomUUID();
+  private static final String EMAIL = "user@example.com";
 
   @Test
   void shouldCreateTokenWithValidParameters() {

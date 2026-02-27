@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.tickon.common.domain.DomainEvent;
-import com.tickon.common.identity.domain.valueobjects.UserId;
 import com.tickon.identity.auth.domain.events.SessionCreatedEvent;
 import com.tickon.identity.auth.domain.events.SessionRevokedEvent;
 import com.tickon.identity.auth.domain.exceptions.SessionExpiredException;
@@ -14,16 +13,18 @@ import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.auth.shared.AuthTestFixtures;
+import com.tickon.identity.shared.kernel.exceptions.IdentityExceptionCodes;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class SessionTest {
 
   private static final Instant FIXED_INSTANT = Instant.parse("2025-01-15T10:00:00Z");
   private static final Duration DURATION_30_DAYS = java.time.Duration.ofDays(30);
-  private static final UserId USER_ID = UserId.generate();
+  private static final UUID USER_ID = UUID.randomUUID();
 
   @Test
   void shouldCreateSessionWithValidParameters() {
@@ -111,7 +112,7 @@ class SessionTest {
     session.revoke(FIXED_INSTANT.plusSeconds(10), RevokeReason.USER_LOGOUT);
     Instant revokeTime = FIXED_INSTANT.plusSeconds(20);
     assertThatThrownBy(() -> session.revoke(revokeTime, RevokeReason.TOKEN_COMPROMISED))
-        .isInstanceOf(SessionRevokedException.class).hasMessage("Session is already revoked for a different reason");
+        .isInstanceOf(SessionRevokedException.class).hasMessage(IdentityExceptionCodes.SESSION_REVOKED.name());
 
   }
 
@@ -168,7 +169,7 @@ class SessionTest {
     Instant rotateTime = FIXED_INSTANT.plusSeconds(15);
     assertThatThrownBy(
         () -> originalSession.rotateTo(rotateTime, RefreshTokenHash.from("new-hash"), SessionId.generate()))
-        .isInstanceOf(SessionExpiredException.class).hasMessage("Session is already expired");
+        .isInstanceOf(SessionExpiredException.class).hasMessage(IdentityExceptionCodes.SESSION_EXPIRED.name());
   }
 
   @Test

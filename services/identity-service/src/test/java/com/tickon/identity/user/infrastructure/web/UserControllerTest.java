@@ -2,17 +2,19 @@ package com.tickon.identity.user.infrastructure.web;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tickon.identity.user.application.dto.RegisterUserCommand;
-import com.tickon.identity.user.application.dto.UserResult;
-import com.tickon.identity.user.application.ports.in.DeleteUserUseCase;
-import com.tickon.identity.user.application.ports.in.GetUserByIdUseCase;
-import com.tickon.identity.user.application.ports.in.RegisterUserUseCase;
+import com.tickon.common.commands.CommandBus;
+import com.tickon.common.commands.CommandResult;
+import com.tickon.common.queries.QueryBus;
+import com.tickon.common.queries.QueryResult;
+import com.tickon.identity.user.application.UserResult;
 import com.tickon.identity.user.infrastructure.web.dto.RegisterUserRequest;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,13 +34,10 @@ class UserControllerTest {
   private ObjectMapper objectMapper;
 
   @MockBean
-  private RegisterUserUseCase registerUserService;
+  private CommandBus commandBus;
 
   @MockBean
-  private GetUserByIdUseCase getUserByIdService;
-
-  @MockBean
-  private DeleteUserUseCase deleteUserUseCase;
+  private QueryBus queryBus;
 
   @Test
   void shouldRegisterNewUser_WhenValidInput() throws Exception {
@@ -46,7 +45,7 @@ class UserControllerTest {
         "SecurePass123!");
     UserResult expectedResponse = new UserResult("123", "johndoe", "john@example.com", "John", "Doe");
 
-    when(registerUserService.register(any(RegisterUserCommand.class))).thenReturn(expectedResponse);
+    when(commandBus.execute(any())).thenReturn(new CommandResult.Success<>(expectedResponse));
 
     mockMvc
         .perform(
@@ -101,4 +100,23 @@ class UserControllerTest {
         .andExpect(jsonPath("$.errors.password").exists());
   }
 
+  @Test
+  void shouldReturnCurrentUser_WhenHeaderPresent() throws Exception {
+    String userId = "550e8400-e29b-41d4-a716-446655440000";
+    UserResult userResult = new UserResult(userId, "johndoe", "john@example.com", "John", "Doe");
+    when(queryBus.execute(any())).thenReturn(new QueryResult.Success<>(Optional.of(userResult)));
+
+    mockMvc.perform(get("/v1/users/me").header("X-User-Id", userId)).andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(userId)).andExpect(jsonPath("$.username").value("johndoe"))
+        .andExpect(jsonPath("$.email").value("john@example.com")).andExpect(jsonPath("$.firstName").value("John"))
+        .andExpect(jsonPath("$.lastName").value("Doe"));
+  }
+
+  @Test
+  void shouldReturn404_WhenCurrentUserNotFound() throws Exception {
+    when(queryBus.execute(any())).thenReturn(new QueryResult.Success<>(Optional.empty()));
+
+    mockMvc.perform(get("/v1/users/me").header("X-User-Id", "550e8400-e29b-41d4-a716-446655440000"))
+        .andExpect(status().isNotFound());
+  }
 }

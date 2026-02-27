@@ -9,14 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tickon.identity.auth.application.dto.LoginCommand;
-import com.tickon.identity.auth.application.dto.LoginResult;
-import com.tickon.identity.auth.application.dto.LogoutCommand;
-import com.tickon.identity.auth.application.ports.in.LoginUseCase;
-import com.tickon.identity.auth.application.ports.in.LogoutUseCase;
-import com.tickon.identity.auth.application.ports.in.RefreshTokenUseCase;
+import com.tickon.common.commands.CommandBus;
+import com.tickon.common.commands.CommandResult;
+import com.tickon.identity.auth.application.command.login.LoginResult;
+import com.tickon.identity.auth.application.command.refresh.RefreshTokenResult;
 import com.tickon.identity.auth.infrastructure.web.dto.LoginRequest;
 import com.tickon.identity.auth.infrastructure.web.dto.LogoutRequest;
+import com.tickon.identity.auth.infrastructure.web.dto.RefreshTokenRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,20 +35,14 @@ class AuthControllerTest {
   private ObjectMapper objectMapper;
 
   @MockBean
-  private LoginUseCase loginUseCase;
-
-  @MockBean
-  private RefreshTokenUseCase refreshTokenUseCase;
-
-  @MockBean
-  private LogoutUseCase logoutUseCase;
+  private CommandBus commandBus;
 
   @Test
   void shouldLoginAndReturnTokens_WhenValidRequest() throws Exception {
     LoginRequest request = new LoginRequest("john@example.com", "plain-password", "device-123");
     LoginResult response = new LoginResult("access-token", "refresh-token");
 
-    when(loginUseCase.login(any(LoginCommand.class))).thenReturn(response);
+    when(commandBus.execute(any())).thenReturn(new CommandResult.Success<>(response));
 
     mockMvc
         .perform(post("/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
@@ -70,10 +63,26 @@ class AuthControllerTest {
   void shouldReturnNoContent_WhenValidLogoutRequest() throws Exception {
     LogoutRequest request = new LogoutRequest("valid-refresh-token");
 
+    when(commandBus.execute(any())).thenReturn(new CommandResult.Success<>(null));
+
     mockMvc.perform(post("/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request))).andExpect(status().isNoContent());
 
-    verify(logoutUseCase).logout(any(LogoutCommand.class));
+    verify(commandBus).execute(any());
+  }
+
+  @Test
+  void shouldRefreshAndReturnTokens_WhenValidRequest() throws Exception {
+    RefreshTokenRequest request = new RefreshTokenRequest("refresh-token");
+    RefreshTokenResult response = new RefreshTokenResult("new-access-token", "new-refresh-token");
+
+    when(commandBus.execute(any())).thenReturn(new CommandResult.Success<>(response));
+
+    mockMvc
+        .perform(post("/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.accessToken").value("new-access-token"))
+        .andExpect(jsonPath("$.refreshToken").value("new-refresh-token"));
   }
 
   @Test
@@ -83,6 +92,6 @@ class AuthControllerTest {
     mockMvc.perform(post("/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request))).andExpect(status().isBadRequest());
 
-    verify(logoutUseCase, never()).logout(any(LogoutCommand.class));
+    verify(commandBus, never()).execute(any());
   }
 }

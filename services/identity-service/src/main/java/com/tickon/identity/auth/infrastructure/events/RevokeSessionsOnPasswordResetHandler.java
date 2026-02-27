@@ -1,9 +1,9 @@
 package com.tickon.identity.auth.infrastructure.events;
 
-import com.tickon.identity.auth.application.ports.out.SessionRepository;
+import com.tickon.identity.auth.application.ports.SessionRepository;
 import com.tickon.identity.auth.domain.events.PasswordResetCompletedEvent;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
-import com.tickon.identity.shared.infrastructure.metrics.IdentityMetrics;
+import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +29,12 @@ public class RevokeSessionsOnPasswordResetHandler {
   @Async
   @EventListener
   public void handle(PasswordResetCompletedEvent event) {
-    log.info("Revoking all sessions for user {} due to password reset", event.userId().value());
+    log.info("Revoking all sessions for user {} due to password reset", event.userId());
     try {
       sessionRepository.revokeAllByUserId(event.userId(), clock.instant(), RevokeReason.PASSWORD_RESET);
-      metrics.sessionRevoked("password_reset").increment();
+      metrics.sessionRevoked("password_reset");
     } catch (Exception e) {
-      log.error("Failed to revoke sessions for user {} after password reset", event.userId().value(), e);
+      log.error("Failed to revoke sessions for user {} after password reset", event.userId(), e);
     }
   }
 }

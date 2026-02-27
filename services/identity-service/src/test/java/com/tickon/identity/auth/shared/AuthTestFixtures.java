@@ -1,27 +1,25 @@
 package com.tickon.identity.auth.shared;
 
-import com.tickon.common.identity.domain.valueobjects.PasswordHash;
-import com.tickon.common.identity.domain.valueobjects.UserId;
-import com.tickon.common.identity.domain.valueobjects.UserStatus;
-import com.tickon.identity.auth.domain.AuthUser;
 import com.tickon.identity.auth.domain.Session;
 import com.tickon.identity.auth.domain.valueobjects.FamilyId;
 import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
+import com.tickon.identity.contracts.user.queries.UserAuthDataDTO;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.UUID;
 
 public final class AuthTestFixtures {
   private AuthTestFixtures() {}
 
-  public static final UserId DEFAULT_USER_ID = UserId.generate();
+  public static final UUID DEFAULT_USER_ID = UUID.randomUUID();
 
-  public static AuthUser anAuthUser() {
-    return new AuthUser(DEFAULT_USER_ID, PasswordHash.from("password-hash-abc"), UserStatus.ACTIVE);
+  public static UserAuthDataDTO aUserAuthData() {
+    return aUserAuthData(DEFAULT_USER_ID);
   }
 
-  public static AuthUser anAuthUser(UserId userId) {
-    return new AuthUser(userId, PasswordHash.from("password-hash-abc"), UserStatus.ACTIVE);
+  public static UserAuthDataDTO aUserAuthData(UUID userId) {
+    return new UserAuthDataDTO(userId, "password-hash-abc", "ACTIVE");
   }
 
   public static Session aSession(Instant now, Duration duration) {

@@ -49,7 +49,8 @@ public class SpringCommandBus implements CommandBus {
   @Override
   @SuppressWarnings("unchecked")
   public <R> CommandResult<R> execute(Command<R> command) {
-    if (command == null) throw new IllegalArgumentException("Command must not be null");
+    if (command == null)
+      throw new IllegalArgumentException("Command must not be null");
     CommandHandler<Command<R>, R> handler = (CommandHandler<Command<R>, R>) handlers.get(command.getClass());
     if (handler == null) {
       throw new CommandHandlerNotFoundException(command.getClass());

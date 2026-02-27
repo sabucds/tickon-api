@@ -112,8 +112,7 @@ class SessionTest {
     session.revoke(FIXED_INSTANT.plusSeconds(10), RevokeReason.USER_LOGOUT);
     Instant revokeTime = FIXED_INSTANT.plusSeconds(20);
     assertThatThrownBy(() -> session.revoke(revokeTime, RevokeReason.TOKEN_COMPROMISED))
-        .isInstanceOf(SessionRevokedException.class)
-        .hasMessage(IdentityExceptionCodes.SESSION_REVOKED.name());
+        .isInstanceOf(SessionRevokedException.class).hasMessage(IdentityExceptionCodes.SESSION_REVOKED.name());
 
   }
 

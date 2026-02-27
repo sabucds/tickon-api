@@ -91,8 +91,7 @@ class LoginCommandHandlerMetricsTest {
     when(passwordHasher.verify(any(), any())).thenReturn(false);
 
     var cmd = new LoginCommand("user@example.com", "wrong", "device-1");
-    assertThatThrownBy(() -> handler.handle(cmd))
-        .isInstanceOf(InvalidCredentialsException.class);
+    assertThatThrownBy(() -> handler.handle(cmd)).isInstanceOf(InvalidCredentialsException.class);
 
     assertThat(
         registry.find("identity.auth.login").tag("outcome", "failure").tag("reason", "invalid_credentials").counter())

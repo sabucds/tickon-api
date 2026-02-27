@@ -130,11 +130,10 @@ class ChangePasswordCommandHandlerTest {
     ChangePasswordCommand command = new ChangePasswordCommand(userId, weakPassword);
 
     // Act & Assert
-    assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(InvalidPasswordException.class)
-        .satisfies(ex -> {
-          InvalidPasswordException invalid = (InvalidPasswordException) ex;
-          org.assertj.core.api.Assertions.assertThat(invalid.violation()).isEqualTo(PasswordViolation.TOO_SHORT);
-        });
+    assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(InvalidPasswordException.class).satisfies(ex -> {
+      InvalidPasswordException invalid = (InvalidPasswordException) ex;
+      org.assertj.core.api.Assertions.assertThat(invalid.violation()).isEqualTo(PasswordViolation.TOO_SHORT);
+    });
 
     verify(passwordHasher, never()).hash(any());
     verify(userRepository, never()).findById(any());

@@ -8,10 +8,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.tickon.common.domain.DomainEvent;
+import com.tickon.identity.shared.kernel.exceptions.IdentityExceptionCodes;
 import com.tickon.identity.shared.kernel.ports.DomainEventPublisher;
 import com.tickon.identity.shared.kernel.ports.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
-import com.tickon.identity.shared.kernel.exceptions.IdentityExceptionCodes;
 import com.tickon.identity.user.application.UserResult;
 import com.tickon.identity.user.application.ports.UserRepository;
 import com.tickon.identity.user.domain.User;
@@ -128,11 +128,10 @@ class RegisterUserCommandHandlerTest {
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(false);
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
 
-    assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(InvalidPasswordException.class)
-        .satisfies(ex -> {
-          InvalidPasswordException invalid = (InvalidPasswordException) ex;
-          org.assertj.core.api.Assertions.assertThat(invalid.violation()).isEqualTo(PasswordViolation.TOO_SHORT);
-        });
+    assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(InvalidPasswordException.class).satisfies(ex -> {
+      InvalidPasswordException invalid = (InvalidPasswordException) ex;
+      org.assertj.core.api.Assertions.assertThat(invalid.violation()).isEqualTo(PasswordViolation.TOO_SHORT);
+    });
   }
 
   @Test

@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
-@Import({IdentityGlobalExceptionHandler.class, MessageSourceConfig.class})
+@Import({ IdentityGlobalExceptionHandler.class, MessageSourceConfig.class })
 class IdentityGlobalExceptionHandlerWebMvcTest {
 
   @Autowired
@@ -44,10 +44,8 @@ class IdentityGlobalExceptionHandlerWebMvcTest {
 
     mockMvc
         .perform(post("/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
-            .header(HttpHeaders.ACCEPT_LANGUAGE, "es")
-            .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isUnauthorized())
-        .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, "es").content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isUnauthorized()).andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
         .andExpect(jsonPath("$.message").value("Credenciales inválidas"));
   }
 }

@@ -38,11 +38,11 @@ class PasswordStrengthPolicyTest {
 
   private String passwordForViolation(PasswordViolation violation) {
     return switch (violation) {
-      case TOO_SHORT -> "Aa1!aaa";
-      case MISSING_UPPERCASE -> "lowercase1!";
-      case MISSING_LOWERCASE -> "UPPERCASE1!";
-      case MISSING_DIGIT -> "NoDigit!A";
-      case MISSING_SPECIAL_CHAR -> "NoSpecial1A";
+    case TOO_SHORT -> "Aa1!aaa";
+    case MISSING_UPPERCASE -> "lowercase1!";
+    case MISSING_LOWERCASE -> "UPPERCASE1!";
+    case MISSING_DIGIT -> "NoDigit!A";
+    case MISSING_SPECIAL_CHAR -> "NoSpecial1A";
     };
   }
 }

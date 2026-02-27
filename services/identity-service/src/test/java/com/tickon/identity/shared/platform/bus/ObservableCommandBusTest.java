@@ -47,9 +47,7 @@ class ObservableCommandBusTest {
 
     bus.execute(cmd);
 
-    Timer timer = registry.find("platform.command.duration")
-        .tag("command", "TestCommand")
-        .tag("outcome", "success")
+    Timer timer = registry.find("platform.command.duration").tag("command", "TestCommand").tag("outcome", "success")
         .timer();
     assertThat(timer).isNotNull();
     assertThat(timer.count()).isEqualTo(1);
@@ -63,9 +61,7 @@ class ObservableCommandBusTest {
 
     assertThatThrownBy(() -> bus.execute(cmd)).isInstanceOf(RuntimeException.class);
 
-    Timer timer = registry.find("platform.command.duration")
-        .tag("command", "TestCommand")
-        .tag("outcome", "failure")
+    Timer timer = registry.find("platform.command.duration").tag("command", "TestCommand").tag("outcome", "failure")
         .timer();
     assertThat(timer).isNotNull();
     assertThat(timer.count()).isEqualTo(1);

@@ -22,8 +22,7 @@ public class ObservableCommandBus implements CommandBus {
   private final CommandBus delegate;
   private final MeterRegistry registry;
 
-  public ObservableCommandBus(@Qualifier("springCommandBus") CommandBus delegate,
-      MeterRegistry registry) {
+  public ObservableCommandBus(@Qualifier("springCommandBus") CommandBus delegate, MeterRegistry registry) {
     this.delegate = delegate;
     this.registry = registry;
   }
@@ -55,11 +54,8 @@ public class ObservableCommandBus implements CommandBus {
   }
 
   private void recordTimer(String command, String outcome, long ms) {
-    Timer.builder(TIMER_NAME)
-        .tag("command", command)
-        .tag("outcome", outcome)
-        .register(registry)
-        .record(ms, TimeUnit.MILLISECONDS);
+    Timer.builder(TIMER_NAME).tag("command", command).tag("outcome", outcome).register(registry).record(ms,
+        TimeUnit.MILLISECONDS);
   }
 
   private long elapsedMs(long startNano) {

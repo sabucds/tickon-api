@@ -47,10 +47,7 @@ class ObservableQueryBusTest {
 
     bus.execute(query);
 
-    Timer timer = registry.find("platform.query.duration")
-        .tag("query", "TestQuery")
-        .tag("outcome", "success")
-        .timer();
+    Timer timer = registry.find("platform.query.duration").tag("query", "TestQuery").tag("outcome", "success").timer();
     assertThat(timer).isNotNull();
     assertThat(timer.count()).isEqualTo(1);
   }
@@ -58,15 +55,11 @@ class ObservableQueryBusTest {
   @Test
   void should_RecordFailureTimer_When_QueryThrows() {
     TestQuery query = new TestQuery("x");
-    when(delegate.execute(query))
-        .thenThrow(new QueryExecutionException(TestQuery.class, new RuntimeException("boom")));
+    when(delegate.execute(query)).thenThrow(new QueryExecutionException(TestQuery.class, new RuntimeException("boom")));
 
     assertThatThrownBy(() -> bus.execute(query)).isInstanceOf(RuntimeException.class);
 
-    Timer timer = registry.find("platform.query.duration")
-        .tag("query", "TestQuery")
-        .tag("outcome", "failure")
-        .timer();
+    Timer timer = registry.find("platform.query.duration").tag("query", "TestQuery").tag("outcome", "failure").timer();
     assertThat(timer).isNotNull();
     assertThat(timer.count()).isEqualTo(1);
   }

@@ -122,8 +122,7 @@ class LoginCommandHandlerTest {
     stubInvalidPassword("wrong-password", user);
 
     assertThatThrownBy(() -> handler.handle(new LoginCommand(IDENTIFIER, "wrong-password", DEVICE_ID)))
-        .isInstanceOf(InvalidCredentialsException.class)
-        .hasMessage(IdentityExceptionCodes.INVALID_CREDENTIALS.name());
+        .isInstanceOf(InvalidCredentialsException.class).hasMessage(IdentityExceptionCodes.INVALID_CREDENTIALS.name());
 
     verify(sessionRepository, never()).save(any());
   }

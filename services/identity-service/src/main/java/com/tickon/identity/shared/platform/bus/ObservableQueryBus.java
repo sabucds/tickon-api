@@ -22,8 +22,7 @@ public class ObservableQueryBus implements QueryBus {
   private final QueryBus delegate;
   private final MeterRegistry registry;
 
-  public ObservableQueryBus(@Qualifier("springQueryBus") QueryBus delegate,
-      MeterRegistry registry) {
+  public ObservableQueryBus(@Qualifier("springQueryBus") QueryBus delegate, MeterRegistry registry) {
     this.delegate = delegate;
     this.registry = registry;
   }
@@ -52,11 +51,8 @@ public class ObservableQueryBus implements QueryBus {
   }
 
   private void recordTimer(String query, String outcome, long ms) {
-    Timer.builder(TIMER_NAME)
-        .tag("query", query)
-        .tag("outcome", outcome)
-        .register(registry)
-        .record(ms, TimeUnit.MILLISECONDS);
+    Timer.builder(TIMER_NAME).tag("query", query).tag("outcome", outcome).register(registry).record(ms,
+        TimeUnit.MILLISECONDS);
   }
 
   private long elapsedMs(long startNano) {

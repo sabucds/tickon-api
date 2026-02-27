@@ -76,8 +76,8 @@ public class IdentityMetrics {
   }
 
   public void tokenRefreshFailure(String reason) {
-    Counter.builder("identity.auth.token.refresh").tag(TAG_OUTCOME, "failure").tag(TAG_REASON, reason).register(registry)
-        .increment();
+    Counter.builder("identity.auth.token.refresh").tag(TAG_OUTCOME, "failure").tag(TAG_REASON, reason)
+        .register(registry).increment();
   }
 
   public Counter logout() {

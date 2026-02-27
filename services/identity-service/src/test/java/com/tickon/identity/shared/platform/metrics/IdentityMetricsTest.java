@@ -53,8 +53,8 @@ class IdentityMetricsTest {
   @Test
   void loginFailureRecordsOutcomeAndReason() {
     metrics.loginFailure("invalid_credentials");
-    Counter counter = registry.find("identity.auth.login").tag("outcome", "failure").tag("reason", "invalid_credentials")
-        .counter();
+    Counter counter = registry.find("identity.auth.login").tag("outcome", "failure")
+        .tag("reason", "invalid_credentials").counter();
     assertThat(counter).isNotNull();
     assertThat(counter.count()).isEqualTo(1.0);
   }

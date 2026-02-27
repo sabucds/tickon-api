@@ -11,6 +11,7 @@ import com.tickon.common.domain.DomainEvent;
 import com.tickon.identity.shared.kernel.ports.DomainEventPublisher;
 import com.tickon.identity.shared.kernel.ports.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
+import com.tickon.identity.shared.kernel.exceptions.IdentityExceptionCodes;
 import com.tickon.identity.user.application.UserResult;
 import com.tickon.identity.user.application.ports.UserRepository;
 import com.tickon.identity.user.domain.User;
@@ -18,6 +19,7 @@ import com.tickon.identity.user.domain.events.UserCreatedEvent;
 import com.tickon.identity.user.domain.exceptions.DuplicateEmailException;
 import com.tickon.identity.user.domain.exceptions.DuplicateUsernameException;
 import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
+import com.tickon.identity.user.domain.exceptions.PasswordViolation;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
 import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
@@ -100,7 +102,7 @@ class RegisterUserCommandHandlerTest {
     when(userRepository.existsByEmail(any(Email.class))).thenReturn(true);
 
     assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(DuplicateEmailException.class)
-        .hasMessage("Email already in use");
+        .hasMessage(IdentityExceptionCodes.DUPLICATE_EMAIL.name());
     verify(userRepository).existsByEmail(any(Email.class));
     verifyNoMoreInteractions(userRepository, passwordHasher, eventPublisher);
   }
@@ -113,7 +115,7 @@ class RegisterUserCommandHandlerTest {
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(true);
 
     assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(DuplicateUsernameException.class)
-        .hasMessage("Username already in use");
+        .hasMessage(IdentityExceptionCodes.DUPLICATE_USERNAME.name());
     verify(userRepository).existsByEmail(any(Email.class));
     verify(userRepository).existsByUsername(any(Username.class));
     verifyNoMoreInteractions(userRepository, passwordHasher, eventPublisher);
@@ -127,7 +129,10 @@ class RegisterUserCommandHandlerTest {
     when(userRepository.existsByUsername(any(Username.class))).thenReturn(false);
 
     assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(InvalidPasswordException.class)
-        .hasMessageContaining("Password must be at least");
+        .satisfies(ex -> {
+          InvalidPasswordException invalid = (InvalidPasswordException) ex;
+          org.assertj.core.api.Assertions.assertThat(invalid.violation()).isEqualTo(PasswordViolation.TOO_SHORT);
+        });
   }
 
   @Test

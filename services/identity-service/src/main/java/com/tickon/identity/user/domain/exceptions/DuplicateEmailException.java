@@ -7,7 +7,7 @@ public class DuplicateEmailException extends IdentityDomainException {
   private final String email;
 
   public DuplicateEmailException(String email) {
-    super(IdentityExceptionCodes.DUPLICATE_EMAIL, "Email already in use");
+    super(IdentityExceptionCodes.DUPLICATE_EMAIL);
     this.email = email;
   }
 

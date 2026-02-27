@@ -5,6 +5,6 @@ import com.tickon.identity.shared.kernel.exceptions.IdentityExceptionCodes;
 
 public class InvalidRefreshTokenException extends IdentityDomainException {
   public InvalidRefreshTokenException() {
-    super(IdentityExceptionCodes.INVALID_REFRESH_TOKEN, "Invalid refresh token");
+    super(IdentityExceptionCodes.INVALID_REFRESH_TOKEN);
   }
 }

@@ -13,6 +13,7 @@ import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.domain.valueobjects.RevokeReason;
 import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.auth.shared.AuthTestFixtures;
+import com.tickon.identity.shared.kernel.exceptions.IdentityExceptionCodes;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -111,7 +112,8 @@ class SessionTest {
     session.revoke(FIXED_INSTANT.plusSeconds(10), RevokeReason.USER_LOGOUT);
     Instant revokeTime = FIXED_INSTANT.plusSeconds(20);
     assertThatThrownBy(() -> session.revoke(revokeTime, RevokeReason.TOKEN_COMPROMISED))
-        .isInstanceOf(SessionRevokedException.class).hasMessage("Session is already revoked for a different reason");
+        .isInstanceOf(SessionRevokedException.class)
+        .hasMessage(IdentityExceptionCodes.SESSION_REVOKED.name());
 
   }
 
@@ -168,7 +170,7 @@ class SessionTest {
     Instant rotateTime = FIXED_INSTANT.plusSeconds(15);
     assertThatThrownBy(
         () -> originalSession.rotateTo(rotateTime, RefreshTokenHash.from("new-hash"), SessionId.generate()))
-        .isInstanceOf(SessionExpiredException.class).hasMessage("Session is already expired");
+        .isInstanceOf(SessionExpiredException.class).hasMessage(IdentityExceptionCodes.SESSION_EXPIRED.name());
   }
 
   @Test

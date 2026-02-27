@@ -20,6 +20,7 @@ import com.tickon.identity.auth.domain.valueobjects.RefreshTokenHash;
 import com.tickon.identity.auth.shared.AuthTestFixtures;
 import com.tickon.identity.contracts.user.queries.GetUserByUsernameOrEmailQuery;
 import com.tickon.identity.contracts.user.queries.UserAuthDataDTO;
+import com.tickon.identity.shared.kernel.exceptions.IdentityExceptionCodes;
 import com.tickon.identity.shared.kernel.ports.DomainEventPublisher;
 import com.tickon.identity.shared.kernel.ports.PasswordHasher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
@@ -108,7 +109,8 @@ class LoginCommandHandlerTest {
         .thenReturn(new QueryResult.Success<>(Optional.empty()));
 
     assertThatThrownBy(() -> handler.handle(new LoginCommand("missing", "any", DEVICE_ID)))
-        .isInstanceOf(InvalidCredentialsException.class).hasMessageContaining("Invalid credentials");
+        .isInstanceOf(InvalidCredentialsException.class)
+        .hasMessage(IdentityExceptionCodes.INVALID_CREDENTIALS.name());
 
     verify(sessionRepository, never()).save(any());
   }
@@ -120,7 +122,8 @@ class LoginCommandHandlerTest {
     stubInvalidPassword("wrong-password", user);
 
     assertThatThrownBy(() -> handler.handle(new LoginCommand(IDENTIFIER, "wrong-password", DEVICE_ID)))
-        .isInstanceOf(InvalidCredentialsException.class).hasMessageContaining("Invalid credentials");
+        .isInstanceOf(InvalidCredentialsException.class)
+        .hasMessage(IdentityExceptionCodes.INVALID_CREDENTIALS.name());
 
     verify(sessionRepository, never()).save(any());
   }

@@ -7,7 +7,7 @@ public class DuplicateUsernameException extends IdentityDomainException {
   private final String username;
 
   public DuplicateUsernameException(String username) {
-    super(IdentityExceptionCodes.DUPLICATE_USERNAME, "Username already in use");
+    super(IdentityExceptionCodes.DUPLICATE_USERNAME);
     this.username = username;
   }
 

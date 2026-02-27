@@ -7,7 +7,7 @@ public class InvalidUsernameException extends IdentityDomainException {
   private final String username;
 
   public InvalidUsernameException(String username) {
-    super(IdentityExceptionCodes.INVALID_USERNAME, "Invalid username");
+    super(IdentityExceptionCodes.INVALID_USERNAME);
     this.username = username;
   }
 

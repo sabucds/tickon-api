@@ -1,5 +1,5 @@
 # identity-service multilanguage domain errors
-Status: planned
+Status: done
 Service/module: identity-service
 
 ## Goal
@@ -52,3 +52,4 @@ Domain layer: **no changes**.
 
 ## Progress log (brief)
 - 2026-02-26: Plan written.
+- 2026-02-26: Implementation complete; tests green per local run.

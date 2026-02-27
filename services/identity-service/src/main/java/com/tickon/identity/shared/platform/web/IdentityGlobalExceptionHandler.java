@@ -21,8 +21,7 @@ public class IdentityGlobalExceptionHandler extends GlobalExceptionHandler {
   @ExceptionHandler(IdentityDomainException.class)
   public ResponseEntity<ApiError> handleDomain(IdentityDomainException ex) {
     IdentityExceptionCodes code = ex.code();
-    String messageKey = "identity.error." + code.name();
-    String message = messageSource.getMessage(messageKey, null, LocaleContextHolder.getLocale());
+    String message = messageSource.getMessage(ex.messageKey(), null, LocaleContextHolder.getLocale());
     return ResponseEntity.status(code.status()).body(new ApiError(code.name(), message, null));
   }
 

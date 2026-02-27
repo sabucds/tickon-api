@@ -1,5 +1,5 @@
 # Observability Refactor
-Status: planned
+Status: Done
 Service/module: identity-service (primary), event-service (phase 5)
 Branch: refactor/observability
 

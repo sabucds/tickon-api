@@ -15,6 +15,7 @@ import com.tickon.identity.shared.kernel.ports.PasswordHasher;
 import com.tickon.identity.user.application.ports.UserRepository;
 import com.tickon.identity.user.domain.User;
 import com.tickon.identity.user.domain.exceptions.InvalidPasswordException;
+import com.tickon.identity.user.domain.exceptions.PasswordViolation;
 import com.tickon.identity.user.domain.policies.PasswordStrengthPolicy;
 import com.tickon.identity.user.domain.valueobjects.Email;
 import com.tickon.identity.user.domain.valueobjects.PasswordHash;
@@ -130,7 +131,10 @@ class ChangePasswordCommandHandlerTest {
 
     // Act & Assert
     assertThatThrownBy(() -> handler.handle(command)).isInstanceOf(InvalidPasswordException.class)
-        .hasMessageContaining("Password must be at least");
+        .satisfies(ex -> {
+          InvalidPasswordException invalid = (InvalidPasswordException) ex;
+          org.assertj.core.api.Assertions.assertThat(invalid.violation()).isEqualTo(PasswordViolation.TOO_SHORT);
+        });
 
     verify(passwordHasher, never()).hash(any());
     verify(userRepository, never()).findById(any());

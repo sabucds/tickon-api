@@ -7,7 +7,7 @@ public class InvalidEmailException extends IdentityDomainException {
   private final String email;
 
   public InvalidEmailException(String email) {
-    super(IdentityExceptionCodes.INVALID_EMAIL, "Invalid email");
+    super(IdentityExceptionCodes.INVALID_EMAIL);
     this.email = email;
   }
 

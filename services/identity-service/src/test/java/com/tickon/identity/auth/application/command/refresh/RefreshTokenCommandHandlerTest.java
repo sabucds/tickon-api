@@ -25,6 +25,7 @@ import com.tickon.identity.auth.domain.valueobjects.SessionId;
 import com.tickon.identity.auth.shared.AuthTestFixtures;
 import com.tickon.identity.contracts.user.queries.GetUserAuthDataQuery;
 import com.tickon.identity.contracts.user.queries.UserAuthDataDTO;
+import com.tickon.identity.shared.kernel.exceptions.IdentityExceptionCodes;
 import com.tickon.identity.shared.kernel.ports.DomainEventPublisher;
 import com.tickon.identity.shared.platform.metrics.IdentityMetrics;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -97,7 +98,8 @@ class RefreshTokenCommandHandlerTest {
     when(sessionRepository.findByRefreshTokenHash(REFRESH_TOKEN_HASH)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> handler.handle(new RefreshTokenCommand(REFRESH_TOKEN)))
-        .isInstanceOf(InvalidRefreshTokenException.class).hasMessageContaining("Invalid refresh token");
+        .isInstanceOf(InvalidRefreshTokenException.class)
+        .hasMessage(IdentityExceptionCodes.INVALID_REFRESH_TOKEN.name());
 
     verify(sessionRepository, never()).save(any());
   }
@@ -109,7 +111,8 @@ class RefreshTokenCommandHandlerTest {
     stubSessionFound(REFRESH_TOKEN_HASH, session);
 
     assertThatThrownBy(() -> handler.handle(new RefreshTokenCommand(REFRESH_TOKEN)))
-        .isInstanceOf(InvalidRefreshTokenException.class).hasMessageContaining("Invalid refresh token");
+        .isInstanceOf(InvalidRefreshTokenException.class)
+        .hasMessage(IdentityExceptionCodes.INVALID_REFRESH_TOKEN.name());
 
     verify(sessionRepository).revokeAllByFamilyId(session.familyId(), fixedInstant, RevokeReason.TOKEN_REUSE_DETECTED);
     verify(sessionRepository, never()).save(any());
@@ -122,7 +125,8 @@ class RefreshTokenCommandHandlerTest {
     stubSessionFound(REFRESH_TOKEN_HASH, session);
 
     assertThatThrownBy(() -> handler.handle(new RefreshTokenCommand(REFRESH_TOKEN)))
-        .isInstanceOf(InvalidRefreshTokenException.class).hasMessageContaining("Invalid refresh token");
+        .isInstanceOf(InvalidRefreshTokenException.class)
+        .hasMessage(IdentityExceptionCodes.INVALID_REFRESH_TOKEN.name());
 
     verify(sessionRepository, never()).save(any());
   }
@@ -135,7 +139,8 @@ class RefreshTokenCommandHandlerTest {
     when(queryBus.execute(any(GetUserAuthDataQuery.class))).thenReturn(new QueryResult.Success<>(Optional.empty()));
 
     assertThatThrownBy(() -> handler.handle(new RefreshTokenCommand(REFRESH_TOKEN)))
-        .isInstanceOf(InvalidRefreshTokenException.class).hasMessageContaining("Invalid refresh token");
+        .isInstanceOf(InvalidRefreshTokenException.class)
+        .hasMessage(IdentityExceptionCodes.INVALID_REFRESH_TOKEN.name());
 
     verify(sessionRepository, never()).save(any());
   }

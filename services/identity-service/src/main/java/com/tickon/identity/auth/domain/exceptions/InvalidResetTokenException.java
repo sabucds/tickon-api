@@ -5,6 +5,6 @@ import com.tickon.identity.shared.kernel.exceptions.IdentityExceptionCodes;
 
 public class InvalidResetTokenException extends IdentityDomainException {
   public InvalidResetTokenException() {
-    super(IdentityExceptionCodes.INVALID_RESET_TOKEN, "Invalid or expired reset token");
+    super(IdentityExceptionCodes.INVALID_RESET_TOKEN);
   }
 }

@@ -94,4 +94,14 @@ class AuthControllerTest {
 
     verify(commandBus, never()).execute(any());
   }
+
+  @Test
+  void shouldReturnBadRequest_WhenRefreshTokenIsBlank() throws Exception {
+    RefreshTokenRequest request = new RefreshTokenRequest("");
+
+    mockMvc.perform(post("/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request))).andExpect(status().isBadRequest());
+
+    verify(commandBus, never()).execute(any());
+  }
 }

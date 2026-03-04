@@ -1,7 +1,9 @@
 package com.tickon.identity.user.infrastructure.web;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -118,5 +120,25 @@ class UserControllerTest {
 
     mockMvc.perform(get("/v1/users/me").header("X-User-Id", "550e8400-e29b-41d4-a716-446655440000"))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void shouldReturnUser_WhenGetUserById() throws Exception {
+    String userId = "550e8400-e29b-41d4-a716-446655440000";
+    UserResult userResult = new UserResult(userId, "johndoe", "john@example.com", "John", "Doe");
+    when(queryBus.execute(any())).thenReturn(new QueryResult.Success<>(Optional.of(userResult)));
+
+    mockMvc.perform(get("/v1/users/{id}", userId)).andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(userId)).andExpect(jsonPath("$.username").value("johndoe"));
+  }
+
+  @Test
+  void shouldReturn204_WhenDeletingUser() throws Exception {
+    String userId = "550e8400-e29b-41d4-a716-446655440000";
+    when(commandBus.execute(any())).thenReturn(new CommandResult.Success<>(null));
+
+    mockMvc.perform(delete("/v1/users/{id}", userId)).andExpect(status().isNoContent());
+
+    verify(commandBus).execute(any());
   }
 }

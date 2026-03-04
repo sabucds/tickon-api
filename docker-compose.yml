@@ -203,6 +203,7 @@ services:
   loki:
     image: grafana/loki:latest
     container_name: tickon-loki
+    user: "0:0"
     command: ["-config.file=/etc/loki/loki.yaml"]
     volumes:
       - ./infra/loki/loki.yaml:/etc/loki/loki.yaml:ro

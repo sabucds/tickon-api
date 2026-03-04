@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +33,7 @@ public class ResetPasswordCommandHandler implements CommandHandler<ResetPassword
   private final IdentityMetrics metrics;
 
   public ResetPasswordCommandHandler(ResetTokenRepository resetTokenRepository, ResetTokenHasher resetTokenHasher,
-      Clock clock, CommandBus commandBus, DomainEventPublisher eventPublisher, IdentityMetrics metrics) {
+      Clock clock, @Lazy CommandBus commandBus, DomainEventPublisher eventPublisher, IdentityMetrics metrics) {
     this.resetTokenRepository = resetTokenRepository;
     this.resetTokenHasher = resetTokenHasher;
     this.clock = clock;
